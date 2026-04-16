@@ -1,5 +1,7 @@
 extends Area2D
 
+var is_thrown: bool = false
+
 # Called when the node enters the scene tree for the first time.
 func _ready():
 	visible = false
@@ -81,6 +83,10 @@ func _attach_to_ghost(ghost: CharacterBody2D, offset: Vector2):
 		position = offset
 
 func on_thrown(target_global_pos: Vector2):
+	is_thrown = true # Mark as active projectile
+	monitoring = true
+	monitorable = true
+	
 	# 1. Identify the ghost (current parent) and the world
 	var ghost = get_parent()
 	var world = ghost.get_parent()
@@ -113,3 +119,20 @@ func _finish_throw(ghost):
 	monitorable = true
 	if is_instance_valid(ghost):
 		ghost.is_picking = false
+
+func _on_body_entered(body):
+	# Only trigger if the item is currently flying
+	if is_thrown and body.is_in_group("Players"):
+		var ghosts = get_tree().get_nodes_in_group("Ghost")
+		for ghost in ghosts:
+			if ghost.has_method("is_picking"):
+				ghost.is_picking = false
+				
+		# Since your players have an 'input_prefix' 
+		var p_id = body.input_prefix
+		
+		# Trigger the heal via SignalBus [cite: 5]
+		SignalBus.emit_signal("take_damage", -10.0, p_id)
+		
+		# Item is 'consumed'
+		queue_free()
