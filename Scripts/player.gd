@@ -1,13 +1,17 @@
 extends CharacterBody2D
 
-@export var speed = 300.0
+@export var input_prefix: String = "p1_"
+@export var speed: float = 300.0
 
 func _physics_process(_delta):
-	# Get input direction (-1, 0, or 1 for both axes)
-	var direction = Input.get_vector("ui_left", "ui_right", "ui_up", "ui_down")
+	# Construct the action names dynamically
+	var move_left = input_prefix + "move_left"
+	var move_right = input_prefix + "move_right"
+	var move_up = input_prefix + "move_up"
+	var move_down = input_prefix + "move_down"
 	
-	# Apply movement
+	# Get the vector based on the dynamic names
+	var direction = Input.get_vector(move_left, move_right, move_up, move_down)
+	
 	velocity = direction * speed
-	
-	# move_and_slide uses the 'velocity' property automatically
 	move_and_slide()
