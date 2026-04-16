@@ -12,6 +12,7 @@ var current_stamina: float = 100.0
 var is_sleeping: bool = false
 
 @onready var stamina_bar = $Stats/StaminaBar
+@onready var ghost_node = $Ghost
 
 func _ready():
 	stamina_bar.max_value = max_stamina

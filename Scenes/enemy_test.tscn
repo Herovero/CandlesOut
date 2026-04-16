@@ -3,11 +3,11 @@
 [ext_resource type="Script" uid="uid://c2t7es6cljgi0" path="res://Scripts/enemy_test.gd" id="1_67vpr"]
 [ext_resource type="Texture2D" uid="uid://b7fvyw61qmnl7" path="res://icon.svg" id="1_q8xid"]
 
-[sub_resource type="CircleShape2D" id="CircleShape2D_kxk0d"]
-radius = 37.01351
+[sub_resource type="RectangleShape2D" id="RectangleShape2D_67vpr"]
+size = Vector2(64, 64)
 
-[sub_resource type="CircleShape2D" id="CircleShape2D_67vpr"]
-radius = 37.01351
+[sub_resource type="RectangleShape2D" id="RectangleShape2D_kxk0d"]
+size = Vector2(68, 68)
 
 [node name="Enemy" type="CharacterBody2D" unique_id=1685618765 groups=["Enemies"]]
 script = ExtResource("1_67vpr")
@@ -18,12 +18,12 @@ scale = Vector2(0.5, 0.5)
 texture = ExtResource("1_q8xid")
 
 [node name="CollisionShape2D" type="CollisionShape2D" parent="." unique_id=2102995938]
-shape = SubResource("CircleShape2D_kxk0d")
+shape = SubResource("RectangleShape2D_67vpr")
 
 [node name="Hitbox" type="Area2D" parent="." unique_id=1943702713]
 
-[node name="CollisionShape2D" type="CollisionShape2D" parent="Hitbox" unique_id=500030585]
-shape = SubResource("CircleShape2D_67vpr")
+[node name="CollisionShape2D" type="CollisionShape2D" parent="Hitbox" unique_id=874079151]
+shape = SubResource("RectangleShape2D_kxk0d")
 
 [node name="AttackTimer" type="Timer" parent="." unique_id=751666876]
 one_shot = true
