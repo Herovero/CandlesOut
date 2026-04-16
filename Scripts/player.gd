@@ -5,8 +5,10 @@ extends CharacterBody2D
 
 @export var max_stamina: float = 100.0
 var current_stamina: float = 100.0
-@export var depletion_rate: float = 10.0
-@export var recharge_rate: float = 5.0
+@export var depletion_rate: float = 50.0
+@export var recharge_rate: float = 10.0
+#@export var depletion_rate: float = 10.0
+#@export var recharge_rate: float = 5.0
 
 var is_sleeping: bool = false
 var ghost_scene = preload("res://Scenes/player_ghost.tscn")
@@ -23,6 +25,8 @@ func _ready():
 
 
 func _physics_process(delta: float) -> void:
+	update_ui()
+	
 	if is_sleeping:
 		handle_sleep(delta)
 		return
@@ -44,7 +48,6 @@ func _physics_process(delta: float) -> void:
 		velocity = knockback_velocity
 
 	move_and_slide()
-	update_ui()
 
 
 func consume_stamina(delta):
@@ -63,9 +66,13 @@ func enter_sleep():
 	active_ghost.global_position = global_position # Start at player's body
 	get_parent().add_child(active_ghost)
 	
+	SignalBus.emit_signal("ghost_mode_started")
+	
 func handle_sleep(delta):
 	current_stamina += recharge_rate * delta
-
+	
+	current_stamina = min(current_stamina, max_stamina)
+	
 	if current_stamina >= max_stamina:
 		wake_up()
 
@@ -74,6 +81,8 @@ func wake_up():
 	modulate = Color(1, 1, 1)
 	if active_ghost:
 		active_ghost.queue_free() # Remove the ghost when waking up
+	
+	SignalBus.emit_signal("ghost_mode_ended")
 
 func update_ui():
 	stamina_bar.value = current_stamina
