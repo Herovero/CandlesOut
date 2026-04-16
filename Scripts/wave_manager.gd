@@ -13,8 +13,10 @@ var spawner_ref = null
 
 
 func _ready() -> void:
-	NodeRefWave.wave_ref = self
-	var spawner_ref = NodeRefSpawn.spawner_ref
+	Global.wave = self
+	print("Children:", get_children())
+	print("I am:", self)
+	print("Path:", get_path())
 	pass # Replace with function body.
 
 func start_wave(wave_number: int):
@@ -44,7 +46,7 @@ func _on_timer_timeout():
 		spawn_timer.stop()
 		return
 	
-	var spawner_ref = NodeRefSpawn.spawner_ref
+	var spawner_ref = Global.spawn
 	spawner_ref.spawn_one(spawner_ref.enemy)
 	enemies_remaining_to_spawn -= 1
 	enemies_alive += 1

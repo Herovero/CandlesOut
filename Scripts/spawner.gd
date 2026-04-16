@@ -7,10 +7,9 @@ extends Node2D
 @export var min_y: float = 400.0
 
 var wave_ref = null
-
 # Called when the node enters the scene tree for the first time.
 func _ready() -> void:
-	NodeRefSpawn.spawner_ref = self
+	Global.spawn = self
 	pass # Replace with function body.
 
 
@@ -41,7 +40,7 @@ func _process(_delta: float) -> void:
 
 
 func _on_timer_timeout() -> void:
-	var wm = NodeRefWave.wave_ref
+	var wm = Global.wave
 	wm.start_wave(1)
 	pass
 
@@ -56,5 +55,5 @@ func spawn_one(enemy_toSpawn):
 	print("Spawning enemy at %d", ene.global_position)
 	get_parent().add_child(ene)
 	# tell wave manager when this enemy dies
-	var wm = NodeRefWave.wave_ref
+	var wm = Global.wave
 	ene.tree_exited.connect(wm.on_enemy_died)
