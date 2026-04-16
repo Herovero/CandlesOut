@@ -6,6 +6,7 @@ extends CharacterBody2D
 @onready var interaction_area: Area2D = $InteractionArea
 
 var is_picking: bool = false
+var held_item: Node2D = null
 
 func _physics_process(_delta: float) -> void:
 	if is_picking:
@@ -29,6 +30,10 @@ func _input(event):
 func attempt_pickup():
 	if is_picking: return
 	
+	if held_item != null:
+		drop_item()
+		return
+	
 	var overlapping_areas = interaction_area.get_overlapping_areas()
 	for area in overlapping_areas:
 		# Check if the area is a spiritual item
@@ -36,5 +41,12 @@ func attempt_pickup():
 			# If the item has a collect function, call it
 			if area.has_method("on_collected"):
 				is_picking = true
+				held_item = area # Store the item reference
 				area.on_collected(self)
 				break
+
+func drop_item():
+	if held_item and held_item.has_method("on_dropped"):
+		is_picking = true
+		held_item.on_dropped()
+		held_item = null # Clear the reference immediately

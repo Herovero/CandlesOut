@@ -1,9 +1,9 @@
 [gd_scene format=4 uid="uid://b4jda3svu4fmh"]
 
 [ext_resource type="PackedScene" uid="uid://c4sy607bwof83" path="res://Scenes/player.tscn" id="1_jjgbg"]
-[ext_resource type="PackedScene" path="res://Scenes/item1.tscn" id="1_jjvhh"]
+[ext_resource type="PackedScene" uid="uid://d4mmodq5hen4l" path="res://Scenes/item1.tscn" id="1_jjvhh"]
 [ext_resource type="PackedScene" uid="uid://cqbq35ef7qsmd" path="res://Scenes/heart.tscn" id="2_8gbba"]
-[ext_resource type="PackedScene" uid="uid://dxnyakx10q5kf" path="res://Scenes/enemy_test.tscn" id="2_bo1nx"]
+[ext_resource type="PackedScene" uid="uid://dbovespj7y5o8" path="res://Scenes/enemy_test.tscn" id="2_bo1nx"]
 [ext_resource type="Texture2D" uid="uid://biv8vykh0s88f" path="res://Assets/2D Pixel Dungeon Asset Pack/character and tileset/Dungeon_Tileset.png" id="5_kry3j"]
 
 [sub_resource type="TileSetAtlasSource" id="TileSetAtlasSource_21xkr"]
