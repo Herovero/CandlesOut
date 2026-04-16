@@ -3,7 +3,7 @@
 [ext_resource type="Script" uid="uid://dpp0622emkluy" path="res://Scripts/heart.gd" id="1_v4aiu"]
 [ext_resource type="Texture2D" uid="uid://dyy8151t8djhp" path="res://Assets/UIs/heart_full.png" id="2_jgxw8"]
 
-[node name="HBoxContainer" type="HBoxContainer" unique_id=706036972]
+[node name="Hearts" type="HBoxContainer" unique_id=706036972]
 offset_right = 40.0
 offset_bottom = 40.0
 scale = Vector2(0.2, 0.2)
