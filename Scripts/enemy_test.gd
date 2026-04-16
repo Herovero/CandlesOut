@@ -36,10 +36,10 @@ func find_closest_player() -> CharacterBody2D:
 
 	return closest
 
-
 func _on_hitbox_body_entered(body):
 	if body.is_in_group("Players"):
-		body.take_damage(damage_amount)
+		SignalBus.emit_signal("take_damage", 1.0, body.input_prefix)
+		#body.take_damage(damage_amount)
 
 		var dir = (body.global_position - global_position).normalized()
 		if body.has_method("apply_knockback"):

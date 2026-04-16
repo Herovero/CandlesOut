@@ -11,7 +11,6 @@ var current_stamina: float = 100.0
 var is_sleeping: bool = false
 var ghost_scene = preload("res://Scenes/player_ghost.tscn")
 var active_ghost: CharacterBody2D = null
-var hp: float = 10.0
 
 var knockback_velocity: Vector2 = Vector2.ZERO
 
@@ -79,16 +78,5 @@ func wake_up():
 func update_ui():
 	stamina_bar.value = current_stamina
 
-
 func apply_knockback(force: Vector2):
 	knockback_velocity = force
-
-
-func take_damage(amount: float):
-	hp -= amount
-	if hp <= 0:
-		die()
-
-
-func die():
-	print_debug("player died")
