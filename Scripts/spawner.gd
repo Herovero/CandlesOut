@@ -46,7 +46,7 @@ func spawn_n(count: int, enemy_toSpawn):
 func spawn_one(enemy_toSpawn):
 	var ene = enemy_toSpawn.instantiate()
 	ene.position = get_random_spawn_position()
-	get_parent().add_child(ene)
+	get_tree().current_scene.add_child(ene)
 	# tell wave manager when this enemy dies
 	var wm = Global.wave
 	ene.tree_exited.connect(wm.on_enemy_died)

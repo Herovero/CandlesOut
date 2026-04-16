@@ -70,4 +70,5 @@ func on_enemy_died():
 
 func _on_start_timer_timeout() -> void:
 	start_wave(1)
+	Global.item_spawner.set_spawn_state(true)
 	pass # Replace with function body.
