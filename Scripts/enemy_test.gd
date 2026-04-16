@@ -42,8 +42,6 @@ func find_closest_player() -> CharacterBody2D:
 
 	return closest
 
-<<<<<<< Updated upstream
-=======
 
 func compute_separation() -> Vector2:
 	var enemies = get_tree().get_nodes_in_group("Enemies")
@@ -67,8 +65,6 @@ func compute_separation() -> Vector2:
 
 	return push
 
-
->>>>>>> Stashed changes
 func _on_hitbox_body_entered(body):
 	if body.is_in_group("Players"):
 		SignalBus.emit_signal("take_damage", 1.0, body.input_prefix)
