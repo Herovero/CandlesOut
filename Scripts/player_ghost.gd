@@ -2,12 +2,13 @@ extends CharacterBody2D
 
 @export var input_prefix: String = "p1_"
 @export var speed: float = 200.0 # Maybe ghosts move faster?
+@export var throw_distance: float = 250.0
 
 @onready var interaction_area: Area2D = $InteractionArea
-@onready var aim_arrow = $AimArrow
 
 var is_picking: bool = false
 var held_item: Node2D = null
+var current_dir: Vector2 = Vector2.ZERO # Store the latest movement
 
 func _physics_process(_delta: float) -> void:
 	if is_picking:
@@ -20,21 +21,26 @@ func _physics_process(_delta: float) -> void:
 		input_prefix + "move_up", input_prefix + "move_down"
 	)
 	
+	current_dir = direction # Update aim direction
 	velocity = direction * speed
 	move_and_slide()
 
 func _input(event):
+	if is_picking: 
+		return
+		
 	# Shared Spacebar logic you mentioned
 	if event.is_action_pressed("item_pickup&throw"):
-		attempt_pickup()
+		if held_item == null:
+			attempt_pickup()
+	else:
+			# If we are moving (direction != 0), THROW. If standing still, DROP.
+			if current_dir != Vector2.ZERO:
+				throw_item(current_dir)
+			else:
+				drop_item()
 
 func attempt_pickup():
-	if is_picking: return
-	
-	if held_item != null:
-		drop_item()
-		return
-	
 	var overlapping_areas = interaction_area.get_overlapping_areas()
 	for area in overlapping_areas:
 		# Check if the area is a spiritual item
@@ -51,3 +57,11 @@ func drop_item():
 		is_picking = true
 		held_item.on_dropped()
 		held_item = null # Clear the reference immediately
+
+func throw_item(dir: Vector2):
+	if held_item and held_item.has_method("on_thrown"):
+		is_picking = true
+		# Calculate target based on current movement direction
+		var target_pos = global_position + (dir.normalized() * throw_distance)
+		held_item.on_thrown(target_pos)
+		held_item = null

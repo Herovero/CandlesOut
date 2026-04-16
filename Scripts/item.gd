@@ -79,3 +79,37 @@ func _attach_to_ghost(ghost: CharacterBody2D, offset: Vector2):
 		get_parent().remove_child(self)
 		ghost.add_child(self)
 		position = offset
+
+func on_thrown(target_global_pos: Vector2):
+	# 1. Identify the ghost (current parent) and the world
+	var ghost = get_parent()
+	var world = ghost.get_parent()
+	
+	# 2. Record global position before changing the hierarchy
+	var current_pos = global_position
+	
+	# 3. Detach from ghost and add to world so it stays in place
+	ghost.remove_child(self)
+	world.add_child(self)
+	global_position = current_pos
+	
+	# 4. Create the throw animation
+	var tween = create_tween()
+	
+	# Move to the target calculated by ghost movement
+	tween.tween_property(self, "global_position", target_global_pos, 0.4)\
+		.set_trans(Tween.TRANS_QUAD)\
+		.set_ease(Tween.EASE_OUT)
+	
+	# Parallel rotation for visual "juice"
+	tween.parallel().tween_property(self, "rotation", rotation + PI * 2, 0.4)
+	
+	# 5. Unlock the ghost once the throw is complete
+	tween.tween_callback(func(): _finish_throw(ghost))
+
+func _finish_throw(ghost):
+	# Re-enable detection so it can be picked up again at its new location
+	monitoring = true
+	monitorable = true
+	if is_instance_valid(ghost):
+		ghost.is_picking = false

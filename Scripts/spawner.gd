@@ -3,14 +3,9 @@ extends Node2D
 
 @onready var enemy = preload("res://Scenes/enemy_test.tscn")
 @onready var spawn_area = $Area2D/CollisionShape2D
-@export var min_x: float = 640.0
-@export var min_y: float = 400.0
-
-var wave_ref = null
 
 # Called when the node enters the scene tree for the first time.
 func _ready() -> void:
-	NodeRefSpawn.spawner_ref = self
 	pass # Replace with function body.
 
 
@@ -19,6 +14,8 @@ func get_random_spawn_position() -> Vector2:
 	var extents = shape.size / 2
 	
 	# minimum distance from center
+	var min_x = 640.0
+	var min_y = 400.0
 	
 	var rand_x: float
 	var rand_y: float
@@ -41,9 +38,7 @@ func _process(_delta: float) -> void:
 
 
 func _on_timer_timeout() -> void:
-	var wm = NodeRefWave.wave_ref
-	wm.start_wave(1)
-	pass
+	spawn_one(enemy)
 
 
 func spawn_n(count: int, enemy_toSpawn):
@@ -52,9 +47,5 @@ func spawn_n(count: int, enemy_toSpawn):
 
 func spawn_one(enemy_toSpawn):
 	var ene = enemy_toSpawn.instantiate()
-	ene.global_position = get_random_spawn_position()
-	print("Spawning enemy at %d", ene.global_position)
+	ene.position = get_random_spawn_position()
 	get_parent().add_child(ene)
-	# tell wave manager when this enemy dies
-	var wm = NodeRefWave.wave_ref
-	ene.tree_exited.connect(wm.on_enemy_died)
