@@ -7,7 +7,9 @@
 [sub_resource type="RectangleShape2D" id="RectangleShape2D_1o0s7"]
 size = Vector2(50, 50)
 
-[node name="item1" type="Area2D" unique_id=839316503]
+[node name="item1" type="Area2D" unique_id=839316503 groups=["Items"]]
+collision_layer = 2
+collision_mask = 2
 script = ExtResource("1_pkys8")
 
 [node name="Sprite2D" type="Sprite2D" parent="." unique_id=171564091]

@@ -3,8 +3,8 @@
 [ext_resource type="Script" uid="uid://dwsroubvetdac" path="res://Scripts/player.gd" id="1_ndhuy"]
 [ext_resource type="Texture2D" uid="uid://b7fvyw61qmnl7" path="res://icon.svg" id="2_rliju"]
 
-[sub_resource type="CircleShape2D" id="CircleShape2D_l2cxq"]
-radius = 34.36568
+[sub_resource type="RectangleShape2D" id="RectangleShape2D_cvnsp"]
+size = Vector2(64, 64)
 
 [node name="Player" type="CharacterBody2D" unique_id=687220319]
 script = ExtResource("1_ndhuy")
@@ -14,7 +14,7 @@ scale = Vector2(0.5, 0.5)
 texture = ExtResource("2_rliju")
 
 [node name="CollisionShape2D" type="CollisionShape2D" parent="." unique_id=1487779076]
-shape = SubResource("CircleShape2D_l2cxq")
+shape = SubResource("RectangleShape2D_cvnsp")
 
 [node name="Stats" type="Node2D" parent="." unique_id=1450506992]
 position = Vector2(0, -48)

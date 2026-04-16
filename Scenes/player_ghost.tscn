@@ -1,0 +1,30 @@
+[gd_scene format=3 uid="uid://co8ys1q0spb7f"]
+
+[ext_resource type="Script" uid="uid://bt0tvdxl0akvq" path="res://Scripts/player_ghost.gd" id="1_humek"]
+[ext_resource type="Texture2D" uid="uid://b7fvyw61qmnl7" path="res://icon.svg" id="2_5c57a"]
+
+[sub_resource type="RectangleShape2D" id="RectangleShape2D_gl5sa"]
+size = Vector2(64, 64)
+
+[sub_resource type="RectangleShape2D" id="RectangleShape2D_humek"]
+size = Vector2(64, 64)
+
+[node name="CharacterBody2D" type="CharacterBody2D" unique_id=929815185 groups=["Ghost"]]
+collision_layer = 0
+collision_mask = 2
+script = ExtResource("1_humek")
+
+[node name="Sprite2D" type="Sprite2D" parent="." unique_id=1738129205]
+modulate = Color(0, 0.25490198, 1, 0.44705883)
+scale = Vector2(0.5, 0.5)
+texture = ExtResource("2_5c57a")
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="." unique_id=1899094678]
+shape = SubResource("RectangleShape2D_gl5sa")
+
+[node name="InteractionArea" type="Area2D" parent="." unique_id=660207684]
+collision_layer = 2
+collision_mask = 2
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="InteractionArea" unique_id=132704989]
+shape = SubResource("RectangleShape2D_humek")
