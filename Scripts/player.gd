@@ -10,6 +10,8 @@ var current_stamina: float = 100.0
 @export var recharge_rate: float = 5.0   # Per second while standing/sleeping
 
 var is_sleeping: bool = false
+var ghost_scene = preload("res://Scenes/player_ghost.tscn")
+var active_ghost: CharacterBody2D = null
 
 @onready var stamina_bar = $Stats/StaminaBar
 
@@ -50,15 +52,24 @@ func enter_sleep():
 	is_sleeping = true
 	velocity = Vector2.ZERO
 	modulate = Color(0.5, 0.5, 1.0) # Turn slightly blue/dark to show sleeping
-
+	
+	active_ghost = ghost_scene.instantiate()
+	active_ghost.input_prefix = input_prefix # Give the ghost your controls
+	active_ghost.global_position = global_position # Start at player's body
+	get_parent().add_child(active_ghost)
+	
 func handle_sleep(delta):
 	current_stamina += recharge_rate * delta # Maybe recharge faster when forced?
 	update_ui()
 	
 	if current_stamina >= max_stamina:
-		current_stamina = max_stamina
-		is_sleeping = false
-		modulate = Color(1, 1, 1) # Back to normal
+		wake_up()
+
+func wake_up():
+	is_sleeping = false
+	modulate = Color(1, 1, 1)
+	if active_ghost:
+		active_ghost.queue_free() # Remove the ghost when waking up
 
 func update_ui():
 	stamina_bar.value = current_stamina

@@ -1,6 +1,6 @@
 extends CharacterBody2D
 
-const speed: float = 100.0
+const speed: float = 50.0
 const hp: float = 100.0
 @export var damage_amount: float = 1.0
 
