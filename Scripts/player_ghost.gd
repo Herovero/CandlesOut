@@ -4,9 +4,17 @@ extends CharacterBody2D
 @export var speed: float = 200.0 # Maybe ghosts move faster?
 
 @onready var interaction_area: Area2D = $InteractionArea
+@onready var aim_arrow = $AimArrow
+
+var is_picking: bool = false
+var held_item: Node2D = null
 
 func _physics_process(_delta: float) -> void:
-	# Use the same input logic as your player.gd [cite: 6]
+	if is_picking:
+		velocity = Vector2.ZERO
+		move_and_slide()
+		return
+		
 	var direction = Input.get_vector(
 		input_prefix + "move_left", input_prefix + "move_right",
 		input_prefix + "move_up", input_prefix + "move_down"
@@ -21,11 +29,25 @@ func _input(event):
 		attempt_pickup()
 
 func attempt_pickup():
+	if is_picking: return
+	
+	if held_item != null:
+		drop_item()
+		return
+	
 	var overlapping_areas = interaction_area.get_overlapping_areas()
 	for area in overlapping_areas:
 		# Check if the area is a spiritual item
 		if area.is_in_group("Items"):
 			# If the item has a collect function, call it
 			if area.has_method("on_collected"):
-				area.on_collected(input_prefix)
+				is_picking = true
+				held_item = area # Store the item reference
+				area.on_collected(self)
 				break
+
+func drop_item():
+	if held_item and held_item.has_method("on_dropped"):
+		is_picking = true
+		held_item.on_dropped()
+		held_item = null # Clear the reference immediately
