@@ -18,6 +18,8 @@ func get_random_spawn_position() -> Vector2:
 	var extents = shape.size / 2
 	
 	# minimum distance from center
+	var min_x = 640.0
+	var min_y = 400.0
 	
 	var rand_x: float
 	var rand_y: float
@@ -51,8 +53,7 @@ func spawn_n(count: int, enemy_toSpawn):
 
 func spawn_one(enemy_toSpawn):
 	var ene = enemy_toSpawn.instantiate()
-	ene.global_position = get_random_spawn_position()
-	print("Spawning enemy at %d", ene.global_position)
+	ene.position = get_random_spawn_position()
 	get_parent().add_child(ene)
 	# tell wave manager when this enemy dies
 	var wm = Global.wave

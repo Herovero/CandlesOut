@@ -1,5 +1,7 @@
 extends Area2D
 
+var is_thrown: bool = false
+
 # Called when the node enters the scene tree for the first time.
 func _ready():
 	visible = false
@@ -79,3 +81,58 @@ func _attach_to_ghost(ghost: CharacterBody2D, offset: Vector2):
 		get_parent().remove_child(self)
 		ghost.add_child(self)
 		position = offset
+
+func on_thrown(target_global_pos: Vector2):
+	is_thrown = true # Mark as active projectile
+	monitoring = true
+	monitorable = true
+	
+	# 1. Identify the ghost (current parent) and the world
+	var ghost = get_parent()
+	var world = ghost.get_parent()
+	
+	# 2. Record global position before changing the hierarchy
+	var current_pos = global_position
+	
+	# 3. Detach from ghost and add to world so it stays in place
+	ghost.remove_child(self)
+	world.add_child(self)
+	global_position = current_pos
+	
+	# 4. Create the throw animation
+	var tween = create_tween()
+	
+	# Move to the target calculated by ghost movement
+	tween.tween_property(self, "global_position", target_global_pos, 0.4)\
+		.set_trans(Tween.TRANS_QUAD)\
+		.set_ease(Tween.EASE_OUT)
+	
+	# Parallel rotation for visual "juice"
+	tween.parallel().tween_property(self, "rotation", rotation + PI * 2, 0.4)
+	
+	# 5. Unlock the ghost once the throw is complete
+	tween.tween_callback(func(): _finish_throw(ghost))
+
+func _finish_throw(ghost):
+	# Re-enable detection so it can be picked up again at its new location
+	monitoring = true
+	monitorable = true
+	if is_instance_valid(ghost):
+		ghost.is_picking = false
+
+func _on_body_entered(body):
+	# Only trigger if the item is currently flying
+	if is_thrown and body.is_in_group("Players"):
+		var ghosts = get_tree().get_nodes_in_group("Ghost")
+		for ghost in ghosts:
+			if ghost.has_method("is_picking"):
+				ghost.is_picking = false
+				
+		# Since your players have an 'input_prefix' 
+		var p_id = body.input_prefix
+		
+		# Trigger the heal via SignalBus [cite: 5]
+		SignalBus.emit_signal("take_damage", -10.0, p_id)
+		
+		# Item is 'consumed'
+		queue_free()
