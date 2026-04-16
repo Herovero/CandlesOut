@@ -1,10 +1,14 @@
 extends CharacterBody2D
 
 const SPEED: float = 100.0
+const SEPARATION_RADIUS: float = 40.0
+const SEPARATION_FORCE: float = 200.0
+
 @export var damage_amount: float = 1.0
 
 var hp: float = 100.0
 var knockback_velocity: Vector2 = Vector2.ZERO
+
 
 func _physics_process(delta: float) -> void:
 	var target = find_closest_player()
@@ -13,7 +17,9 @@ func _physics_process(delta: float) -> void:
 	if target:
 		direction = global_position.direction_to(target.global_position)
 
-	var move_velocity = direction * SPEED
+	var separation = compute_separation()
+
+	var move_velocity = (direction * SPEED) + separation
 	velocity = move_velocity + knockback_velocity
 	knockback_velocity *= 0.85
 
@@ -36,6 +42,33 @@ func find_closest_player() -> CharacterBody2D:
 
 	return closest
 
+<<<<<<< Updated upstream
+=======
+
+func compute_separation() -> Vector2:
+	var enemies = get_tree().get_nodes_in_group("Enemies")
+	var push = Vector2.ZERO
+	var count = 0
+
+	for e in enemies:
+		if e == self:
+			continue
+
+		var dist = global_position.distance_to(e.global_position)
+
+		if dist < SEPARATION_RADIUS and dist > 0:
+			var away = (global_position - e.global_position).normalized()
+			push += away * (SEPARATION_RADIUS - dist)
+			count += 1
+
+	if count > 0:
+		push = push / count
+		push = push.normalized() * SEPARATION_FORCE
+
+	return push
+
+
+>>>>>>> Stashed changes
 func _on_hitbox_body_entered(body):
 	if body.is_in_group("Players"):
 		SignalBus.emit_signal("take_damage", 1.0, body.input_prefix)
