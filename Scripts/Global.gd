@@ -1,7 +1,7 @@
 extends Node
 
 var wave
-var spawn
+var spawners: Array = []
 
 # Called when the node enters the scene tree for the first time.
 func _ready():

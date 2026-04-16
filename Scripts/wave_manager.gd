@@ -46,8 +46,13 @@ func _on_timer_timeout():
 		spawn_timer.stop()
 		return
 	
-	var spawner_ref = Global.spawn
-	spawner_ref.spawn_one(spawner_ref.enemy)
+	# pick a random spawner from all registered spawners
+	if Global.spawners.is_empty():
+		push_error("No spawners registered!")
+		return
+	
+	var random_spawner = Global.spawners[randi() % Global.spawners.size()]
+	random_spawner.spawn_one(random_spawner.enemy)
 	enemies_remaining_to_spawn -= 1
 	enemies_alive += 1
 	
@@ -61,3 +66,8 @@ func on_enemy_died():
 		try_spawn()
 	elif enemies_alive == 0:
 		print("Wave %d complete!" % current_wave)
+
+
+func _on_start_timer_timeout() -> void:
+	start_wave(1)
+	pass # Replace with function body.
