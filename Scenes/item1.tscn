@@ -18,5 +18,3 @@ texture = SubResource("CanvasTexture_yk461")
 
 [node name="CollisionShape2D" type="CollisionShape2D" parent="." unique_id=40545649]
 shape = SubResource("RectangleShape2D_1o0s7")
-
-[connection signal="body_entered" from="." to="." method="_on_body_entered"]

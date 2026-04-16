@@ -5,8 +5,14 @@ extends CharacterBody2D
 
 @onready var interaction_area: Area2D = $InteractionArea
 
+var is_picking: bool = false
+
 func _physics_process(_delta: float) -> void:
-	# Use the same input logic as your player.gd [cite: 6]
+	if is_picking:
+		velocity = Vector2.ZERO
+		move_and_slide()
+		return
+		
 	var direction = Input.get_vector(
 		input_prefix + "move_left", input_prefix + "move_right",
 		input_prefix + "move_up", input_prefix + "move_down"
@@ -21,11 +27,14 @@ func _input(event):
 		attempt_pickup()
 
 func attempt_pickup():
+	if is_picking: return
+	
 	var overlapping_areas = interaction_area.get_overlapping_areas()
 	for area in overlapping_areas:
 		# Check if the area is a spiritual item
 		if area.is_in_group("Items"):
 			# If the item has a collect function, call it
 			if area.has_method("on_collected"):
-				area.on_collected(input_prefix)
+				is_picking = true
+				area.on_collected(self)
 				break
