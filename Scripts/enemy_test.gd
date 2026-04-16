@@ -47,6 +47,9 @@ func find_closest_player() -> CharacterBody2D:
 	var best_dist = INF
 
 	for p in players:
+		if p.is_sleeping:
+			continue
+
 		var d = global_position.distance_to(p.global_position)
 		if d < best_dist:
 			best_dist = d
