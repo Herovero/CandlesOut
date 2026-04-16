@@ -1,5 +1,7 @@
 extends HBoxContainer
 
+@export var my_player_id: String = "p1_"
+
 var heart_full = preload("res://Assets/UIs/heart_full.png")
 var heart_half = preload("res://Assets/UIs/heart_half.png")
 var heart_empty = preload("res://Assets/UIs/heart_empty.png")
@@ -8,15 +10,18 @@ var hearts_list: Array[TextureRect]
 var health: float = 5
 
 func _ready() -> void:
+	SignalBus.connect("take_damage", _on_take_damage)
 	var hearts_parent = $"."
 	for child in hearts_parent.get_children():
-		hearts_list.append(child)
+		if child is TextureRect:
+			hearts_list.append(child)
 	update_heart_visuals()
 
-func take_damage(amount: float):
-	health -= amount
-	health = clamp(health, 0, hearts_list.size()) # Prevent negative health
-	update_heart_visuals()
+func _on_take_damage(amount: float, target_id: String):
+	if target_id == my_player_id:
+		health -= amount
+		health = clamp(health, 0, hearts_list.size()) # Prevent negative health
+		update_heart_visuals()
 		
 func update_heart_visuals():
 	for i in range(hearts_list.size()):
