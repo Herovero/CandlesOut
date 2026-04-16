@@ -138,6 +138,18 @@ sources/0 = SubResource("TileSetAtlasSource_21xkr")
 [node name="item1" parent="." unique_id=839316503 instance=ExtResource("1_jjvhh")]
 position = Vector2(28, -165)
 
+[node name="item2" parent="." unique_id=1533824678 instance=ExtResource("1_jjvhh")]
+position = Vector2(-292, -71)
+
+[node name="item3" parent="." unique_id=1161662603 instance=ExtResource("1_jjvhh")]
+position = Vector2(372, 94)
+
+[node name="item4" parent="." unique_id=747266027 instance=ExtResource("1_jjvhh")]
+position = Vector2(-223, 174)
+
+[node name="item5" parent="." unique_id=1677040398 instance=ExtResource("1_jjvhh")]
+position = Vector2(147, 198)
+
 [node name="Player1" parent="." unique_id=687220319 groups=["Players"] instance=ExtResource("1_jjgbg")]
 position = Vector2(-80, 0)
 
