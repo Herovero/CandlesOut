@@ -4,6 +4,7 @@
 [ext_resource type="Script" uid="uid://crrb13j6wodos" path="res://Scripts/enemy_1.gd" id="1_mxdow"]
 
 [sub_resource type="RectangleShape2D" id="RectangleShape2D_mxdow"]
+size = Vector2(135.5, 135)
 
 [node name="Enemy1" type="CharacterBody2D" unique_id=1604539804]
 script = ExtResource("1_mxdow")
@@ -11,7 +12,7 @@ script = ExtResource("1_mxdow")
 [node name="Sprite2D" type="Sprite2D" parent="." unique_id=416605895]
 texture = ExtResource("1_ld55o")
 
-[node name="CollisionShape2D" type="CollisionShape2D" parent="." unique_id=1617489183]
-shape = SubResource("RectangleShape2D_mxdow")
-
 [node name="AnimatedSprite2D" type="AnimatedSprite2D" parent="." unique_id=512762040]
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="." unique_id=1689810094]
+shape = SubResource("RectangleShape2D_mxdow")
