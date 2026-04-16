@@ -1,46 +1,46 @@
 extends CharacterBody2D
 
-const speed: float = 100.0
-const hp: float = 100.0
+const SPEED: float = 100.0
 @export var damage_amount: float = 1.0
 
-@onready var hitbox: Area2D = $Hitbox
-@onready var attack_timer: Timer = $AttackTimer
-
-var target_player: CharacterBody2D = null
-
-func _ready():
-	pass
+var hp: float = 100.0
+var knockback_velocity: Vector2 = Vector2.ZERO
 
 func _physics_process(delta: float) -> void:
 	var target = find_closest_player()
 	var direction = Vector2.ZERO
-	
+
 	if target:
 		direction = global_position.direction_to(target.global_position)
 
-	velocity = direction * speed
+	var move_velocity = direction * SPEED
+	velocity = move_velocity + knockback_velocity
+	knockback_velocity *= 0.85
+
 	move_and_slide()
 
+
 func find_closest_player() -> CharacterBody2D:
-	var players = get_tree().get_nodes_in_group("Players") # Matches your group name
-	var closest_player = null
-	var shortest_distance = INF # Start with infinity
-	
-	for player in players:
-		# Avoid targeting the 'Ghost' if it's in the same group but shouldn't be chased
-		if player.has_method("is_sleeping") and player.is_sleeping:
+	var players = get_tree().get_nodes_in_group("Players")
+	var closest = null
+	var best_dist = INF
+
+	for p in players:
+		if p.is_sleeping:
 			continue
-			
-		var distance = global_position.distance_to(player.global_position)
-		if distance < shortest_distance:
-			shortest_distance = distance
-			closest_player = player
-			
-	return closest_player
-	
+
+		var d = global_position.distance_to(p.global_position)
+		if d < best_dist:
+			best_dist = d
+			closest = p
+
+	return closest
+
+
 func _on_hitbox_body_entered(body):
 	if body.is_in_group("Players"):
-		# body.input_prefix will grab "p1_" or "p2_" based on which player it just touched
-		SignalBus.emit_signal("take_damage", 1.0, body.input_prefix)
-		
+		body.take_damage(damage_amount)
+
+		var dir = (body.global_position - global_position).normalized()
+		if body.has_method("apply_knockback"):
+			body.apply_knockback(dir * 150)
