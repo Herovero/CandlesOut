@@ -4,6 +4,7 @@ extends CharacterBody2D
 @export var speed: float = 200.0 # Maybe ghosts move faster?
 
 @onready var interaction_area: Area2D = $InteractionArea
+@onready var aim_arrow = $AimArrow
 
 var is_picking: bool = false
 var held_item: Node2D = null
