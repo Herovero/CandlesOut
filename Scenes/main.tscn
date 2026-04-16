@@ -187,9 +187,6 @@ offset_right = 2343.0
 offset_bottom = 287.0
 my_player_id = "p2_"
 
-[node name="Enemy" parent="." unique_id=1685618765 instance=ExtResource("2_bo1nx")]
-position = Vector2(357, -144)
-
 [node name="TileMapLayer" type="TileMapLayer" parent="." unique_id=184758336]
 z_index = -1
 position = Vector2(-143, -24)
