@@ -33,7 +33,7 @@ func _input(event):
 	if event.is_action_pressed("item_pickup&throw"):
 		if held_item == null:
 			attempt_pickup()
-	else:
+		else:
 			# If we are moving (direction != 0), THROW. If standing still, DROP.
 			if current_dir != Vector2.ZERO:
 				throw_item(current_dir)
