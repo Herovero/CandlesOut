@@ -1,13 +1,19 @@
 [gd_scene format=3 uid="uid://b4jda3svu4fmh"]
 
 [ext_resource type="PackedScene" uid="uid://c4sy607bwof83" path="res://Scenes/player.tscn" id="1_jjgbg"]
+[ext_resource type="PackedScene" uid="uid://d4mmodq5hen4l" path="res://Scenes/item1.tscn" id="1_jjvhh"]
+[ext_resource type="PackedScene" uid="uid://cqbq35ef7qsmd" path="res://Scenes/heart.tscn" id="2_8gbba"]
+[ext_resource type="PackedScene" uid="uid://dxnyakx10q5kf" path="res://Scenes/enemy_test.tscn" id="2_bo1nx"]
 
 [node name="main" type="Node2D" unique_id=1941177541]
 
-[node name="Player1" parent="." unique_id=687220319 instance=ExtResource("1_jjgbg")]
+[node name="item1" parent="." unique_id=839316503 instance=ExtResource("1_jjvhh")]
+position = Vector2(28, -165)
+
+[node name="Player1" parent="." unique_id=687220319 groups=["Players"] instance=ExtResource("1_jjgbg")]
 position = Vector2(-80, 0)
 
-[node name="Player2" parent="." unique_id=771985895 instance=ExtResource("1_jjgbg")]
+[node name="Player2" parent="." unique_id=771985895 groups=["Players"] instance=ExtResource("1_jjgbg")]
 position = Vector2(80, 0)
 input_prefix = "p2_"
 
@@ -15,6 +21,38 @@ input_prefix = "p2_"
 self_modulate = Color(0.4305942, 0.9065291, 2.695322e-06, 1)
 
 [node name="Camera2D" type="Camera2D" parent="." unique_id=1658536604]
+
+[node name="HUDs" type="CanvasLayer" parent="." unique_id=518585437]
+
+[node name="Player1" type="Control" parent="HUDs" unique_id=1050061049]
+layout_mode = 3
+anchors_preset = 0
+offset_right = 40.0
+offset_bottom = 40.0
+
+[node name="Hearts" parent="HUDs/Player1" unique_id=706036972 instance=ExtResource("2_8gbba")]
+layout_mode = 0
+offset_left = 28.000004
+offset_top = 33.0
+offset_right = 1399.0
+offset_bottom = 289.0
+
+[node name="Player2" type="Control" parent="HUDs" unique_id=364119189]
+layout_mode = 3
+anchors_preset = 0
+offset_right = 40.0
+offset_bottom = 40.0
+
+[node name="Hearts" parent="HUDs/Player2" unique_id=999244154 instance=ExtResource("2_8gbba")]
+layout_mode = 0
+offset_left = 971.99994
+offset_top = 31.000004
+offset_right = 2343.0
+offset_bottom = 287.0
+my_player_id = "p2_"
+
+[node name="Enemy" parent="." unique_id=1685618765 instance=ExtResource("2_bo1nx")]
+position = Vector2(357, -144)
 
 [editable path="Player1"]
 [editable path="Player2"]

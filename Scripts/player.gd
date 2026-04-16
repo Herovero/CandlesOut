@@ -62,3 +62,6 @@ func handle_sleep(delta):
 
 func update_ui():
 	stamina_bar.value = current_stamina
+
+func die():
+	print_debug("player died")
