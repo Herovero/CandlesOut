@@ -1,6 +1,7 @@
 [gd_scene format=3 uid="uid://b4jda3svu4fmh"]
 
 [ext_resource type="PackedScene" uid="uid://c4sy607bwof83" path="res://Scenes/player.tscn" id="1_jjgbg"]
+[ext_resource type="PackedScene" uid="uid://cqts1yegiva4h" path="res://Scenes/WaveManager.tscn" id="2_8gbba"]
 [ext_resource type="PackedScene" uid="uid://ct8trhua4tgaq" path="res://Scenes/Spawner.tscn" id="2_bo1nx"]
 
 [node name="main" type="Node2D" unique_id=1941177541]
@@ -19,6 +20,9 @@ self_modulate = Color(0.4305942, 0.9065291, 2.695322e-06, 1)
 
 [node name="Spawner" parent="." unique_id=1677051792 instance=ExtResource("2_bo1nx")]
 position = Vector2(-3, -6)
+
+[node name="WaveManager" parent="." unique_id=657000445 instance=ExtResource("2_8gbba")]
+position = Vector2(-500, -408)
 
 [editable path="Player1"]
 [editable path="Player2"]

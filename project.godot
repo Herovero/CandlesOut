@@ -19,6 +19,8 @@ config/icon="res://icon.svg"
 
 Global="*uid://8v5wss64fddf"
 SignalBus="*uid://dcigyssxuhf46"
+NodeRefSpawn="*uid://ck8l2sidoaa7p"
+NodeRefWave="*uid://d0aeh0gtl2ddc"
 
 [display]
 
@@ -29,6 +31,7 @@ window/stretch/mode="canvas_items"
 [global_group]
 
 Enemies=""
+Players=""
 
 [input]
 
