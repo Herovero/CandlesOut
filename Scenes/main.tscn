@@ -1,3 +1,20 @@
 [gd_scene format=3 uid="uid://b4jda3svu4fmh"]
 
+[ext_resource type="PackedScene" uid="uid://c4sy607bwof83" path="res://Scenes/player.tscn" id="1_jjgbg"]
+
 [node name="main" type="Node2D" unique_id=1941177541]
+
+[node name="Player1" parent="." unique_id=687220319 instance=ExtResource("1_jjgbg")]
+position = Vector2(-80, 0)
+
+[node name="Player2" parent="." unique_id=771985895 instance=ExtResource("1_jjgbg")]
+position = Vector2(80, 0)
+input_prefix = "p2_"
+
+[node name="Sprite2D" parent="Player2" index="0" unique_id=488149044]
+self_modulate = Color(0.4305942, 0.9065291, 2.695322e-06, 1)
+
+[node name="Camera2D" type="Camera2D" parent="." unique_id=1658536604]
+
+[editable path="Player1"]
+[editable path="Player2"]
