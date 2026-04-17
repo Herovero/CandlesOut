@@ -23,6 +23,9 @@ func _on_take_damage(amount: float, target_id: String):
 		health = clamp(health, 0, hearts_list.size()) # Prevent negative health
 		update_heart_visuals()
 		
+		if health <= 0:
+			SignalBus.emit_signal("game_over", "Player " + my_player_id + " died!")
+		
 func update_heart_visuals():
 	for i in range(hearts_list.size()):
 		var heart_node = hearts_list[i]
