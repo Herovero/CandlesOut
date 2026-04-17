@@ -10,11 +10,16 @@ const SEPARATION_FORCE: float = 200.0
 @export var projectile_speed: float = 250.0
 @export var projectile_damage: float = 1.0
 @export var muzzle_offset: float = 24.0
+@export var max_hp: float = 5.0
 
-var hp: float = 100.0
+var hp: float = 5.0
 var knockback_velocity: Vector2 = Vector2.ZERO
 var shoot_cooldown: float = 0.0
 var last_move_dir: Vector2 = Vector2.RIGHT
+
+
+func _ready() -> void:
+	hp = max_hp
 
 
 func _physics_process(delta: float) -> void:
@@ -89,6 +94,12 @@ func shoot_projectile() -> void:
 	projectile.owner_group = "Enemies"
 	projectile.target_group = "Players"
 	get_tree().current_scene.add_child(projectile)
+
+
+func take_damage(amount: float) -> void:
+	hp = clamp(hp - amount, 0.0, max_hp)
+	if hp <= 0.0:
+		queue_free()
 
 
 func _on_hitbox_body_entered(body):
