@@ -1,12 +1,13 @@
 [gd_scene format=4 uid="uid://b4jda3svu4fmh"]
 
-[ext_resource type="PackedScene" uid="uid://e74olsliput5" path="res://Scenes/item_coffee.tscn" id="1_6bp64"]
+[ext_resource type="PackedScene" path="res://Scenes/item_coffee.tscn" id="1_6bp64"]
 [ext_resource type="PackedScene" uid="uid://c4sy607bwof83" path="res://Scenes/player.tscn" id="1_jjgbg"]
 [ext_resource type="PackedScene" uid="uid://cqbq35ef7qsmd" path="res://Scenes/heart.tscn" id="2_8gbba"]
 [ext_resource type="PackedScene" uid="uid://ct8trhua4tgaq" path="res://Scenes/Spawners/Spawner.tscn" id="5_21xkr"]
 [ext_resource type="Texture2D" uid="uid://biv8vykh0s88f" path="res://Assets/2D Pixel Dungeon Asset Pack/character and tileset/Dungeon_Tileset.png" id="5_kry3j"]
 [ext_resource type="PackedScene" uid="uid://duwadq4gka1wx" path="res://Scenes/Spawners/item_spawner.tscn" id="6_6bp64"]
 [ext_resource type="PackedScene" uid="uid://cqts1yegiva4h" path="res://Scenes/Spawners/WaveManager.tscn" id="6_21xkr"]
+[ext_resource type="Shader" uid="uid://6hqdvb46pj53" path="res://Assets/vig.gdshader" id="8_344ge"]
 
 [sub_resource type="TileSetAtlasSource" id="TileSetAtlasSource_21xkr"]
 texture = ExtResource("5_kry3j")
@@ -133,6 +134,11 @@ texture = ExtResource("5_kry3j")
 physics_layer_0/collision_layer = 1
 sources/0 = SubResource("TileSetAtlasSource_21xkr")
 
+[sub_resource type="ShaderMaterial" id="ShaderMaterial_ynf5e"]
+shader = ExtResource("8_344ge")
+shader_parameter/strength = 1.4
+shader_parameter/radius = 0.1
+
 [node name="main" type="Node2D" unique_id=1941177541]
 
 [node name="item_coffee" parent="." unique_id=839316503 instance=ExtResource("1_6bp64")]
@@ -164,6 +170,7 @@ metadata/_edit_use_anchors_ = true
 zoom = Vector2(0.75, 0.75)
 
 [node name="HUDs" type="CanvasLayer" parent="." unique_id=518585437]
+layer = 2
 
 [node name="Player1" type="Control" parent="HUDs" unique_id=1050061049]
 layout_mode = 3
@@ -221,6 +228,20 @@ rotation = -1.5707964
 position = Vector2(-10, 24)
 
 [node name="WaveManager" parent="." unique_id=657000445 instance=ExtResource("6_21xkr")]
+
+[node name="CanvasLayer" type="CanvasLayer" parent="." unique_id=1150843612]
+
+[node name="ColorRect" type="ColorRect" parent="CanvasLayer" unique_id=507186883]
+material = SubResource("ShaderMaterial_ynf5e")
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+offset_left = -10.0
+offset_top = -2.0
+offset_right = 8.0
+grow_horizontal = 2
+grow_vertical = 2
+color = Color(1, 1, 1, 0)
 
 [editable path="Player1"]
 [editable path="Player2"]
