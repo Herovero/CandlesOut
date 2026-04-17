@@ -1,6 +1,6 @@
 extends CharacterBody2D
 
-const SPEED: float = 100.0
+const SPEED: float = 200.0
 const SEPARATION_RADIUS: float = 40.0
 const SEPARATION_FORCE: float = 200.0
 
