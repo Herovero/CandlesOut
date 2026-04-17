@@ -1,6 +1,6 @@
 [gd_scene format=3 uid="uid://duwadq4gka1wx"]
 
-[ext_resource type="Script" uid="uid://wc6cjfawbxfg" path="res://Scenes/Spawners/item_spawner.gd" id="1_qdwl7"]
+[ext_resource type="Script" uid="uid://wc6cjfawbxfg" path="res://Scripts/item_spawner.gd" id="1_qdwl7"]
 
 [sub_resource type="RectangleShape2D" id="RectangleShape2D_hjhgd"]
 size = Vector2(1069.25, 571)

@@ -1,6 +1,6 @@
 [gd_scene format=3 uid="uid://ct8trhua4tgaq"]
 
-[ext_resource type="Script" uid="uid://d0aeh0gtl2ddc" path="res://Scripts/spawner.gd" id="1_ohbek"]
+[ext_resource type="Script" uid="uid://d0aeh0gtl2ddc" path="res://Scripts/Spawners/spawner.gd" id="1_ohbek"]
 
 [sub_resource type="RectangleShape2D" id="RectangleShape2D_ohbek"]
 size = Vector2(234, 32)

@@ -10,7 +10,7 @@ const SEPARATION_FORCE: float = 200.0
 @export var projectile_speed: float = 250.0
 @export var projectile_damage: float = 1.0
 @export var muzzle_offset: float = 24.0
-@export var max_hp: float = 5.0
+@export var max_hp: float = 1.0
 
 var hp: float = 5.0
 var knockback_velocity: Vector2 = Vector2.ZERO
