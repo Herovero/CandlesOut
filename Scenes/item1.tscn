@@ -1,7 +1,7 @@
 [gd_scene format=3 uid="uid://d4mmodq5hen4l"]
 
-[ext_resource type="Script" uid="uid://bg4yvuv83bq3f" path="res://Scripts/item.gd" id="1_pkys8"]
-[ext_resource type="Texture2D" uid="uid://dyy8151t8djhp" path="res://Assets/UIs/heart_full.png" id="2_1o0s7"]
+[ext_resource type="Script" uid="uid://b703b564cjb8q" path="res://Scripts/coffee.gd" id="1_1o0s7"]
+[ext_resource type="Texture2D" uid="uid://bio78rbpw1vkf" path="res://Assets/Sprites/item_coffee.png" id="2_1weea"]
 
 [sub_resource type="CircleShape2D" id="CircleShape2D_1weea"]
 radius = 20.024984
@@ -9,11 +9,12 @@ radius = 20.024984
 [node name="item1" type="Area2D" unique_id=839316503 groups=["Items"]]
 collision_layer = 3
 collision_mask = 3
-script = ExtResource("1_pkys8")
+script = ExtResource("1_1o0s7")
 
-[node name="Sprite2D" type="Sprite2D" parent="." unique_id=171564091]
-scale = Vector2(0.2, 0.2)
-texture = ExtResource("2_1o0s7")
+[node name="Sprite2D" type="Sprite2D" parent="." unique_id=786398800]
+position = Vector2(-4, -2)
+scale = Vector2(1.5, 1.5)
+texture = ExtResource("2_1weea")
 
 [node name="CollisionShape2D" type="CollisionShape2D" parent="." unique_id=40545649]
 shape = SubResource("CircleShape2D_1weea")

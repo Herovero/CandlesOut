@@ -1,6 +1,6 @@
 [gd_scene format=3 uid="uid://fvfcli6ddale"]
 
-[ext_resource type="Script" uid="uid://qaqrcuiubex6" path="res://Scenes/bomb.gd" id="1_84vf5"]
+[ext_resource type="Script" uid="uid://qaqrcuiubex6" path="res://Scripts/bomb.gd" id="1_84vf5"]
 [ext_resource type="Texture2D" uid="uid://288qrg3nk07y" path="res://Assets/Sprites/item_bomb.png" id="2_84vf5"]
 [ext_resource type="Texture2D" uid="uid://jlnyjr8040vx" path="res://Assets/explosion pack 1/Explosions pack/explosion-1-g/Sprites/frame1.png" id="3_5b00u"]
 [ext_resource type="Texture2D" uid="uid://c0jb7mvcxp5i1" path="res://Assets/explosion pack 1/Explosions pack/explosion-1-g/Sprites/frame2.png" id="4_t8hh5"]

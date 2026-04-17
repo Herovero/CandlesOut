@@ -4,6 +4,12 @@ extends "res://Scripts/item.gd"
 @onready var anim_sprite = $ExplosionVFX
 @onready var sprite = $Sprite2D # Your original bomb sprite
 
+@export var bomb_throw_distance: float = 450.0
+
+func _ready():
+	super()
+	custom_throw_distance = 450.0
+	
 func _finish_throw(ghost):
 	super._finish_throw(ghost)
 	
