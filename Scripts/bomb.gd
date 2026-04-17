@@ -8,6 +8,8 @@ extends "res://Scripts/item.gd"
 
 @export var bomb_throw_distance: float = 450.0
 var is_stalking: bool = false
+@export var max_stalk_time: float = 5.0
+var stalk_timer: float = 0.0
 
 func _ready():
 	super()
@@ -17,7 +19,7 @@ func _finish_throw(ghost):
 	super._finish_throw(ghost)
 	
 	# 50% chance to grow wings instead of exploding
-	if randf() < 0.9:
+	if randf() < 0.5:
 		start_stalking()
 	else:
 		explode()
@@ -25,8 +27,8 @@ func _finish_throw(ghost):
 func explode():
 	# Stop the bomb from moving/being picked up again
 	is_thrown = false 
-	monitoring = false 
-	monitorable = false 
+	set_deferred("monitoring", false)
+	set_deferred("monitorable", false)
 	
 	# Hide the bomb sprite and show/play the explosion 
 	if sprite: sprite.visible = false
@@ -49,6 +51,7 @@ func explode():
 
 func start_stalking():
 	is_stalking = true
+	stalk_timer = 0.0 # Reset timer
 	left_wing.visible = true
 	right_wing.visible = true
 	left_wing.play("default")
@@ -56,6 +59,13 @@ func start_stalking():
 
 func _physics_process(delta):
 	if is_stalking:
+		stalk_timer += delta
+		
+		# Condition: Explode if chase lasts too long
+		if stalk_timer >= max_stalk_time:
+			explode()
+			return
+			
 		var target = find_active_player()
 		if target:
 			var dir = global_position.direction_to(target.global_position)
