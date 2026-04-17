@@ -38,7 +38,7 @@ enum BossState {
 @export var cone_windup: float = 0.35
 @export var cone_recover: float = 0.45
 
-var hp: float = 120.0
+var hp: float = 100.0
 var is_phase_two: bool = false
 var state: BossState = BossState.IDLE
 var state_time_left: float = 0.0
