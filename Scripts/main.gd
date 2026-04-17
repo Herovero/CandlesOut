@@ -9,7 +9,7 @@ func _ready():
 	gameover_label.hide()
 	restart_button.hide()
 	
-	SignalBus.connect("game_over", _on_game_over)
+	# SignalBus.connect("game_over", _on_game_over)
 
 # Called every frame. 'delta' is the elapsed time since the previous frame.
 # In a central script (e.g., Main.gd or GameManager.gd)
@@ -29,10 +29,10 @@ func check_total_sleep_condition():
 		SignalBus.emit_signal("game_over", "Both players fell asleep!")
 
 func _on_game_over(reason: String):
-	#print("Game Over: ", reason)
-	## Pause the game
+	pass
+	"""## Pause the game
 	gameover_label.show()
 	restart_button.show()
 	get_tree().paused = true
 	# Show your Game Over UI here
-	pass
+	pass"""

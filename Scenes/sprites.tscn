@@ -1,26 +1,24 @@
-[gd_scene format=4 uid="uid://b4jda3svu4fmh"]
+[gd_scene format=4 uid="uid://cc6i0e1kvelc8"]
 
-[ext_resource type="PackedScene" uid="uid://c4sy607bwof83" path="res://Scenes/player.tscn" id="1_jjgbg"]
-[ext_resource type="Script" uid="uid://bmd6hkjls56de" path="res://Scripts/main.gd" id="1_ynf5e"]
-[ext_resource type="PackedScene" uid="uid://cqbq35ef7qsmd" path="res://Scenes/heart.tscn" id="2_8gbba"]
-[ext_resource type="PackedScene" uid="uid://cmxdhycob41w4" path="res://Scenes/item_oil.tscn" id="2_d1ilt"]
-[ext_resource type="PackedScene" uid="uid://fvfcli6ddale" path="res://Scenes/item_bomb.tscn" id="2_fdnlq"]
-[ext_resource type="PackedScene" uid="uid://bl7c35jykhk4q" path="res://Scenes/item_lighter.tscn" id="2_hptm8"]
-[ext_resource type="PackedScene" uid="uid://druku4bp3uv5i" path="res://Scenes/item_shoe.tscn" id="4_6iyac"]
-[ext_resource type="PackedScene" uid="uid://ct8trhua4tgaq" path="res://Scenes/Spawners/Spawner.tscn" id="5_21xkr"]
-[ext_resource type="Texture2D" uid="uid://biv8vykh0s88f" path="res://Assets/2D Pixel Dungeon Asset Pack/character and tileset/Dungeon_Tileset.png" id="5_kry3j"]
-[ext_resource type="PackedScene" uid="uid://duwadq4gka1wx" path="res://Scenes/Spawners/item_spawner.tscn" id="6_6bp64"]
-[ext_resource type="PackedScene" uid="uid://cqts1yegiva4h" path="res://Scenes/Spawners/WaveManager.tscn" id="6_21xkr"]
-[ext_resource type="Texture2D" uid="uid://banibmuufdg3x" path="res://Assets/UIs/button UI.png" id="6_hptm8"]
-[ext_resource type="Script" uid="uid://0a15j6p2c2ts" path="res://Scripts/restart_button.gd" id="7_d1ilt"]
-[ext_resource type="Shader" uid="uid://it33xyedawxm" path="res://Assets/vig.gdshader" id="8_344ge"]
+[ext_resource type="Script" uid="uid://bmd6hkjls56de" path="res://Scripts/main.gd" id="1_aqrgr"]
+[ext_resource type="PackedScene" uid="uid://druku4bp3uv5i" path="res://Scenes/item_shoe.tscn" id="2_t1i21"]
+[ext_resource type="PackedScene" uid="uid://e74olsliput5" path="res://Scenes/item_coffee.tscn" id="3_q15t2"]
+[ext_resource type="PackedScene" uid="uid://c4sy607bwof83" path="res://Scenes/player.tscn" id="4_7icnw"]
+[ext_resource type="PackedScene" uid="uid://cqbq35ef7qsmd" path="res://Scenes/heart.tscn" id="5_8oggy"]
+[ext_resource type="Texture2D" uid="uid://banibmuufdg3x" path="res://Assets/UIs/button UI.png" id="6_kvgin"]
+[ext_resource type="Script" uid="uid://0a15j6p2c2ts" path="res://Scripts/restart_button.gd" id="7_y5mkc"]
+[ext_resource type="Texture2D" uid="uid://biv8vykh0s88f" path="res://Assets/2D Pixel Dungeon Asset Pack/character and tileset/Dungeon_Tileset.png" id="8_kdssi"]
+[ext_resource type="PackedScene" uid="uid://ct8trhua4tgaq" path="res://Scenes/Spawners/Spawner.tscn" id="9_yn76n"]
+[ext_resource type="PackedScene" uid="uid://duwadq4gka1wx" path="res://Scenes/Spawners/item_spawner.tscn" id="10_5xnyj"]
+[ext_resource type="PackedScene" uid="uid://cqts1yegiva4h" path="res://Scenes/Spawners/WaveManager.tscn" id="11_or00x"]
+[ext_resource type="Shader" path="res://Assets/vig.gdshader" id="12_ph8bh"]
 
 [sub_resource type="AtlasTexture" id="AtlasTexture_d1ilt"]
-atlas = ExtResource("6_hptm8")
+atlas = ExtResource("6_kvgin")
 region = Rect2(143.5381, 0, 17.599411, 16.972132)
 
 [sub_resource type="TileSetAtlasSource" id="TileSetAtlasSource_21xkr"]
-texture = ExtResource("5_kry3j")
+texture = ExtResource("8_kdssi")
 0:0/0 = 0
 0:0/0/physics_layer_0/polygon_0/points = PackedVector2Array(-8, -8, 8, -8, 8, 8, -8, 8)
 1:0/0 = 0
@@ -145,47 +143,32 @@ physics_layer_0/collision_layer = 1
 sources/0 = SubResource("TileSetAtlasSource_21xkr")
 
 [sub_resource type="ShaderMaterial" id="ShaderMaterial_6iyac"]
-shader = ExtResource("8_344ge")
+shader = ExtResource("12_ph8bh")
 shader_parameter/strength = 2.0
 shader_parameter/radius = 0.1
 
 [node name="main" type="Node2D" unique_id=1941177541]
-script = ExtResource("1_ynf5e")
+script = ExtResource("1_aqrgr")
 
-[node name="item_bomb" parent="." unique_id=839316503 instance=ExtResource("2_fdnlq")]
-position = Vector2(140, -162)
+[node name="item_shoe" parent="." unique_id=839316503 instance=ExtResource("2_t1i21")]
+position = Vector2(-17, -99)
 
-[node name="item_bomb2" parent="." unique_id=930017513 instance=ExtResource("2_fdnlq")]
-position = Vector2(345, -57)
+[node name="item_coffee" parent="." unique_id=53782182 instance=ExtResource("3_q15t2")]
+position = Vector2(145, -104)
 
-[node name="item_bomb3" parent="." unique_id=1654210986 instance=ExtResource("2_fdnlq")]
-position = Vector2(-292, 124)
+[node name="item_coffee2" parent="." unique_id=23504135 instance=ExtResource("3_q15t2")]
+position = Vector2(-186, 171)
 
-[node name="item_oil" parent="." unique_id=1451110955 instance=ExtResource("2_d1ilt")]
-position = Vector2(-316, -107)
+[node name="item_coffee3" parent="." unique_id=1398194374 instance=ExtResource("3_q15t2")]
+position = Vector2(-280, -121)
 
-[node name="item_oil2" parent="." unique_id=1555296276 instance=ExtResource("2_d1ilt")]
-position = Vector2(344, -147)
-
-[node name="item_oil3" parent="." unique_id=1806718288 instance=ExtResource("2_d1ilt")]
-position = Vector2(136, 176)
-
-[node name="item_lighter3" parent="." unique_id=846522892 instance=ExtResource("2_hptm8")]
-position = Vector2(354, 157)
-
-[node name="item_shoe" parent="." unique_id=2049204612 instance=ExtResource("4_6iyac")]
-position = Vector2(-114, -161)
-
-[node name="item_shoe2" parent="." unique_id=1502797259 instance=ExtResource("4_6iyac")]
-position = Vector2(-377, 151)
-
-[node name="Player1" parent="." unique_id=687220319 groups=["Players"] instance=ExtResource("1_jjgbg")]
+[node name="Player1" parent="." unique_id=687220319 groups=["Players"] instance=ExtResource("4_7icnw")]
 position = Vector2(-80, 0)
 
 [node name="StaminaBar" parent="Player1/Stats" parent_id_path=PackedInt32Array(687220319, 1450506992) index="0" unique_id=61292380]
 metadata/_edit_use_anchors_ = true
 
-[node name="Player2" parent="." unique_id=771985895 groups=["Players"] instance=ExtResource("1_jjgbg")]
+[node name="Player2" parent="." unique_id=771985895 groups=["Players"] instance=ExtResource("4_7icnw")]
 position = Vector2(80, 0)
 input_prefix = "p2_"
 
@@ -205,7 +188,7 @@ offset_right = 40.0
 offset_bottom = 40.0
 metadata/_edit_use_anchors_ = true
 
-[node name="Hearts" parent="HUDs/Player1" unique_id=706036972 instance=ExtResource("2_8gbba")]
+[node name="Hearts" parent="HUDs/Player1" unique_id=706036972 instance=ExtResource("5_8oggy")]
 layout_mode = 0
 offset_left = 28.000004
 offset_top = 33.0
@@ -219,7 +202,7 @@ offset_right = 40.0
 offset_bottom = 40.0
 metadata/_edit_use_anchors_ = true
 
-[node name="Hearts" parent="HUDs/Player2" unique_id=999244154 instance=ExtResource("2_8gbba")]
+[node name="Hearts" parent="HUDs/Player2" unique_id=999244154 instance=ExtResource("5_8oggy")]
 layout_mode = 0
 offset_left = 971.99994
 offset_top = 31.000004
@@ -259,7 +242,7 @@ grow_horizontal = 2
 grow_vertical = 2
 scale = Vector2(8.985192, 8.985192)
 texture_normal = SubResource("AtlasTexture_d1ilt")
-script = ExtResource("7_d1ilt")
+script = ExtResource("7_y5mkc")
 
 [node name="TileMapLayer" type="TileMapLayer" parent="." unique_id=184758336]
 z_index = -1
@@ -270,24 +253,24 @@ tile_set = SubResource("TileSet_6bp64")
 
 [node name="Spawners" type="Node" parent="." unique_id=1638346625]
 
-[node name="Spawner" parent="Spawners" unique_id=1677051792 instance=ExtResource("5_21xkr")]
+[node name="Spawner" parent="Spawners" unique_id=1677051792 instance=ExtResource("9_yn76n")]
 position = Vector2(24, -386)
 
-[node name="Spawner2" parent="Spawners" unique_id=281733100 instance=ExtResource("5_21xkr")]
+[node name="Spawner2" parent="Spawners" unique_id=281733100 instance=ExtResource("9_yn76n")]
 position = Vector2(23, 529)
 
-[node name="Spawner3" parent="Spawners" unique_id=1006731115 instance=ExtResource("5_21xkr")]
+[node name="Spawner3" parent="Spawners" unique_id=1006731115 instance=ExtResource("9_yn76n")]
 position = Vector2(-896, -1)
 rotation = -1.5707964
 
-[node name="Spawner4" parent="Spawners" unique_id=139584195 instance=ExtResource("5_21xkr")]
+[node name="Spawner4" parent="Spawners" unique_id=139584195 instance=ExtResource("9_yn76n")]
 position = Vector2(656, -1)
 rotation = -1.5707964
 
-[node name="ItemSpawner" parent="Spawners" unique_id=2051812496 instance=ExtResource("6_6bp64")]
+[node name="ItemSpawner" parent="Spawners" unique_id=2051812496 instance=ExtResource("10_5xnyj")]
 position = Vector2(-10, 24)
 
-[node name="WaveManager" parent="." unique_id=657000445 instance=ExtResource("6_21xkr")]
+[node name="WaveManager" parent="." unique_id=657000445 instance=ExtResource("11_or00x")]
 
 [node name="CanvasLayer" type="CanvasLayer" parent="." unique_id=1994626862]
 
