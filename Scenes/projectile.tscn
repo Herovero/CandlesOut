@@ -50,7 +50,7 @@ script = ExtResource("1_script")
 position = Vector2(-11, 0)
 scale = Vector2(3, 3)
 sprite_frames = SubResource("SpriteFrames_rsyq6")
-frame_progress = 0.3318418
+frame_progress = 0.44915757
 
 [node name="Sprite2D" type="Sprite2D" parent="." unique_id=1912473741]
 visible = false
