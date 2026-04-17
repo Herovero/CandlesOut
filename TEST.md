@@ -60,11 +60,11 @@ Import AnimatedSprite & Animation - Justin
 
 new addition log:
 
+- separation of ranged and enemy
 - ranged enemy lower hp
 - ranged enemy dont move away if player approaches closer to them
 - ranged enemy shoot less freq
 - ranged enemy have shoot range, not infinite
 - player shoot while standing, their last moving toward direction is saved
-- enemy_test have atk buffer
+- enemy_test have longer atk buffer
 - projectile slower
-- separation of ranged and enemy

@@ -3,7 +3,7 @@ extends "res://Scripts/enemy_test.gd"
 @export var ranged_max_hp: float = 3.0
 @export var projectile_scene: PackedScene = preload("res://Scenes/projectile.tscn")
 @export var shoot_interval: float = 1.6
-@export var projectile_speed: float = 250.0
+@export var projectile_speed: float = 200.0
 @export var projectile_damage: float = 1.0
 @export var muzzle_offset: float = 24.0
 @export var preferred_distance: float = 220.0
@@ -15,6 +15,7 @@ var last_move_dir: Vector2 = Vector2.RIGHT
 
 
 func _ready() -> void:
+	motion_mode = CharacterBody2D.MOTION_MODE_FLOATING
 	max_hp = ranged_max_hp
 	hp = max_hp
 

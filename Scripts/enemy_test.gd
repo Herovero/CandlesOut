@@ -6,13 +6,19 @@ const SEPARATION_FORCE: float = 200.0
 
 @export var damage_amount: float = 1.0
 @export var max_hp: float = 2
+@export var melee_attack_buffer: float = 1.2
+@export var max_hp: float = 5.0
 
 var hp: float = 5.0
 var knockback_velocity: Vector2 = Vector2.ZERO
 
+@onready var attack_timer: Timer = $AttackTimer
+
 
 func _ready() -> void:
+	motion_mode = CharacterBody2D.MOTION_MODE_FLOATING
 	hp = max_hp
+	attack_timer.wait_time = melee_attack_buffer
 
 
 func _physics_process(delta: float) -> void:
@@ -74,9 +80,12 @@ func take_damage(amount: float) -> void:
 
 
 func _on_hitbox_body_entered(body):
+	if not attack_timer.is_stopped():
+		return
+
 	if body.is_in_group("Players"):
-		SignalBus.emit_signal("take_damage", 1.0, body.input_prefix)
-		#body.take_damage(damage_amount)
+		SignalBus.emit_signal("take_damage", damage_amount, body.input_prefix)
+		attack_timer.start()
 
 		var dir = (body.global_position - global_position).normalized()
 		if body.has_method("apply_knockback"):
