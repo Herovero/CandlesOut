@@ -68,3 +68,5 @@ new addition log:
 - player shoot while standing, their last moving toward direction is saved
 - enemy_test have longer atk buffer
 - projectile slower
+- player autoaim at shooting direction, cone shaped from the player
+- enemy fix attack stops after it sticks to the player

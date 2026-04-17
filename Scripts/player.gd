@@ -8,6 +8,9 @@ extends CharacterBody2D
 @export var projectile_speed: float = 200.0
 @export var projectile_damage: float = 1.0
 @export var muzzle_offset: float = 24.0
+@export var autoaim_enabled: bool = true
+@export var autoaim_range: float = 300.0
+@export var autoaim_cone_angle_deg: float = 50.0
 
 @export var max_stamina: float = 100.0
 var current_stamina: float = 100.0
@@ -106,13 +109,49 @@ func apply_knockback(force: Vector2):
 	knockback_velocity = force
 
 
+func find_autoaim_target(shoot_dir: Vector2) -> Node2D:
+	var enemies = get_tree().get_nodes_in_group("Enemies")
+	var best_target: Node2D = null
+	var best_dot := -1.0
+	var best_dist := INF
+	var max_dist_sq := autoaim_range * autoaim_range
+	var min_dot := cos(deg_to_rad(autoaim_cone_angle_deg * 0.5))
+
+	for e in enemies:
+		if not (e is Node2D):
+			continue
+
+		var to_enemy = (e as Node2D).global_position - global_position
+		var dist_sq = to_enemy.length_squared()
+		if dist_sq > max_dist_sq or dist_sq == 0.0:
+			continue
+
+		var dir_to_enemy = to_enemy.normalized()
+		var dot = shoot_dir.dot(dir_to_enemy)
+		if dot < min_dot:
+			continue
+
+		if dot > best_dot or (is_equal_approx(dot, best_dot) and dist_sq < best_dist):
+			best_dot = dot
+			best_dist = dist_sq
+			best_target = e as Node2D
+
+	return best_target
+
+
 func shoot_projectile() -> void:
 	if projectile_scene == null:
 		return
 
+	var shot_dir = last_move_dir
+	if autoaim_enabled:
+		var target = find_autoaim_target(last_move_dir)
+		if target:
+			shot_dir = global_position.direction_to(target.global_position)
+
 	var projectile = projectile_scene.instantiate()
-	projectile.global_position = global_position + (last_move_dir * muzzle_offset)
-	projectile.direction = last_move_dir
+	projectile.global_position = global_position + (shot_dir * muzzle_offset)
+	projectile.direction = shot_dir
 	projectile.speed = projectile_speed
 	projectile.damage = projectile_damage
 	projectile.owner_group = "Players"
