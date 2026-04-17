@@ -4,6 +4,7 @@
 [ext_resource type="Script" uid="uid://bmd6hkjls56de" path="res://Scripts/main.gd" id="1_ynf5e"]
 [ext_resource type="PackedScene" uid="uid://cqbq35ef7qsmd" path="res://Scenes/heart.tscn" id="2_8gbba"]
 [ext_resource type="PackedScene" uid="uid://cmxdhycob41w4" path="res://Scenes/item_oil.tscn" id="2_d1ilt"]
+[ext_resource type="PackedScene" uid="uid://fvfcli6ddale" path="res://Scenes/item_bomb.tscn" id="2_fdnlq"]
 [ext_resource type="PackedScene" uid="uid://bl7c35jykhk4q" path="res://Scenes/item_lighter.tscn" id="2_hptm8"]
 [ext_resource type="PackedScene" uid="uid://druku4bp3uv5i" path="res://Scenes/item_shoe.tscn" id="4_6iyac"]
 [ext_resource type="PackedScene" uid="uid://ct8trhua4tgaq" path="res://Scenes/Spawners/Spawner.tscn" id="5_21xkr"]
@@ -145,7 +146,16 @@ sources/0 = SubResource("TileSetAtlasSource_21xkr")
 [node name="main" type="Node2D" unique_id=1941177541]
 script = ExtResource("1_ynf5e")
 
-[node name="item_oil" parent="." unique_id=839316503 instance=ExtResource("2_d1ilt")]
+[node name="item_bomb" parent="." unique_id=839316503 instance=ExtResource("2_fdnlq")]
+position = Vector2(140, -162)
+
+[node name="item_bomb2" parent="." unique_id=930017513 instance=ExtResource("2_fdnlq")]
+position = Vector2(345, -57)
+
+[node name="item_bomb3" parent="." unique_id=1654210986 instance=ExtResource("2_fdnlq")]
+position = Vector2(-292, 124)
+
+[node name="item_oil" parent="." unique_id=1451110955 instance=ExtResource("2_d1ilt")]
 position = Vector2(-316, -107)
 
 [node name="item_oil2" parent="." unique_id=1555296276 instance=ExtResource("2_d1ilt")]

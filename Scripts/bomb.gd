@@ -3,8 +3,11 @@ extends "res://Scripts/item.gd"
 @onready var explosion_area = $ExplosionArea
 @onready var anim_sprite = $ExplosionVFX
 @onready var sprite = $Sprite2D # Your original bomb sprite
+@onready var left_wing = $LeftWing   # Your AnimatedSprite2D
+@onready var right_wing = $RightWing # Your AnimatedSprite2D
 
 @export var bomb_throw_distance: float = 450.0
+var is_stalking: bool = false
 
 func _ready():
 	super()
@@ -13,7 +16,11 @@ func _ready():
 func _finish_throw(ghost):
 	super._finish_throw(ghost)
 	
-	explode()
+	# 50% chance to grow wings instead of exploding
+	if randf() < 0.9:
+		start_stalking()
+	else:
+		explode()
 
 func explode():
 	# Stop the bomb from moving/being picked up again
@@ -39,3 +46,30 @@ func explode():
 	
 	await anim_sprite.animation_finished
 	queue_free()
+
+func start_stalking():
+	is_stalking = true
+	left_wing.visible = true
+	right_wing.visible = true
+	left_wing.play("default")
+	right_wing.play("default")
+
+func _physics_process(delta):
+	if is_stalking:
+		var target = find_active_player()
+		if target:
+			var dir = global_position.direction_to(target.global_position)
+			global_position += dir * 150.0 * delta # Speed of the flying bomb
+
+func find_active_player() -> CharacterBody2D:
+	var players = get_tree().get_nodes_in_group("Players")
+	for p in players:
+		# Don't move toward the sleeping player
+		if not p.is_sleeping:
+			return p
+	return null
+
+func _on_body_entered(body):
+	# If the bomb is stalking and hits the active player
+	if is_stalking and body.is_in_group("Players") and not body.is_sleeping:
+		explode()
