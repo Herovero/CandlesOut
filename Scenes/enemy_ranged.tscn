@@ -1,7 +1,10 @@
-[gd_scene format=3]
+[gd_scene format=3 uid="uid://dcnm854vbpf8x"]
 
-[ext_resource type="Script" path="res://Scripts/enemy_ranged.gd" id="1_script"]
-[ext_resource type="Texture2D" path="res://icon.svg" id="2_icon"]
+[ext_resource type="Script" uid="uid://d1p4qmphbpcfa" path="res://Scripts/enemy_ranged.gd" id="1_script"]
+[ext_resource type="Texture2D" uid="uid://b7fvyw61qmnl7" path="res://icon.svg" id="2_icon"]
+[ext_resource type="AudioStream" uid="uid://b4lhmwb55wd4b" path="res://SFX/Enemy/EneShoot.wav" id="3_htpsb"]
+[ext_resource type="AudioStream" uid="uid://cxcdt0cwv4g4v" path="res://SFX/Enemy/EneFootstep.wav" id="4_t233f"]
+[ext_resource type="AudioStream" uid="uid://do4d7expdd4hw" path="res://SFX/Enemy/EneDead.wav" id="5_kowwf"]
 
 [sub_resource type="RectangleShape2D" id="RectangleShape2D_body"]
 size = Vector2(64, 64)
@@ -9,23 +12,32 @@ size = Vector2(64, 64)
 [sub_resource type="RectangleShape2D" id="RectangleShape2D_hitbox"]
 size = Vector2(68, 68)
 
-[node name="EnemyRanged" type="CharacterBody2D" groups=["Enemies"]]
+[node name="EnemyRanged" type="CharacterBody2D" unique_id=1320265069 groups=["Enemies"]]
 script = ExtResource("1_script")
 
-[node name="Sprite2D" type="Sprite2D" parent="."]
+[node name="Sprite2D" type="Sprite2D" parent="." unique_id=1164631735]
 self_modulate = Color(0.4, 0.8, 1, 1)
 scale = Vector2(0.5, 0.5)
 texture = ExtResource("2_icon")
 
-[node name="CollisionShape2D" type="CollisionShape2D" parent="."]
+[node name="CollisionShape2D" type="CollisionShape2D" parent="." unique_id=2040590797]
 shape = SubResource("RectangleShape2D_body")
 
-[node name="Hitbox" type="Area2D" parent="."]
+[node name="Hitbox" type="Area2D" parent="." unique_id=1912542658]
 
-[node name="CollisionShape2D" type="CollisionShape2D" parent="Hitbox"]
+[node name="CollisionShape2D" type="CollisionShape2D" parent="Hitbox" unique_id=254396155]
 shape = SubResource("RectangleShape2D_hitbox")
 
-[node name="AttackTimer" type="Timer" parent="."]
+[node name="AttackTimer" type="Timer" parent="." unique_id=1149944073]
 one_shot = true
+
+[node name="ShootEnemy" type="AudioStreamPlayer2D" parent="." unique_id=1642925671]
+stream = ExtResource("3_htpsb")
+
+[node name="EnemyFootStep" type="AudioStreamPlayer2D" parent="." unique_id=568007152]
+stream = ExtResource("4_t233f")
+
+[node name="EnemyDies" type="AudioStreamPlayer2D" parent="." unique_id=1400258304]
+stream = ExtResource("5_kowwf")
 
 [connection signal="body_entered" from="Hitbox" to="." method="_on_hitbox_body_entered"]

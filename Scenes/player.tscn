@@ -1,83 +1,19 @@
 [gd_scene format=3 uid="uid://c4sy607bwof83"]
 
 [ext_resource type="Script" uid="uid://dwsroubvetdac" path="res://Scripts/player.gd" id="1_ndhuy"]
-[ext_resource type="Texture2D" uid="uid://cfbf3whkdulbr" path="res://Assets/idle.png" id="2_6t5aa"]
-[ext_resource type="Texture2D" uid="uid://dl6caqu10wpsb" path="res://Assets/walk.png" id="2_cvnsp"]
+[ext_resource type="Texture2D" uid="uid://b7fvyw61qmnl7" path="res://icon.svg" id="2_rliju"]
+[ext_resource type="AudioStream" uid="uid://xo6t8svnw0p" path="res://SFX/Player/Footstep.wav" id="3_6t5aa"]
+[ext_resource type="AudioStream" uid="uid://t0iap5rt6kl4" path="res://SFX/Player/Shoot.wav" id="4_vgqql"]
 
 [sub_resource type="RectangleShape2D" id="RectangleShape2D_cvnsp"]
 size = Vector2(64, 64)
 
-[sub_resource type="AtlasTexture" id="AtlasTexture_8erm5"]
-atlas = ExtResource("2_6t5aa")
-region = Rect2(0, 0, 20, 23)
-
-[sub_resource type="AtlasTexture" id="AtlasTexture_f1ek2"]
-atlas = ExtResource("2_6t5aa")
-region = Rect2(20, 0, 20, 23)
-
-[sub_resource type="AtlasTexture" id="AtlasTexture_tx1dd"]
-atlas = ExtResource("2_6t5aa")
-region = Rect2(40, 0, 20, 23)
-
-[sub_resource type="AtlasTexture" id="AtlasTexture_6t5aa"]
-atlas = ExtResource("2_cvnsp")
-region = Rect2(0, 0, 20, 23)
-
-[sub_resource type="AtlasTexture" id="AtlasTexture_vgqql"]
-atlas = ExtResource("2_cvnsp")
-region = Rect2(20, 0, 20, 23)
-
-[sub_resource type="AtlasTexture" id="AtlasTexture_fkybt"]
-atlas = ExtResource("2_cvnsp")
-region = Rect2(40, 0, 20, 23)
-
-[sub_resource type="AtlasTexture" id="AtlasTexture_x3wgy"]
-atlas = ExtResource("2_cvnsp")
-region = Rect2(60, 0, 20, 23)
-
-[sub_resource type="AtlasTexture" id="AtlasTexture_3smsa"]
-atlas = ExtResource("2_cvnsp")
-region = Rect2(80, 0, 20, 23)
-
-[sub_resource type="SpriteFrames" id="SpriteFrames_8erm5"]
-animations = [{
-"frames": [{
-"duration": 1.0,
-"texture": SubResource("AtlasTexture_8erm5")
-}, {
-"duration": 1.0,
-"texture": SubResource("AtlasTexture_f1ek2")
-}, {
-"duration": 1.0,
-"texture": SubResource("AtlasTexture_tx1dd")
-}],
-"loop": true,
-"name": &"idle",
-"speed": 5.0
-}, {
-"frames": [{
-"duration": 1.0,
-"texture": SubResource("AtlasTexture_6t5aa")
-}, {
-"duration": 1.0,
-"texture": SubResource("AtlasTexture_vgqql")
-}, {
-"duration": 1.0,
-"texture": SubResource("AtlasTexture_fkybt")
-}, {
-"duration": 1.0,
-"texture": SubResource("AtlasTexture_x3wgy")
-}, {
-"duration": 1.0,
-"texture": SubResource("AtlasTexture_3smsa")
-}],
-"loop": true,
-"name": &"walking",
-"speed": 8.0
-}]
-
 [node name="Player" type="CharacterBody2D" unique_id=687220319]
 script = ExtResource("1_ndhuy")
+
+[node name="Sprite2D" type="Sprite2D" parent="." unique_id=488149044]
+scale = Vector2(0.5, 0.5)
+texture = ExtResource("2_rliju")
 
 [node name="CollisionShape2D" type="CollisionShape2D" parent="." unique_id=1487779076]
 shape = SubResource("RectangleShape2D_cvnsp")
@@ -98,18 +34,19 @@ offset_bottom = 13.5
 grow_horizontal = 2
 grow_vertical = 2
 
-[node name="HitStunTimer" type="Timer" parent="." unique_id=754750613]
+[node name="HitStunTimer" type="Timer" parent="." unique_id=628529596]
 one_shot = true
 
-[node name="InvincibilityTimer" type="Timer" parent="." unique_id=690891035]
+[node name="InvincibilityTimer" type="Timer" parent="." unique_id=777994814]
 one_shot = true
 
-[node name="FlashTimer" type="Timer" parent="." unique_id=446379466]
+[node name="FlashTimer" type="Timer" parent="." unique_id=1410117457]
 
-[node name="AnimatedSprite2D" type="AnimatedSprite2D" parent="." unique_id=755746103]
-scale = Vector2(3, 3)
-sprite_frames = SubResource("SpriteFrames_8erm5")
-animation = &"idle"
+[node name="FootstepPlayer" type="AudioStreamPlayer2D" parent="." unique_id=1394466197]
+stream = ExtResource("3_6t5aa")
+
+[node name="ShootPlayer" type="AudioStreamPlayer2D" parent="." unique_id=244165008]
+stream = ExtResource("4_vgqql")
 
 [connection signal="timeout" from="HitStunTimer" to="." method="_on_hit_stun_timer_timeout"]
 [connection signal="timeout" from="InvincibilityTimer" to="." method="_on_invincibility_timer_timeout"]

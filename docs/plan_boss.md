@@ -1,59 +1,96 @@
-# Minimal Boss Plan
+# Boss Implementation Plan
 
 ## Goal
-Add one simple boss that feels like a final encounter without building new systems.
+Implement one boss enemy that feels like a proper final fight with **randomized attack selection** and **3 simple attack patterns**, while keeping code jam-minimal.
 
 ## Scope
 - One boss enemy
 - High HP
-- Two attack patterns only:
-  1. Radial burst
-  2. Charge
-- Simple state cycle: Idle -> Attack1 -> Attack2
+- 3 attacks:
+  1. Radial burst (projectile pattern)
+  2. Charge (2 hearts damage)
+  3. Cone melee slash in facing direction (2 hearts damage)
+- Randomized state flow: `IDLE -> (random attack) -> IDLE -> ...`
 
-## 1) Add Boss Scene + Script
+---
+
+## 1) Files
 - `Scenes/enemy_boss.tscn`
 - `Scripts/enemy_boss.gd`
 
-Reuse existing enemy/projectile approach where possible.
+Reuse current systems where possible:
+- player damage signal / `receive_hit`
+- shared `projectile.tscn`
+- existing enemy movement style as base reference
 
-## 2) Boss Basics
-- Larger visual/collider than normal enemies.
-- Higher health values.
-- Uses same simple damage model (`take_damage`, clamp, despawn at 0).
+---
 
-## 3) Boss State Logic (Minimal)
+## 2) Boss Core Setup
+- Larger sprite/collision than normal enemies.
+- Higher health (`max_hp`, `hp`, `take_damage`) using same simple subtraction/clamp model.
+- Join `Enemies` group so player targeting/projectiles continue to work.
+
+---
+
+## 3) Boss State Logic (Randomized, Minimal)
 States:
-- `IDLE` (short pause)
+- `IDLE` (short delay)
 - `ATTACK_RADIAL`
 - `ATTACK_CHARGE`
+- `ATTACK_CONE`
 
-Cycle sequentially (not complex/randomized FSM).
+Flow:
+1. Enter `IDLE` for a short timer.
+2. Pick one of the 3 attacks randomly (optional: avoid repeating the immediately previous attack).
+3. Execute attack.
+4. Return to `IDLE`.
 
-## 4) Attack 1: Radial Burst
-- Spawn projectiles in fixed directions (e.g., 8-way).
+No full FSM framework needed; a small enum + match + timers is enough.
+
+---
+
+## 4) Attack Details
+
+### Attack 1: Radial Burst
+- Spawn projectiles in fixed spread (e.g., 8 directions).
 - Use shared `projectile.tscn`.
-- Enemy-owned bullets target players.
+- Set owner/target groups:
+  - `owner_group = "Enemies"`
+  - `target_group = "Players"`
 
-## 5) Attack 2: Charge
-- Brief wind-up/telegraph delay.
-- Lock direction to nearest player.
+### Attack 2: Charge (2 hearts)
+- Brief telegraph/wind-up.
+- Lock direction toward nearest player at charge start.
 - Dash for short duration at high speed.
-- Return to idle afterward.
+- On collision with player during charge: deal **2 hearts** damage.
 
-## 6) Integration (Minimal)
-- Spawn boss manually first for testing (scene placement or simple spawn call).
-- Later hook to gamestate boss trigger.
-- On boss death, call existing win/end hook (or placeholder signal).
+### Attack 3: Cone Melee (2 hearts)
+- Short telegraph.
+- Use facing direction to define a forward cone.
+- Damage players inside cone once per attack execution.
+- Damage amount: **2 hearts**.
 
-## 7) Validation Checklist
-- Boss can be damaged and die.
-- Radial burst fires correctly and can hurt players.
-- Charge executes with delay and movement burst.
-- State cycle repeats without freezing.
+---
+
+## 5) Integration
+- First: place boss manually in test scene for behavior tuning.
+- Then: hook to gamestate boss trigger.
+- On boss death: call win/end flow (or emit a boss-dead signal consumed by gamestate).
+
+---
+
+## 6) Validation Checklist
+- Boss spawns and can take damage/die correctly.
+- Attack selection is randomized across the 3 attack types.
+- Radial projectiles fire correctly and damage players.
+- Charge attack deals 2 hearts and has visible wind-up.
+- Cone attack deals 2 hearts only in forward cone region.
+- Boss returns to idle between attacks and does not freeze.
+
+---
 
 ## Out of Scope
-- Complex AI systems
-- Advanced pathfinding
-- Extra boss phases
-- Refactoring enemy architecture
+- Multi-phase boss transformation
+- Complex behavior trees/pathfinding
+- New reusable AI framework
+- Major refactors of enemy architecture

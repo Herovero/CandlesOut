@@ -1,18 +1,20 @@
 extends CharacterBody2D
 
-const SPEED: float = 100.0
+const SPEED: float = 200.0
 const SEPARATION_RADIUS: float = 40.0
 const SEPARATION_FORCE: float = 200.0
 
 @export var damage_amount: float = 1.0
-@export var max_hp: float = 5
+@export var max_hp: float = 3
 @export var melee_attack_buffer: float = 1.2
+@export var post_hit_pause_duration: float = 0.25
 @export var hurt_tint_color: Color = Color(1.0, 0.35, 0.35, 1.0)
 @export var hurt_tint_duration: float = 0.12
 
 var hp: float = 5.0
 var knockback_velocity: Vector2 = Vector2.ZERO
 var current_melee_target: Node2D = null
+var post_hit_pause_left: float = 0.0
 var hurt_tint_token: int = 0
 var base_sprite_modulate: Color = Color(1, 1, 1, 1)
 
@@ -20,6 +22,11 @@ var base_sprite_modulate: Color = Color(1, 1, 1, 1)
 @onready var hitbox: Area2D = $Hitbox
 @onready var sprite: Sprite2D = $Sprite2D
 
+@onready var death_sound = $EnemyDies
+var is_dying: bool = false
+@onready var footstep_enemy = $EnemyFootStep
+@export var footstep_interval: float = 0.5
+var footstep_timer: float = 0.0
 
 func _ready() -> void:
 	motion_mode = CharacterBody2D.MOTION_MODE_FLOATING
@@ -29,10 +36,14 @@ func _ready() -> void:
 
 
 func _physics_process(delta: float) -> void:
+	if is_dying:
+		return
+		
 	var target = find_closest_player()
 	var direction = Vector2.ZERO
 
-	if target:
+	post_hit_pause_left = max(post_hit_pause_left - delta, 0.0)
+	if target and post_hit_pause_left <= 0.0:
 		direction = global_position.direction_to(target.global_position)
 
 	var separation = compute_separation()
@@ -42,6 +53,7 @@ func _physics_process(delta: float) -> void:
 	knockback_velocity *= 0.85
 
 	move_and_slide()
+	handle_footsteps(delta,direction)
 
 
 func find_closest_player() -> CharacterBody2D:
@@ -90,8 +102,14 @@ func play_hurt_tint() -> void:
 
 
 func take_damage(amount: float) -> void:
+	if is_dying:
+		return
 	hp = clamp(hp - amount, 0.0, max_hp)
 	if hp <= 0.0:
+		is_dying = true
+		print(self, " is dying")
+		death_sound.play()
+		await death_sound.finished
 		queue_free()
 		return
 
@@ -102,12 +120,14 @@ func deal_melee_hit(body) -> void:
 	var dir = (body.global_position - global_position).normalized()
 	if body.has_method("receive_hit"):
 		body.receive_hit(damage_amount, dir * 240, true)
+		post_hit_pause_left = post_hit_pause_duration
 		return
 
 	if body.has_method("is_damage_blocked") and body.is_damage_blocked():
 		return
 
 	SignalBus.emit_signal("take_damage", damage_amount, body.input_prefix)
+	post_hit_pause_left = post_hit_pause_duration
 
 
 func _on_hitbox_body_entered(body):
@@ -137,3 +157,23 @@ func _on_attack_timer_timeout() -> void:
 
 	deal_melee_hit(current_melee_target)
 	attack_timer.start()
+	
+func play_footstep():
+	if Global.active_footstep_count >= Global.MAX_ENEMY_FOOTSTEPS:
+		return
+	Global.active_footstep_count += 1
+	footstep_enemy.pitch_scale = randf_range(0.85, 1.15)
+	footstep_enemy.volume_db = randf_range(-6.0, 0.0)
+	footstep_enemy.play()
+	await footstep_enemy.finished
+	Global.active_footstep_count -= 1
+	
+func handle_footsteps(delta, direction):
+	if direction == Vector2.ZERO:
+		footstep_timer = 0.0
+		return
+	
+	footstep_timer -= delta
+	if footstep_timer <= 0.0:
+		play_footstep()
+		footstep_timer = footstep_interval
