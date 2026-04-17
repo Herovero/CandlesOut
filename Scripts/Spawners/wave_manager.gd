@@ -3,7 +3,7 @@ extends Node2D
 @onready var spawn_timer = $Timer  # add a Timer node as child of WaveManager
 const WAVE_DATA = {
 	1: [
-		{"scene": preload("res://Scenes/enemy_ranged.tscn"), "count": 10},
+		{"scene": preload("res://Scenes/enemy_ranged.tscn"), "count": 0},
 		{"scene": preload("res://Scenes/enemy_test.tscn"), "count": 20},
 		],
 	2: [
