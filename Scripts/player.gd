@@ -1,7 +1,7 @@
 extends CharacterBody2D
 
 @export var input_prefix: String = "p1_"
-var speed: float = 200.0 
+var speed: float = 200.0
 var base_speed: float = 200.0 # Store reference
 
 @export var projectile_scene: PackedScene = preload("res://Scenes/projectile.tscn")
@@ -14,6 +14,8 @@ var base_speed: float = 200.0 # Store reference
 @export var hit_stun_duration: float = 0.32
 @export var invincibility_duration: float = 0.32
 @export var flash_interval: float = 0.06
+
+const SHOE_ICON = preload("res://Assets/Sprites/item_shoe.png")
 
 @export var max_stamina: float = 100.0
 var current_stamina: float = 100.0
@@ -37,8 +39,13 @@ var is_flamethrower_active: bool = false
 var is_panicked_fire_active: bool = false
 var is_ramming_active: bool = false
 
+var active_effect_name: String = ""
+var active_effect_time_left: float = 0.0
+var active_effect_icon: Texture2D = null
+var speed_boost_token: int = 0
+
 @onready var stamina_bar = $Stats/StaminaBar
-@onready var sprite: Sprite2D = $Sprite2D
+@onready var sprite: AnimatedSprite2D = $AnimatedSprite2D
 @onready var hit_stun_timer: Timer = $HitStunTimer
 @onready var invincibility_timer: Timer = $InvincibilityTimer
 @onready var flash_timer: Timer = $FlashTimer
@@ -53,26 +60,29 @@ func _ready():
 	motion_mode = CharacterBody2D.MOTION_MODE_FLOATING
 	stamina_bar.max_value = max_stamina
 	stamina_bar.value = max_stamina
-	
+	sprite.sprite_frames.set_animation_speed("idle", 4)
+	sprite.play("idle")
+
 	# item effects signal
 	SignalBus.connect("restore_stamina", _on_restore_stamina)
 	SignalBus.connect("apply_speed_boost", _on_speed_boost_received)
 	SignalBus.connect("swap_player", _on_swap_player)
 	SignalBus.connect("apply_triple_shot", _on_triple_shot_received)
-	
+
 	# item side effects signal
 	SignalBus.connect("apply_speed_backfire", _on_speed_backfire_received)
 	SignalBus.connect("apply_flamethrower_backfire", _on_flamethrower_received)
-	
+
 	hit_stun_timer.wait_time = hit_stun_duration
 	invincibility_timer.wait_time = invincibility_duration
 	flash_timer.wait_time = flash_interval
-	
+
 	shoot_sound.pitch_scale = randf_range(0.95, 1.05)
 
 
 func _physics_process(delta: float) -> void:
 	update_ui()
+	update_effect_state(delta)
 
 	if is_sleeping:
 		handle_sleep(delta)
@@ -99,6 +109,8 @@ func _physics_process(delta: float) -> void:
 		consume_stamina(delta)
 	else:
 		velocity = knockback_velocity
+		sprite.sprite_frames.set_animation_speed("idle", 4)
+		sprite.play("idle")
 
 	if not is_hit_stunned and shoot_cooldown <= 0.0:
 		var target_in_radius = find_autoaim_target()
@@ -107,22 +119,25 @@ func _physics_process(delta: float) -> void:
 			shoot_cooldown = shoot_interval
 
 	move_and_slide()
-	
+
 	if is_ramming_active:
 		for i in get_slide_collision_count():
 			var collision = get_slide_collision(i)
 			var collider = collision.get_collider()
-			
+
 			if collider.is_in_group("Enemies") and collider.has_method("take_damage"):
 				collider.take_damage(1.0) # Deal ramming damage
 				# Add a tiny bounce back so you don't stick to them
 				knockback_velocity = -velocity.normalized() * 150.0
-				
+
 	handle_footsteps(delta, direction)
 
 
 func consume_stamina(delta):
 	current_stamina -= depletion_rate * delta
+	sprite.sprite_frames.set_animation_speed("walking", 8)
+	sprite.play("walking")
+
 	if current_stamina <= 0:
 		enter_sleep()
 
@@ -236,10 +251,10 @@ func shoot_projectile(target: Node2D = null) -> void:
 	var base_dir = last_move_dir
 	if target:
 		base_dir = global_position.direction_to(target.global_position)
-		
+
 		if is_panicked_fire_active:
 			base_dir = -base_dir # Flip the vector
-			
+
 	# Decide how many shots to fire
 	var shot_angles = [0.0]
 	if is_flamethrower_active or is_panicked_fire_active:
@@ -248,12 +263,12 @@ func shoot_projectile(target: Node2D = null) -> void:
 	for angle in shot_angles:
 		var projectile = projectile_scene.instantiate()
 		var final_dir = base_dir.rotated(angle)
-		
+
 		projectile.global_position = global_position + (final_dir * muzzle_offset)
 		projectile.direction = final_dir
 		projectile.speed = projectile_speed
 		projectile.damage = projectile_damage
-		projectile.owner_group = "Players" 
+		projectile.owner_group = "Players"
 		projectile.target_group = "Enemies"
 		get_tree().current_scene.add_child(projectile)
 
@@ -269,42 +284,70 @@ func _on_triple_shot_received(duration: float, p_id: String):
 func _on_flamethrower_received(duration: float, p_id: String):
 	if p_id == input_prefix:
 		var original_interval = shoot_interval
-		
+
 		is_panicked_fire_active = true # Start shooting backwards
-		shoot_interval = 0.05 
-		
+		shoot_interval = 0.05
+
 		# Make the player spin or look confused with modulate
 		modulate = Color(1.0, 0.5, 0.5) # Panicked red tint
-		
+
 		await get_tree().create_timer(duration).timeout
-		
+
 		# Reset
 		is_panicked_fire_active = false
 		shoot_interval = original_interval
 		modulate = Color(1, 1, 1)
-		
+
+func set_active_effect(name: String, duration: float, icon: Texture2D = null) -> void:
+	active_effect_name = name
+	active_effect_time_left = duration
+	active_effect_icon = icon
+
+
+func clear_active_effect() -> void:
+	active_effect_name = ""
+	active_effect_time_left = 0.0
+	active_effect_icon = null
+
+
+func has_active_effect() -> bool:
+	return active_effect_time_left > 0.0 and active_effect_name != ""
+
+
+func update_effect_state(delta: float) -> void:
+	if active_effect_time_left > 0.0:
+		active_effect_time_left = max(active_effect_time_left - delta, 0.0)
+		if active_effect_time_left == 0.0:
+			clear_active_effect()
+
+
 func _on_speed_boost_received(multiplier: float, duration: float, p_id: String):
 	if p_id == input_prefix:
-		# Increase speed
+		speed_boost_token += 1
+		var token := speed_boost_token
+
 		speed = base_speed * multiplier
-		
-		# Create a one-shot timer to reset the speed
+		set_active_effect("Speed Boost", duration, SHOE_ICON)
+
 		await get_tree().create_timer(duration).timeout
-		
-		# Reset speed
+
+		if token != speed_boost_token:
+			return
+
 		speed = base_speed
+		clear_active_effect()
 
 func _on_speed_backfire_received(multiplier: float, duration: float, p_id: String):
 	if p_id == input_prefix:
 		var original_speed = base_speed
 		is_ramming_active = true
 		speed = base_speed * multiplier
-		
+
 		# Visual feedback: Turn yellow and slightly transparent to look like a blur
 		modulate = Color(1.5, 1.5, 0.5, 0.8)
-		
+
 		await get_tree().create_timer(duration).timeout
-		
+
 		is_ramming_active = false
 		speed = base_speed
 		modulate = Color(1, 1, 1, 1)
@@ -326,12 +369,12 @@ func _on_invincibility_timer_timeout() -> void:
 	flash_timer.stop()
 	flash_tint_on = false
 	sprite.modulate = Color(1.0, 1.0, 1.0, 1.0)
-	
+
 func handle_footsteps(delta, direction):
 	if direction == Vector2.ZERO:
 		footstep_timer = 0.0  # reset when standing still
 		return
-	
+
 	footstep_timer -= delta
 	if footstep_timer <= 0.0:
 		footstep_player.pitch_scale = randf_range(0.9, 1.1)

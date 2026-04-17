@@ -1,6 +1,6 @@
 extends CharacterBody2D
 
-const SPEED: float = 90.0
+const SPEED: float = 50.0
 
 enum BossState {
 	IDLE,

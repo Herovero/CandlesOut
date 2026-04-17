@@ -6,14 +6,14 @@
 [ext_resource type="PackedScene" uid="uid://cmxdhycob41w4" path="res://Scenes/item_oil.tscn" id="2_d1ilt"]
 [ext_resource type="PackedScene" uid="uid://fvfcli6ddale" path="res://Scenes/item_bomb.tscn" id="2_fdnlq"]
 [ext_resource type="PackedScene" uid="uid://bl7c35jykhk4q" path="res://Scenes/item_lighter.tscn" id="2_hptm8"]
-[ext_resource type="PackedScene" uid="uid://druku4bp3uv5i" path="res://Scenes/item_shoe.tscn" id="4_6iyac"]
+[ext_resource type="PackedScene" path="res://Scenes/item_shoe.tscn" id="4_6iyac"]
 [ext_resource type="PackedScene" uid="uid://ct8trhua4tgaq" path="res://Scenes/Spawners/Spawner.tscn" id="5_21xkr"]
 [ext_resource type="Texture2D" uid="uid://biv8vykh0s88f" path="res://Assets/2D Pixel Dungeon Asset Pack/character and tileset/Dungeon_Tileset.png" id="5_kry3j"]
 [ext_resource type="PackedScene" uid="uid://duwadq4gka1wx" path="res://Scenes/Spawners/item_spawner.tscn" id="6_6bp64"]
 [ext_resource type="PackedScene" uid="uid://cqts1yegiva4h" path="res://Scenes/Spawners/WaveManager.tscn" id="6_21xkr"]
 [ext_resource type="Texture2D" uid="uid://banibmuufdg3x" path="res://Assets/UIs/button UI.png" id="6_hptm8"]
 [ext_resource type="Script" uid="uid://0a15j6p2c2ts" path="res://Scripts/restart_button.gd" id="7_d1ilt"]
-[ext_resource type="Shader" uid="uid://it33xyedawxm" path="res://Assets/vig.gdshader" id="8_344ge"]
+[ext_resource type="Shader" path="res://Assets/vig.gdshader" id="8_344ge"]
 
 [sub_resource type="AtlasTexture" id="AtlasTexture_d1ilt"]
 atlas = ExtResource("6_hptm8")
@@ -206,11 +206,40 @@ offset_bottom = 40.0
 metadata/_edit_use_anchors_ = true
 
 [node name="Hearts" parent="HUDs/Player1" unique_id=706036972 instance=ExtResource("2_8gbba")]
-layout_mode = 0
+layout_mode = 1
+anchors_preset = -1
+anchor_top = -2.975
+anchor_bottom = -2.975
 offset_left = 28.000004
 offset_top = 33.0
 offset_right = 1399.0
 offset_bottom = 289.0
+metadata/_edit_use_anchors_ = true
+
+[node name="EffectIcon" type="TextureRect" parent="HUDs/Player1" unique_id=1600489821]
+custom_minimum_size = Vector2(28, 28)
+layout_mode = 1
+anchors_preset = -1
+anchor_top = -0.1
+anchor_bottom = -0.1
+offset_left = 28.0
+offset_top = 84.0
+offset_right = 56.0
+offset_bottom = 112.0
+stretch_mode = 5
+metadata/_edit_use_anchors_ = true
+
+[node name="EffectLabel" type="Label" parent="HUDs/Player1" unique_id=456589463]
+layout_mode = 1
+anchors_preset = -1
+anchor_top = -0.1
+anchor_bottom = -0.1
+offset_left = 64.0
+offset_top = 84.0
+offset_right = 430.0
+offset_bottom = 112.0
+text = "Effect: None"
+metadata/_edit_use_anchors_ = true
 
 [node name="Player2" type="Control" parent="HUDs" unique_id=364119189]
 layout_mode = 3
@@ -221,11 +250,28 @@ metadata/_edit_use_anchors_ = true
 
 [node name="Hearts" parent="HUDs/Player2" unique_id=999244154 instance=ExtResource("2_8gbba")]
 layout_mode = 0
-offset_left = 971.99994
-offset_top = 31.000004
-offset_right = 2343.0
-offset_bottom = 287.0
+offset_left = 1069.0
+offset_top = 21.0
+offset_right = 2440.0
+offset_bottom = 58.999996
 my_player_id = "p2_"
+
+[node name="EffectIcon" type="TextureRect" parent="HUDs/Player2" unique_id=935725333]
+custom_minimum_size = Vector2(28, 28)
+layout_mode = 0
+offset_left = 1068.0
+offset_top = 77.0
+offset_right = 1096.0
+offset_bottom = 105.0
+stretch_mode = 5
+
+[node name="EffectLabel" type="Label" parent="HUDs/Player2" unique_id=702341827]
+layout_mode = 0
+offset_left = 1103.0
+offset_top = 77.0
+offset_right = 1469.0
+offset_bottom = 105.0
+text = "Effect: None"
 
 [node name="gameover_label" type="Label" parent="HUDs" unique_id=1777338280]
 visible = false
