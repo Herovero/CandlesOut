@@ -33,7 +33,8 @@ func _ready():
 	motion_mode = CharacterBody2D.MOTION_MODE_FLOATING
 	stamina_bar.max_value = max_stamina
 	stamina_bar.value = max_stamina
-
+	
+	SignalBus.connect("restore_stamina", _on_restore_stamina)
 
 func _physics_process(delta: float) -> void:
 	update_ui()
@@ -74,6 +75,9 @@ func consume_stamina(delta):
 	if current_stamina <= 0:
 		enter_sleep()
 
+func _on_restore_stamina(amount: float, target_id: String):
+	print("restore?")
+	current_stamina += amount
 
 func enter_sleep():
 	is_sleeping = true

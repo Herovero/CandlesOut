@@ -2,6 +2,7 @@ extends Area2D
 
 var is_thrown: bool = false
 var throwing_ghost: CharacterBody2D = null
+@export var custom_throw_distance: float = 250.0
 
 # Called when the node enters the scene tree for the first time.
 func _ready():
