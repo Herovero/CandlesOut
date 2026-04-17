@@ -57,3 +57,16 @@ Import AnimatedSprite & Animation - Justin
 -Player/enemy(idling, walk, attack)
 -Attack/Hurt(turn red, death)
 -Items idling
+
+new addition log:
+
+- separation of ranged and enemy
+- ranged enemy lower hp
+- ranged enemy dont move away if player approaches closer to them
+- ranged enemy shoot less freq
+- ranged enemy have shoot range, not infinite
+- player shoot while standing, their last moving toward direction is saved
+- enemy_test have longer atk buffer
+- projectile slower
+- player autoaim at shooting direction, cone shaped from the player
+- enemy fix attack stops after it sticks to the player

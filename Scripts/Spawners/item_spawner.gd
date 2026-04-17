@@ -6,12 +6,13 @@ var items = [
 	preload("res://Scenes/item1.tscn"),
 	preload("res://Scenes/item1.tscn")
 ]
+
 var can_spawn : bool = false
 @onready var spawn_area = $Area2D/CollisionShape2D
 @export var min_x: float = 0
 @export var min_y: float = 0
 var items_alive:int = 0
-const MAX_ITEMS:int = 5
+const MAX_ITEMS:int = 2
 
 func get_random_spawn_position() -> Vector2:
 	var shape = spawn_area.shape as RectangleShape2D
@@ -40,13 +41,16 @@ func spawn_one() -> void:
 	if not can_spawn:
 		return
 	if items_alive >= MAX_ITEMS:
+		print("max item reached")
 		return
 	
 	var random_item = items[randi() % items.size()]
 	var item_instance = random_item.instantiate()
+	print("spawning item")
 	item_instance.global_position = get_random_spawn_position()
 	get_tree().current_scene.add_child(item_instance)
-	
+	SignalBus.emit_signal("item_spawned")
+	item_instance.add_to_group("items")
 	items_alive += 1
 	item_instance.tree_exited.connect(_on_item_removed)
 	
@@ -55,9 +59,17 @@ func _on_item_removed() -> void:
 	
 # Called when the node enters the scene tree for the first time.
 func _ready() -> void:
-	Global.item_spawner = self
+	SignalBus.connect("ghost_mode_started",  func(): set_spawn_state(true))
+	SignalBus.connect("ghost_mode_ended",  func(): set_spawn_state(false))
+	SignalBus.connect("ghost_mode_ended", func(): destroy_all_items())
 	pass # Replace with function body.
 
+func destroy_all_items() -> void:
+	# get all children of current scene and remove items
+	print("destroy all items")
+	for item in get_tree().get_nodes_in_group("items"):
+		item.queue_free()
+	items_alive = 0
 
 # Called every frame. 'delta' is the elapsed time since the previous frame.
 func _process(delta: float) -> void:

@@ -1,13 +1,15 @@
 extends CharacterBody2D
 
 @export var input_prefix: String = "p1_"
-@export var speed: float = 125.0
+@export var speed: float = 150.0
 
 @export var projectile_scene: PackedScene = preload("res://Scenes/projectile.tscn")
 @export var shoot_interval: float = 0.35
-@export var projectile_speed: float = 300.0
+@export var projectile_speed: float = 200.0
 @export var projectile_damage: float = 1.0
 @export var muzzle_offset: float = 24.0
+@export var autoaim_enabled: bool = true
+@export var autoaim_range: float = 300.0
 
 @export var max_stamina: float = 100.0
 var current_stamina: float = 100.0
@@ -28,6 +30,7 @@ var last_move_dir: Vector2 = Vector2.RIGHT
 
 
 func _ready():
+	motion_mode = CharacterBody2D.MOTION_MODE_FLOATING
 	stamina_bar.max_value = max_stamina
 	stamina_bar.value = max_stamina
 
@@ -54,11 +57,14 @@ func _physics_process(delta: float) -> void:
 	if direction != Vector2.ZERO:
 		last_move_dir = direction
 		consume_stamina(delta)
-		if shoot_cooldown <= 0.0:
-			shoot_projectile()
-			shoot_cooldown = shoot_interval
 	else:
 		velocity = knockback_velocity
+
+	if shoot_cooldown <= 0.0:
+		var target_in_radius = find_autoaim_target()
+		if target_in_radius:
+			shoot_projectile(target_in_radius)
+			shoot_cooldown = shoot_interval
 
 	move_and_slide()
 
@@ -104,13 +110,42 @@ func apply_knockback(force: Vector2):
 	knockback_velocity = force
 
 
-func shoot_projectile() -> void:
+func find_autoaim_target() -> Node2D:
+	if not autoaim_enabled:
+		return null
+
+	var enemies = get_tree().get_nodes_in_group("Enemies")
+	var best_target: Node2D = null
+	var best_dist := INF
+	var max_dist_sq := autoaim_range * autoaim_range
+
+	for e in enemies:
+		if not (e is Node2D):
+			continue
+
+		var to_enemy = (e as Node2D).global_position - global_position
+		var dist_sq = to_enemy.length_squared()
+		if dist_sq > max_dist_sq or dist_sq == 0.0:
+			continue
+
+		if dist_sq < best_dist:
+			best_dist = dist_sq
+			best_target = e as Node2D
+
+	return best_target
+
+
+func shoot_projectile(target: Node2D = null) -> void:
 	if projectile_scene == null:
 		return
 
+	var shot_dir = last_move_dir
+	if target:
+		shot_dir = global_position.direction_to(target.global_position)
+
 	var projectile = projectile_scene.instantiate()
-	projectile.global_position = global_position + (last_move_dir * muzzle_offset)
-	projectile.direction = last_move_dir
+	projectile.global_position = global_position + (shot_dir * muzzle_offset)
+	projectile.direction = shot_dir
 	projectile.speed = projectile_speed
 	projectile.damage = projectile_damage
 	projectile.owner_group = "Players"
