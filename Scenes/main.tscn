@@ -181,11 +181,14 @@ offset_bottom = 40.0
 metadata/_edit_use_anchors_ = true
 
 [node name="Hearts" parent="HUDs/Player1" unique_id=706036972 instance=ExtResource("2_8gbba")]
-layout_mode = 0
+layout_mode = 1
+anchors_preset = -1
+anchor_bottom = -2.975
 offset_left = 28.000004
 offset_top = 33.0
 offset_right = 1399.0
 offset_bottom = 289.0
+metadata/_edit_use_anchors_ = true
 
 [node name="Player2" type="Control" parent="HUDs" unique_id=364119189]
 layout_mode = 3
@@ -196,10 +199,10 @@ metadata/_edit_use_anchors_ = true
 
 [node name="Hearts" parent="HUDs/Player2" unique_id=999244154 instance=ExtResource("2_8gbba")]
 layout_mode = 0
-offset_left = 971.99994
-offset_top = 31.000004
-offset_right = 2343.0
-offset_bottom = 287.0
+offset_left = 1069.0
+offset_top = 21.0
+offset_right = 2440.0
+offset_bottom = 58.999996
 my_player_id = "p2_"
 
 [node name="gameover_label" type="Label" parent="HUDs" unique_id=1777338280]
