@@ -5,7 +5,7 @@ const SEPARATION_RADIUS: float = 40.0
 const SEPARATION_FORCE: float = 200.0
 
 @export var damage_amount: float = 1.0
-@export var max_hp: float = 5.0
+@export var max_hp: float = 2
 
 var hp: float = 5.0
 var knockback_velocity: Vector2 = Vector2.ZERO

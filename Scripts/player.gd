@@ -9,8 +9,8 @@ extends CharacterBody2D
 @export var projectile_damage: float = 1.0
 @export var muzzle_offset: float = 24.0
 
-@export var max_stamina: float = 100.0
-var current_stamina: float = 100.0
+@export var max_stamina: float = 10000.0
+var current_stamina: float = 10000.0
 @export var depletion_rate: float = 50.0
 @export var recharge_rate: float = 10.0
 #@export var depletion_rate: float = 10.0
