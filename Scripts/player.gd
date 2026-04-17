@@ -43,6 +43,8 @@ func _ready():
 	motion_mode = CharacterBody2D.MOTION_MODE_FLOATING
 	stamina_bar.max_value = max_stamina
 	stamina_bar.value = max_stamina
+
+	SignalBus.connect("restore_stamina", _on_restore_stamina)
 	hit_stun_timer.wait_time = hit_stun_duration
 	invincibility_timer.wait_time = invincibility_duration
 	flash_timer.wait_time = flash_interval
@@ -50,7 +52,7 @@ func _ready():
 
 func _physics_process(delta: float) -> void:
 	update_ui()
-	
+
 	if is_sleeping:
 		handle_sleep(delta)
 		return
@@ -91,24 +93,27 @@ func consume_stamina(delta):
 	if current_stamina <= 0:
 		enter_sleep()
 
+func _on_restore_stamina(amount: float, target_id: String):
+	print("restore?")
+	current_stamina += amount
 
 func enter_sleep():
 	is_sleeping = true
 	velocity = Vector2.ZERO
 	modulate = Color(0.5, 0.5, 1.0) # Turn slightly blue/dark to show sleeping
-	
+
 	active_ghost = ghost_scene.instantiate()
 	active_ghost.input_prefix = input_prefix # Give the ghost your controls
 	active_ghost.global_position = global_position # Start at player's body
 	get_parent().add_child(active_ghost)
-	
+
 	SignalBus.emit_signal("ghost_mode_started")
-	
+
 func handle_sleep(delta):
 	current_stamina += recharge_rate * delta
-	
+
 	current_stamina = min(current_stamina, max_stamina)
-	
+
 	if current_stamina >= max_stamina:
 		wake_up()
 
@@ -117,7 +122,7 @@ func wake_up():
 	modulate = Color(1, 1, 1)
 	if active_ghost:
 		active_ghost.queue_free() # Remove the ghost when waking up
-	
+
 	SignalBus.emit_signal("ghost_mode_ended")
 
 func update_ui():
