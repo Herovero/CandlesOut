@@ -3,7 +3,6 @@ extends Node2D
 @onready var gameover_label = $HUDs/gameover_label
 @onready var restart_button = $HUDs/restart_button
 
-
 # Called when the node enters the scene tree for the first time.
 func _ready():
 	get_tree().paused = false
