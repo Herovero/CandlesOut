@@ -10,7 +10,6 @@ extends CharacterBody2D
 @export var muzzle_offset: float = 24.0
 @export var autoaim_enabled: bool = true
 @export var autoaim_range: float = 300.0
-@export var autoaim_cone_angle_deg: float = 50.0
 
 @export var max_stamina: float = 100.0
 var current_stamina: float = 100.0
@@ -62,9 +61,9 @@ func _physics_process(delta: float) -> void:
 		velocity = knockback_velocity
 
 	if shoot_cooldown <= 0.0:
-		var target_in_cone = find_autoaim_target(last_move_dir)
-		if target_in_cone:
-			shoot_projectile(target_in_cone)
+		var target_in_radius = find_autoaim_target()
+		if target_in_radius:
+			shoot_projectile(target_in_radius)
 			shoot_cooldown = shoot_interval
 
 	move_and_slide()
@@ -111,16 +110,14 @@ func apply_knockback(force: Vector2):
 	knockback_velocity = force
 
 
-func find_autoaim_target(shoot_dir: Vector2) -> Node2D:
+func find_autoaim_target() -> Node2D:
 	if not autoaim_enabled:
 		return null
 
 	var enemies = get_tree().get_nodes_in_group("Enemies")
 	var best_target: Node2D = null
-	var best_dot := -1.0
 	var best_dist := INF
 	var max_dist_sq := autoaim_range * autoaim_range
-	var min_dot := cos(deg_to_rad(autoaim_cone_angle_deg * 0.5))
 
 	for e in enemies:
 		if not (e is Node2D):
@@ -131,13 +128,7 @@ func find_autoaim_target(shoot_dir: Vector2) -> Node2D:
 		if dist_sq > max_dist_sq or dist_sq == 0.0:
 			continue
 
-		var dir_to_enemy = to_enemy.normalized()
-		var dot = shoot_dir.dot(dir_to_enemy)
-		if dot < min_dot:
-			continue
-
-		if dot > best_dot or (is_equal_approx(dot, best_dot) and dist_sq < best_dist):
-			best_dot = dot
+		if dist_sq < best_dist:
 			best_dist = dist_sq
 			best_target = e as Node2D
 
