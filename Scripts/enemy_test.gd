@@ -5,13 +5,15 @@ const SEPARATION_RADIUS: float = 40.0
 const SEPARATION_FORCE: float = 200.0
 
 @export var damage_amount: float = 1.0
-@export var max_hp: float = 2
+@export var max_hp: float = 50
 @export var melee_attack_buffer: float = 1.2
 
 var hp: float = 5.0
 var knockback_velocity: Vector2 = Vector2.ZERO
+var current_melee_target: Node2D = null
 
 @onready var attack_timer: Timer = $AttackTimer
+@onready var hitbox: Area2D = $Hitbox
 
 
 func _ready() -> void:
@@ -78,14 +80,38 @@ func take_damage(amount: float) -> void:
 		queue_free()
 
 
+func deal_melee_hit(body) -> void:
+	SignalBus.emit_signal("take_damage", damage_amount, body.input_prefix)
+
+	var dir = (body.global_position - global_position).normalized()
+	if body.has_method("apply_knockback"):
+		body.apply_knockback(dir * 150)
+
+
 func _on_hitbox_body_entered(body):
-	if not attack_timer.is_stopped():
+	if not body.is_in_group("Players") or not (body is Node2D):
 		return
 
-	if body.is_in_group("Players"):
-		SignalBus.emit_signal("take_damage", damage_amount, body.input_prefix)
+	current_melee_target = body as Node2D
+
+	if attack_timer.is_stopped():
+		deal_melee_hit(body)
 		attack_timer.start()
 
-		var dir = (body.global_position - global_position).normalized()
-		if body.has_method("apply_knockback"):
-			body.apply_knockback(dir * 150)
+
+func _on_hitbox_body_exited(body):
+	if body == current_melee_target:
+		current_melee_target = null
+
+
+func _on_attack_timer_timeout() -> void:
+	if current_melee_target == null or not is_instance_valid(current_melee_target):
+		current_melee_target = null
+		return
+
+	if not hitbox.overlaps_body(current_melee_target):
+		current_melee_target = null
+		return
+
+	deal_melee_hit(current_melee_target)
+	attack_timer.start()
