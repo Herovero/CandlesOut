@@ -1,18 +1,20 @@
 extends CharacterBody2D
 
-const SPEED: float = 100.0
+const SPEED: float = 200.0
 const SEPARATION_RADIUS: float = 40.0
 const SEPARATION_FORCE: float = 200.0
 
 @export var damage_amount: float = 1.0
 @export var max_hp: float = 5
 @export var melee_attack_buffer: float = 1.2
+@export var post_hit_pause_duration: float = 0.25
 @export var hurt_tint_color: Color = Color(1.0, 0.35, 0.35, 1.0)
 @export var hurt_tint_duration: float = 0.12
 
 var hp: float = 5.0
 var knockback_velocity: Vector2 = Vector2.ZERO
 var current_melee_target: Node2D = null
+var post_hit_pause_left: float = 0.0
 var hurt_tint_token: int = 0
 var base_sprite_modulate: Color = Color(1, 1, 1, 1)
 
@@ -32,7 +34,8 @@ func _physics_process(delta: float) -> void:
 	var target = find_closest_player()
 	var direction = Vector2.ZERO
 
-	if target:
+	post_hit_pause_left = max(post_hit_pause_left - delta, 0.0)
+	if target and post_hit_pause_left <= 0.0:
 		direction = global_position.direction_to(target.global_position)
 
 	var separation = compute_separation()
@@ -102,12 +105,14 @@ func deal_melee_hit(body) -> void:
 	var dir = (body.global_position - global_position).normalized()
 	if body.has_method("receive_hit"):
 		body.receive_hit(damage_amount, dir * 240, true)
+		post_hit_pause_left = post_hit_pause_duration
 		return
 
 	if body.has_method("is_damage_blocked") and body.is_damage_blocked():
 		return
 
 	SignalBus.emit_signal("take_damage", damage_amount, body.input_prefix)
+	post_hit_pause_left = post_hit_pause_duration
 
 
 func _on_hitbox_body_entered(body):
