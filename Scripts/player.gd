@@ -1,7 +1,8 @@
 extends CharacterBody2D
 
 @export var input_prefix: String = "p1_"
-@export var speed: float = 150.0
+var speed: float = 200.0 
+var base_speed: float = 200.0 # Store reference
 
 @export var projectile_scene: PackedScene = preload("res://Scenes/projectile.tscn")
 @export var shoot_interval: float = 0.35
@@ -35,6 +36,7 @@ func _ready():
 	stamina_bar.value = max_stamina
 	
 	SignalBus.connect("restore_stamina", _on_restore_stamina)
+	SignalBus.connect("apply_speed_boost", _on_speed_boost_received)
 
 func _physics_process(delta: float) -> void:
 	update_ui()
@@ -155,3 +157,14 @@ func shoot_projectile(target: Node2D = null) -> void:
 	projectile.owner_group = "Players"
 	projectile.target_group = "Enemies"
 	get_tree().current_scene.add_child(projectile)
+
+func _on_speed_boost_received(multiplier: float, duration: float, p_id: String):
+	if p_id == input_prefix:
+		# Increase speed
+		speed = base_speed * multiplier
+		
+		# Create a one-shot timer to reset the speed
+		await get_tree().create_timer(duration).timeout
+		
+		# Reset speed
+		speed = base_speed
