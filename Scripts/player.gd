@@ -130,7 +130,7 @@ func is_damage_blocked() -> bool:
 func start_invincibility_flash() -> void:
 	is_invincible = true
 	flash_tint_on = true
-	sprite.modulate = Color(1.0, 0.35, 0.35, 1.0)
+	sprite.modulate = Color(1.0, 1.0, 1.0, 1.0)
 	invincibility_timer.start()
 	flash_timer.start()
 
@@ -206,9 +206,9 @@ func shoot_projectile(target: Node2D = null) -> void:
 func _on_flash_timer_timeout() -> void:
 	flash_tint_on = not flash_tint_on
 	if flash_tint_on:
-		sprite.modulate = Color(1.0, 0.35, 0.35, 1.0)
-	else:
 		sprite.modulate = Color(1.0, 1.0, 1.0, 1.0)
+	else:
+		sprite.modulate = Color(0.75, 0.75, 0.75, 1.0)
 
 
 func _on_hit_stun_timer_timeout() -> void:
