@@ -30,7 +30,9 @@ func explode():
 	var targets = explosion_area.get_overlapping_bodies()
 	for target in targets:
 		if target.is_in_group("Enemies"):
-			if target.has_method("take_damage"):
+			if target.has_method("take_bomb_damage"):
+				target.take_bomb_damage(1.0)
+			elif target.has_method("take_damage"):
 				target.take_damage(10.0)
 		elif target.is_in_group("Players"):
 			SignalBus.emit_signal("take_damage", 3.0, target.input_prefix)

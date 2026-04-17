@@ -52,6 +52,8 @@ func _ready():
 
 	SignalBus.connect("restore_stamina", _on_restore_stamina)
 	SignalBus.connect("apply_speed_boost", _on_speed_boost_received)
+	SignalBus.connect("swap_player", _on_swap_player)
+	
 	hit_stun_timer.wait_time = hit_stun_duration
 	invincibility_timer.wait_time = invincibility_duration
 	flash_timer.wait_time = flash_interval
@@ -115,7 +117,7 @@ func enter_sleep():
 	active_ghost = ghost_scene.instantiate()
 	active_ghost.input_prefix = input_prefix # Give the ghost your controls
 	active_ghost.global_position = global_position # Start at player's body
-	get_parent().add_child(active_ghost)
+	get_parent().call_deferred("add_child", active_ghost)
 
 	SignalBus.emit_signal("ghost_mode_started")
 
@@ -134,6 +136,12 @@ func wake_up():
 		active_ghost.queue_free() # Remove the ghost when waking up
 
 	SignalBus.emit_signal("ghost_mode_ended")
+
+func _on_swap_player():
+	if is_sleeping:
+		wake_up()
+	else:
+		enter_sleep()
 
 func update_ui():
 	stamina_bar.value = current_stamina

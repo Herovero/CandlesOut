@@ -19,13 +19,13 @@ func _process(delta):
 
 func show_item():
 	visible = true
-	monitorable = true
-	monitoring = true
+	set_deferred("monitorable", true)
+	set_deferred("monitoring", true)
 
 func hide_item():
 	visible = false
-	monitorable = false
-	monitoring = false
+	set_deferred("monitorable", false)
+	set_deferred("monitoring", false)
 
 func on_collected(target_ghost: CharacterBody2D):
 	# Now 'target_ghost' is declared and usable!

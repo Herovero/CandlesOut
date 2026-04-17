@@ -5,8 +5,9 @@ signal wave_completed(wave_number : int)
 			
 const WAVE_DATA = {
 	1: [
-		{"scene": preload("res://Scenes/enemy_test.tscn"), "count": 1},
-		{"scene": preload("res://Scenes/enemy_ranged.tscn"), "count": 0},
+		{"scene": preload("res://Scenes/enemy_test.tscn"), "count": 3},
+		{"scene": preload("res://Scenes/enemy_ranged.tscn"), "count": 2},
+		{"scene": preload("res://Scenes/enemy_boss.tscn"), "count": 0}
 		],
 	2: [
 		{"scene": preload("res://Scenes/enemy_ranged.tscn"), "count": 15},
@@ -15,10 +16,10 @@ const WAVE_DATA = {
 	3: [
 		{"scene": preload("res://Scenes/enemy_ranged.tscn"), "count": 15},
 		{"scene": preload("res://Scenes/enemy_test.tscn"), "count": 30},
-		]
+	]
 }
 
-const MAX_ENEMIES_ON_SCREEN = 10
+const MAX_ENEMIES_ON_SCREEN = 0
 const WAVE_1_TOTAL = 50
 
 var spawn_queue: Array = []  # will hold one entry per enemy to spawn
@@ -56,9 +57,6 @@ func start_wave(wave_number: int):
 
 
 func try_spawn():
-	if not is_inside_tree():
-		return
-	
 	var slots_available = MAX_ENEMIES_ON_SCREEN - enemies_alive
 	
 	if slots_available <= 0 or spawn_queue.is_empty():
@@ -111,4 +109,8 @@ func _on_wave_completed(wave_number: int):
 			start_wave(2)
 		2:
 			start_wave(3)
+		3:
+			start_wave(4)
+		4:
+			print("Boss defeated! All waves complete.")
 		
