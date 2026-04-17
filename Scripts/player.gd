@@ -43,6 +43,11 @@ var is_ramming_active: bool = false
 @onready var invincibility_timer: Timer = $InvincibilityTimer
 @onready var flash_timer: Timer = $FlashTimer
 
+@onready var footstep_player = $FootstepPlayer
+@onready var shoot_sound = $ShootPlayer
+@export var footstep_interval: float = 0.35  # time between footstep sounds
+var footstep_timer: float = 0.0
+
 
 func _ready():
 	motion_mode = CharacterBody2D.MOTION_MODE_FLOATING
@@ -62,6 +67,8 @@ func _ready():
 	hit_stun_timer.wait_time = hit_stun_duration
 	invincibility_timer.wait_time = invincibility_duration
 	flash_timer.wait_time = flash_interval
+	
+	shoot_sound.pitch_scale = randf_range(0.95, 1.05)
 
 
 func _physics_process(delta: float) -> void:
@@ -110,6 +117,8 @@ func _physics_process(delta: float) -> void:
 				collider.take_damage(1.0) # Deal ramming damage
 				# Add a tiny bounce back so you don't stick to them
 				knockback_velocity = -velocity.normalized() * 150.0
+				
+	handle_footsteps(delta, direction)
 
 
 func consume_stamina(delta):
@@ -248,6 +257,9 @@ func shoot_projectile(target: Node2D = null) -> void:
 		projectile.target_group = "Enemies"
 		get_tree().current_scene.add_child(projectile)
 
+		shoot_sound.pitch_scale = randf_range(0.95, 1.05)
+		shoot_sound.play()
+
 func _on_triple_shot_received(duration: float, p_id: String):
 	if p_id == input_prefix:
 		is_triple_shot_active = true
@@ -314,3 +326,14 @@ func _on_invincibility_timer_timeout() -> void:
 	flash_timer.stop()
 	flash_tint_on = false
 	sprite.modulate = Color(1.0, 1.0, 1.0, 1.0)
+	
+func handle_footsteps(delta, direction):
+	if direction == Vector2.ZERO:
+		footstep_timer = 0.0  # reset when standing still
+		return
+	
+	footstep_timer -= delta
+	if footstep_timer <= 0.0:
+		footstep_player.pitch_scale = randf_range(0.9, 1.1)
+		footstep_player.play()
+		footstep_timer = footstep_interval

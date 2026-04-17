@@ -2,6 +2,8 @@
 
 [ext_resource type="Script" uid="uid://c2t7es6cljgi0" path="res://Scripts/enemy_test.gd" id="1_67vpr"]
 [ext_resource type="Texture2D" uid="uid://b7fvyw61qmnl7" path="res://icon.svg" id="1_q8xid"]
+[ext_resource type="AudioStream" uid="uid://cxcdt0cwv4g4v" path="res://SFX/Enemy/EneFootstep.wav" id="3_kxk0d"]
+[ext_resource type="AudioStream" uid="uid://do4d7expdd4hw" path="res://SFX/Enemy/EneDead.wav" id="4_oyc1c"]
 
 [sub_resource type="RectangleShape2D" id="RectangleShape2D_67vpr"]
 size = Vector2(64, 64)
@@ -13,7 +15,6 @@ size = Vector2(68, 68)
 script = ExtResource("1_67vpr")
 
 [node name="Sprite2D" type="Sprite2D" parent="." unique_id=617358100]
-self_modulate = Color(1, 1, 1, 1)
 scale = Vector2(0.5, 0.5)
 texture = ExtResource("1_q8xid")
 
@@ -27,6 +28,12 @@ shape = SubResource("RectangleShape2D_kxk0d")
 
 [node name="AttackTimer" type="Timer" parent="." unique_id=751666876]
 one_shot = true
+
+[node name="EnemyFootStep" type="AudioStreamPlayer2D" parent="." unique_id=217196048]
+stream = ExtResource("3_kxk0d")
+
+[node name="EnemyDies" type="AudioStreamPlayer2D" parent="." unique_id=257612411]
+stream = ExtResource("4_oyc1c")
 
 [connection signal="body_entered" from="Hitbox" to="." method="_on_hitbox_body_entered"]
 [connection signal="body_exited" from="Hitbox" to="." method="_on_hitbox_body_exited"]
