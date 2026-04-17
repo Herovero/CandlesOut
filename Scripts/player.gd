@@ -12,13 +12,13 @@ var base_speed: float = 200.0 # Store reference
 @export var autoaim_enabled: bool = true
 @export var autoaim_range: float = 300.0
 @export var hit_stun_duration: float = 0.32
-@export var invincibility_duration: float = 10.32
+@export var invincibility_duration: float = 0.32
 @export var flash_interval: float = 0.06
 
 const SHOE_ICON = preload("res://Assets/Sprites/item_shoe.png")
 
 @export var max_stamina: float = 100.0
-var current_stamina: float = 10.0
+var current_stamina: float = 100.0
 @export var depletion_rate: float = 10.0
 @export var recharge_rate: float = 10.0
 #@export var depletion_rate: float = 10.0
