@@ -9,7 +9,7 @@ enum BossState {
 	ATTACK_CONE
 }
 
-@export var max_hp: float = 120.0
+@export var max_hp: float = 10.0
 @export var hurt_tint_color: Color = Color(1.0, 0.35, 0.35, 1.0)
 @export var hurt_tint_duration: float = 0.12
 
@@ -24,10 +24,13 @@ enum BossState {
 @export var radial_recover: float = 0.5
 
 @export var charge_damage: float = 2.0
-@export var charge_speed: float = 280.0
+@export var charge_speed: float = 360.0
 @export var charge_windup: float = 0.45
 @export var charge_duration: float = 0.5
 @export var charge_knockback: float = 280.0
+@export var contact_damage: float = 1.0
+@export var phase_two_threshold: float = 3.0
+@export var phase_two_bomb_damage: float = 1.0
 
 @export var cone_damage: float = 2.0
 @export var cone_range: float = 180.0
@@ -36,6 +39,7 @@ enum BossState {
 @export var cone_recover: float = 0.45
 
 var hp: float = 120.0
+var is_phase_two: bool = false
 var state: BossState = BossState.IDLE
 var state_time_left: float = 0.0
 var last_attack_state: BossState = BossState.IDLE
@@ -178,6 +182,7 @@ func spawn_projectile(dir: Vector2, dmg: float) -> void:
 	projectile.direction = dir
 	projectile.speed = projectile_speed
 	projectile.damage = dmg
+	projectile.lifetime = 99.0
 	projectile.owner_group = "Enemies"
 	projectile.target_group = "Players"
 	get_tree().current_scene.add_child(projectile)
@@ -230,6 +235,22 @@ func play_hurt_tint() -> void:
 
 
 func take_damage(amount: float) -> void:
+	if is_phase_two:
+		return
+
+	hp = clamp(hp - amount, 0.0, max_hp)
+	if hp <= 0.0:
+		queue_free()
+		return
+
+	if hp <= phase_two_threshold:
+		hp = phase_two_threshold
+		is_phase_two = true
+
+	play_hurt_tint()
+
+
+func take_bomb_damage(amount: float = 1.0) -> void:
 	hp = clamp(hp - amount, 0.0, max_hp)
 	if hp <= 0.0:
 		queue_free()
@@ -239,8 +260,10 @@ func take_damage(amount: float) -> void:
 
 
 func _on_hitbox_body_entered(body: Node) -> void:
-	if not is_charging:
+	if not body.is_in_group("Players") or not body.has_method("receive_hit"):
 		return
 
-	if body.is_in_group("Players") and body.has_method("receive_hit"):
+	if is_charging:
 		body.receive_hit(charge_damage, charge_dir * charge_knockback, true)
+	else:
+		body.receive_hit(contact_damage)
