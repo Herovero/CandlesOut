@@ -38,7 +38,7 @@ var is_panicked_fire_active: bool = false
 var is_ramming_active: bool = false
 
 @onready var stamina_bar = $Stats/StaminaBar
-@onready var sprite: Sprite2D = $Sprite2D
+@onready var sprite: AnimatedSprite2D = $AnimatedSprite2D
 @onready var hit_stun_timer: Timer = $HitStunTimer
 @onready var invincibility_timer: Timer = $InvincibilityTimer
 @onready var flash_timer: Timer = $FlashTimer
@@ -53,7 +53,9 @@ func _ready():
 	motion_mode = CharacterBody2D.MOTION_MODE_FLOATING
 	stamina_bar.max_value = max_stamina
 	stamina_bar.value = max_stamina
-	
+	sprite.sprite_frames.set_animation_speed("idle", 4)
+	sprite.play("idle")
+
 	# item effects signal
 	SignalBus.connect("restore_stamina", _on_restore_stamina)
 	SignalBus.connect("apply_speed_boost", _on_speed_boost_received)
@@ -99,6 +101,8 @@ func _physics_process(delta: float) -> void:
 		consume_stamina(delta)
 	else:
 		velocity = knockback_velocity
+		sprite.sprite_frames.set_animation_speed("idle", 4)
+		sprite.play("idle")
 
 	if not is_hit_stunned and shoot_cooldown <= 0.0:
 		var target_in_radius = find_autoaim_target()
@@ -123,6 +127,9 @@ func _physics_process(delta: float) -> void:
 
 func consume_stamina(delta):
 	current_stamina -= depletion_rate * delta
+	sprite.sprite_frames.set_animation_speed("walking", 8)
+	sprite.play("walking")
+	
 	if current_stamina <= 0:
 		enter_sleep()
 
