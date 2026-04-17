@@ -21,6 +21,7 @@ var current_stamina: float = 100.0
 @export var recharge_rate: float = 10.0
 #@export var depletion_rate: float = 10.0
 #@export var recharge_rate: float = 5.0
+@onready var anim := $AnimatedSprite2D
 
 var is_sleeping: bool = false
 var ghost_scene = preload("res://Scenes/player_ghost.tscn")
@@ -34,7 +35,7 @@ var is_invincible: bool = false
 var flash_tint_on: bool = false
 
 @onready var stamina_bar = $Stats/StaminaBar
-@onready var sprite: Sprite2D = $Sprite2D
+@onready var sprite := $AnimatedSprite2D
 @onready var hit_stun_timer: Timer = $HitStunTimer
 @onready var invincibility_timer: Timer = $InvincibilityTimer
 @onready var flash_timer: Timer = $FlashTimer
@@ -44,6 +45,8 @@ func _ready():
 	motion_mode = CharacterBody2D.MOTION_MODE_FLOATING
 	stamina_bar.max_value = max_stamina
 	stamina_bar.value = max_stamina
+	anim.sprite_frames.set_animation_speed("default", 8)
+	anim.play()
 
 	SignalBus.connect("restore_stamina", _on_restore_stamina)
 	SignalBus.connect("apply_speed_boost", _on_speed_boost_received)
