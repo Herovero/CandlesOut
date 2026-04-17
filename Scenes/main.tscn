@@ -183,11 +183,37 @@ metadata/_edit_use_anchors_ = true
 [node name="Hearts" parent="HUDs/Player1" unique_id=706036972 instance=ExtResource("2_8gbba")]
 layout_mode = 1
 anchors_preset = -1
+anchor_top = -2.975
 anchor_bottom = -2.975
 offset_left = 28.000004
 offset_top = 33.0
 offset_right = 1399.0
 offset_bottom = 289.0
+metadata/_edit_use_anchors_ = true
+
+[node name="EffectIcon" type="TextureRect" parent="HUDs/Player1" unique_id=1600489821]
+custom_minimum_size = Vector2(28, 28)
+layout_mode = 1
+anchors_preset = -1
+anchor_top = -0.1
+anchor_bottom = -0.1
+offset_left = 28.0
+offset_top = 84.0
+offset_right = 56.0
+offset_bottom = 112.0
+stretch_mode = 5
+metadata/_edit_use_anchors_ = true
+
+[node name="EffectLabel" type="Label" parent="HUDs/Player1" unique_id=456589463]
+layout_mode = 1
+anchors_preset = -1
+anchor_top = -0.1
+anchor_bottom = -0.1
+offset_left = 64.0
+offset_top = 84.0
+offset_right = 430.0
+offset_bottom = 112.0
+text = "Effect: None"
 metadata/_edit_use_anchors_ = true
 
 [node name="Player2" type="Control" parent="HUDs" unique_id=364119189]
@@ -204,6 +230,23 @@ offset_top = 21.0
 offset_right = 2440.0
 offset_bottom = 58.999996
 my_player_id = "p2_"
+
+[node name="EffectIcon" type="TextureRect" parent="HUDs/Player2" unique_id=935725333]
+custom_minimum_size = Vector2(28, 28)
+layout_mode = 0
+offset_left = 1068.0
+offset_top = 77.0
+offset_right = 1096.0
+offset_bottom = 105.0
+stretch_mode = 5
+
+[node name="EffectLabel" type="Label" parent="HUDs/Player2" unique_id=702341827]
+layout_mode = 0
+offset_left = 1103.0
+offset_top = 77.0
+offset_right = 1469.0
+offset_bottom = 105.0
+text = "Effect: None"
 
 [node name="gameover_label" type="Label" parent="HUDs" unique_id=1777338280]
 visible = false

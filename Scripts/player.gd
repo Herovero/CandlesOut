@@ -12,11 +12,13 @@ var base_speed: float = 200.0 # Store reference
 @export var autoaim_enabled: bool = true
 @export var autoaim_range: float = 300.0
 @export var hit_stun_duration: float = 0.32
-@export var invincibility_duration: float = 0.32
+@export var invincibility_duration: float = 10.32
 @export var flash_interval: float = 0.06
 
+const SHOE_ICON = preload("res://Assets/Sprites/item_shoe.png")
+
 @export var max_stamina: float = 100.0
-var current_stamina: float = 100.0
+var current_stamina: float = 10.0
 @export var depletion_rate: float = 10.0
 @export var recharge_rate: float = 10.0
 #@export var depletion_rate: float = 10.0
@@ -32,6 +34,11 @@ var last_move_dir: Vector2 = Vector2.RIGHT
 var is_hit_stunned: bool = false
 var is_invincible: bool = false
 var flash_tint_on: bool = false
+
+var active_effect_name: String = ""
+var active_effect_time_left: float = 0.0
+var active_effect_icon: Texture2D = null
+var speed_boost_token: int = 0
 
 @onready var stamina_bar = $Stats/StaminaBar
 @onready var sprite: Sprite2D = $Sprite2D
@@ -63,6 +70,7 @@ func _ready():
 
 func _physics_process(delta: float) -> void:
 	update_ui()
+	update_effect_state(delta)
 
 	if is_sleeping:
 		handle_sleep(delta)
@@ -227,16 +235,44 @@ func shoot_projectile(target: Node2D = null) -> void:
 	shoot_sound.pitch_scale = randf_range(0.95, 1.05)
 	shoot_sound.play()
 
+func set_active_effect(name: String, duration: float, icon: Texture2D = null) -> void:
+	active_effect_name = name
+	active_effect_time_left = duration
+	active_effect_icon = icon
+
+
+func clear_active_effect() -> void:
+	active_effect_name = ""
+	active_effect_time_left = 0.0
+	active_effect_icon = null
+
+
+func has_active_effect() -> bool:
+	return active_effect_time_left > 0.0 and active_effect_name != ""
+
+
+func update_effect_state(delta: float) -> void:
+	if active_effect_time_left > 0.0:
+		active_effect_time_left = max(active_effect_time_left - delta, 0.0)
+		if active_effect_time_left == 0.0:
+			clear_active_effect()
+
+
 func _on_speed_boost_received(multiplier: float, duration: float, p_id: String):
 	if p_id == input_prefix:
-		# Increase speed
+		speed_boost_token += 1
+		var token := speed_boost_token
+
 		speed = base_speed * multiplier
-		
-		# Create a one-shot timer to reset the speed
+		set_active_effect("Speed Boost", duration, SHOE_ICON)
+
 		await get_tree().create_timer(duration).timeout
-		
-		# Reset speed
+
+		if token != speed_boost_token:
+			return
+
 		speed = base_speed
+		clear_active_effect()
 
 func _on_flash_timer_timeout() -> void:
 	flash_tint_on = not flash_tint_on
