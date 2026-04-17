@@ -70,3 +70,5 @@ new addition log:
 - projectile slower
 - player autoaim at shooting direction, cone shaped from the player
 - enemy fix attack stops after it sticks to the player
+- player gains incinvible status for short period after an attack, sprite will flash during that period
+- player gets a knockback from melee enemy only, it will have flashing and cannot walk for short/shoot period
