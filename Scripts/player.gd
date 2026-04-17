@@ -32,6 +32,10 @@ var last_move_dir: Vector2 = Vector2.RIGHT
 var is_hit_stunned: bool = false
 var is_invincible: bool = false
 var flash_tint_on: bool = false
+var is_triple_shot_active: bool = false
+var is_flamethrower_active: bool = false
+var is_panicked_fire_active: bool = false
+var is_ramming_active: bool = false
 
 @onready var stamina_bar = $Stats/StaminaBar
 @onready var sprite: Sprite2D = $Sprite2D
@@ -44,10 +48,16 @@ func _ready():
 	motion_mode = CharacterBody2D.MOTION_MODE_FLOATING
 	stamina_bar.max_value = max_stamina
 	stamina_bar.value = max_stamina
-
+	
+	# item effects signal
 	SignalBus.connect("restore_stamina", _on_restore_stamina)
 	SignalBus.connect("apply_speed_boost", _on_speed_boost_received)
 	SignalBus.connect("swap_player", _on_swap_player)
+	SignalBus.connect("apply_triple_shot", _on_triple_shot_received)
+	
+	# item side effects signal
+	SignalBus.connect("apply_speed_backfire", _on_speed_backfire_received)
+	SignalBus.connect("apply_flamethrower_backfire", _on_flamethrower_received)
 	
 	hit_stun_timer.wait_time = hit_stun_duration
 	invincibility_timer.wait_time = invincibility_duration
@@ -90,6 +100,16 @@ func _physics_process(delta: float) -> void:
 			shoot_cooldown = shoot_interval
 
 	move_and_slide()
+	
+	if is_ramming_active:
+		for i in get_slide_collision_count():
+			var collision = get_slide_collision(i)
+			var collider = collision.get_collider()
+			
+			if collider.is_in_group("Enemies") and collider.has_method("take_damage"):
+				collider.take_damage(1.0) # Deal ramming damage
+				# Add a tiny bounce back so you don't stick to them
+				knockback_velocity = -velocity.normalized() * 150.0
 
 
 func consume_stamina(delta):
@@ -204,19 +224,53 @@ func shoot_projectile(target: Node2D = null) -> void:
 	if projectile_scene == null:
 		return
 
-	var shot_dir = last_move_dir
+	var base_dir = last_move_dir
 	if target:
-		shot_dir = global_position.direction_to(target.global_position)
+		base_dir = global_position.direction_to(target.global_position)
+		
+		if is_panicked_fire_active:
+			base_dir = -base_dir # Flip the vector
+			
+	# Decide how many shots to fire
+	var shot_angles = [0.0]
+	if is_flamethrower_active or is_panicked_fire_active:
+		shot_angles = [-0.52, 0.0, 0.52] # -30, 0, +30 degrees
 
-	var projectile = projectile_scene.instantiate()
-	projectile.global_position = global_position + (shot_dir * muzzle_offset)
-	projectile.direction = shot_dir
-	projectile.speed = projectile_speed
-	projectile.damage = projectile_damage
-	projectile.owner_group = "Players"
-	projectile.target_group = "Enemies"
-	get_tree().current_scene.add_child(projectile)
+	for angle in shot_angles:
+		var projectile = projectile_scene.instantiate()
+		var final_dir = base_dir.rotated(angle)
+		
+		projectile.global_position = global_position + (final_dir * muzzle_offset)
+		projectile.direction = final_dir
+		projectile.speed = projectile_speed
+		projectile.damage = projectile_damage
+		projectile.owner_group = "Players" 
+		projectile.target_group = "Enemies"
+		get_tree().current_scene.add_child(projectile)
 
+func _on_triple_shot_received(duration: float, p_id: String):
+	if p_id == input_prefix:
+		is_triple_shot_active = true
+		await get_tree().create_timer(duration).timeout
+		is_triple_shot_active = false
+
+func _on_flamethrower_received(duration: float, p_id: String):
+	if p_id == input_prefix:
+		var original_interval = shoot_interval
+		
+		is_panicked_fire_active = true # Start shooting backwards
+		shoot_interval = 0.05 
+		
+		# Make the player spin or look confused with modulate
+		modulate = Color(1.0, 0.5, 0.5) # Panicked red tint
+		
+		await get_tree().create_timer(duration).timeout
+		
+		# Reset
+		is_panicked_fire_active = false
+		shoot_interval = original_interval
+		modulate = Color(1, 1, 1)
+		
 func _on_speed_boost_received(multiplier: float, duration: float, p_id: String):
 	if p_id == input_prefix:
 		# Increase speed
@@ -227,6 +281,21 @@ func _on_speed_boost_received(multiplier: float, duration: float, p_id: String):
 		
 		# Reset speed
 		speed = base_speed
+
+func _on_speed_backfire_received(multiplier: float, duration: float, p_id: String):
+	if p_id == input_prefix:
+		var original_speed = base_speed
+		is_ramming_active = true
+		speed = base_speed * multiplier
+		
+		# Visual feedback: Turn yellow and slightly transparent to look like a blur
+		modulate = Color(1.5, 1.5, 0.5, 0.8)
+		
+		await get_tree().create_timer(duration).timeout
+		
+		is_ramming_active = false
+		speed = base_speed
+		modulate = Color(1, 1, 1, 1)
 
 func _on_flash_timer_timeout() -> void:
 	flash_tint_on = not flash_tint_on
