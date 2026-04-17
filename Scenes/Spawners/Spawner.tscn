@@ -3,7 +3,7 @@
 [ext_resource type="Script" uid="uid://d0aeh0gtl2ddc" path="res://Scripts/Spawners/spawner.gd" id="1_ohbek"]
 
 [sub_resource type="RectangleShape2D" id="RectangleShape2D_ohbek"]
-size = Vector2(234, 32)
+size = Vector2(208, 27)
 
 [node name="Spawner" type="Node2D" unique_id=1677051792]
 script = ExtResource("1_ohbek")
