@@ -2,6 +2,43 @@
 
 [ext_resource type="Script" uid="uid://beex6txfgnroy" path="res://Scripts/projectile.gd" id="1_script"]
 [ext_resource type="Texture2D" uid="uid://b7fvyw61qmnl7" path="res://icon.svg" id="2_icon"]
+[ext_resource type="Texture2D" uid="uid://d1s4fvnmun1y5" path="res://Assets/All_Fire_Bullet_Pixel_16x16_01.png" id="2_tl4hk"]
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_d4467"]
+atlas = ExtResource("2_tl4hk")
+region = Rect2(256, 133, 16, 7)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_e1077"]
+atlas = ExtResource("2_tl4hk")
+region = Rect2(272, 133, 16, 7)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_cgh1o"]
+atlas = ExtResource("2_tl4hk")
+region = Rect2(288, 133, 16, 7)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_cu5m1"]
+atlas = ExtResource("2_tl4hk")
+region = Rect2(304, 133, 16, 7)
+
+[sub_resource type="SpriteFrames" id="SpriteFrames_rsyq6"]
+animations = [{
+"frames": [{
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_d4467")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_e1077")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_cgh1o")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_cu5m1")
+}],
+"loop": true,
+"name": &"default",
+"speed": 15.0
+}]
 
 [sub_resource type="CircleShape2D" id="CircleShape2D_1"]
 radius = 8.0
@@ -9,7 +46,14 @@ radius = 8.0
 [node name="Projectile" type="Area2D" unique_id=1954428549]
 script = ExtResource("1_script")
 
+[node name="AnimatedSprite2D" type="AnimatedSprite2D" parent="." unique_id=322159658]
+position = Vector2(-11, 0)
+scale = Vector2(3, 3)
+sprite_frames = SubResource("SpriteFrames_rsyq6")
+frame_progress = 0.44915757
+
 [node name="Sprite2D" type="Sprite2D" parent="." unique_id=1912473741]
+visible = false
 scale = Vector2(0.2, 0.2)
 texture = ExtResource("2_icon")
 

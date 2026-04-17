@@ -3,6 +3,7 @@ extends Area2D
 @export var speed: float = 200.0
 @export var damage: float = 1.0
 @export var lifetime: float = 2.0
+@onready var anim := $AnimatedSprite2D
 
 var direction: Vector2 = Vector2.RIGHT
 var owner_group: String = ""
@@ -11,8 +12,11 @@ var target_group: String = ""
 
 func _ready() -> void:
 	direction = direction.normalized()
+	anim.sprite_frames.set_animation_speed("default", 15)
+	anim.play()
 	$LifetimeTimer.wait_time = lifetime
 	$LifetimeTimer.start()
+	rotation = direction.angle()
 
 
 func _physics_process(delta: float) -> void:
