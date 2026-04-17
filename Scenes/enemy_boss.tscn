@@ -1,7 +1,8 @@
-[gd_scene format=3]
+[gd_scene format=3 uid="uid://vs82ttxb1nix"]
 
-[ext_resource type="Script" path="res://Scripts/enemy_boss.gd" id="1_script"]
-[ext_resource type="Texture2D" path="res://icon.svg" id="2_icon"]
+[ext_resource type="Script" uid="uid://bdj6c82bjbyf7" path="res://Scripts/enemy_boss.gd" id="1_script"]
+[ext_resource type="Texture2D" uid="uid://b7fvyw61qmnl7" path="res://icon.svg" id="2_icon"]
+[ext_resource type="SpriteFrames" uid="uid://bv5v4e3wtb12c" path="res://addons/duelyst_animated_sprites/assets/spritesheets/units/boss_manaman.tres" id="3_648fd"]
 
 [sub_resource type="RectangleShape2D" id="RectangleShape2D_body"]
 size = Vector2(120, 120)
@@ -9,20 +10,30 @@ size = Vector2(120, 120)
 [sub_resource type="CircleShape2D" id="CircleShape2D_hitbox"]
 radius = 72.0
 
-[node name="EnemyBoss" type="CharacterBody2D" groups=["Enemies"]]
+[node name="EnemyBoss" type="CharacterBody2D" unique_id=1538485009 groups=["Enemies"]]
 script = ExtResource("1_script")
 
-[node name="Sprite2D" type="Sprite2D" parent="."]
+[node name="Sprite2D" type="Sprite2D" parent="." unique_id=733335108]
+visible = false
 self_modulate = Color(0.85, 0.75, 1, 1)
 scale = Vector2(0.95, 0.95)
 texture = ExtResource("2_icon")
 
-[node name="CollisionShape2D" type="CollisionShape2D" parent="."]
+[node name="CollisionShape2D" type="CollisionShape2D" parent="." unique_id=1304806297]
+visible = false
 shape = SubResource("RectangleShape2D_body")
 
-[node name="Hitbox" type="Area2D" parent="."]
+[node name="Hitbox" type="Area2D" parent="." unique_id=494444212]
+visible = false
 
-[node name="CollisionShape2D" type="CollisionShape2D" parent="Hitbox"]
+[node name="CollisionShape2D" type="CollisionShape2D" parent="Hitbox" unique_id=1059983155]
+visible = false
 shape = SubResource("CircleShape2D_hitbox")
+
+[node name="AnimatedSprite2D" type="AnimatedSprite2D" parent="." unique_id=255919478]
+scale = Vector2(3, 3)
+sprite_frames = ExtResource("3_648fd")
+animation = &"breathing"
+frame_progress = 0.30004326
 
 [connection signal="body_entered" from="Hitbox" to="." method="_on_hitbox_body_entered"]
