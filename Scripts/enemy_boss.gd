@@ -52,7 +52,7 @@ var hurt_tint_token: int = 0
 var base_sprite_modulate: Color = Color(1, 1, 1, 1)
 
 @onready var hitbox: Area2D = $Hitbox
-@onready var sprite: Sprite2D = $Sprite2D
+@onready var sprite: AnimatedSprite2D = $AnimatedSprite2D
 
 
 func _ready() -> void:
@@ -60,7 +60,8 @@ func _ready() -> void:
 	hp = max_hp
 	base_sprite_modulate = sprite.modulate
 	enter_idle()
-
+	sprite.sprite_frames.set_animation_speed("idle", 10)
+	sprite.play()
 
 func _physics_process(delta: float) -> void:
 	var target = find_closest_player()

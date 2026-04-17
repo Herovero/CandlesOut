@@ -20,19 +20,26 @@ var base_sprite_modulate: Color = Color(1, 1, 1, 1)
 
 @onready var attack_timer: Timer = $AttackTimer
 @onready var hitbox: Area2D = $Hitbox
-@onready var sprite: Sprite2D = $Sprite2D
+@onready var sprite: AnimatedSprite2D = $AnimatedSprite2D
 
 @onready var death_sound = $EnemyDies
 var is_dying: bool = false
 @onready var footstep_enemy = $EnemyFootStep
 @export var footstep_interval: float = 0.5
 var footstep_timer: float = 0.0
+var attacking_animation: bool = false
 
 func _ready() -> void:
 	motion_mode = CharacterBody2D.MOTION_MODE_FLOATING
 	hp = max_hp
 	attack_timer.wait_time = melee_attack_buffer
 	base_sprite_modulate = sprite.modulate
+	sprite.sprite_frames.set_animation_speed("idle", 10)
+	sprite.sprite_frames.set_animation_speed("move", 10)
+	sprite.sprite_frames.set_animation_speed("attack", 10)
+	sprite.play("idle")
+	
+	sprite.animation_finished.connect(_on_animation_finished)
 
 
 func _physics_process(delta: float) -> void:
@@ -50,6 +57,9 @@ func _physics_process(delta: float) -> void:
 
 	var move_velocity = (direction * SPEED) + separation
 	velocity = move_velocity + knockback_velocity
+	if velocity.x != 0:
+		sprite.flip_h = velocity.x < 0
+		
 	knockback_velocity *= 0.85
 
 	move_and_slide()
@@ -118,6 +128,9 @@ func take_damage(amount: float) -> void:
 
 
 func deal_melee_hit(body) -> void:
+	attacking_animation = true
+	sprite.play("attack")
+	
 	var dir = (body.global_position - global_position).normalized()
 	if body.has_method("receive_hit"):
 		body.receive_hit(damage_amount, dir * 240, true)
@@ -140,7 +153,6 @@ func _on_hitbox_body_entered(body):
 	if attack_timer.is_stopped():
 		deal_melee_hit(body)
 		attack_timer.start()
-
 
 func _on_hitbox_body_exited(body):
 	if body == current_melee_target:
@@ -170,11 +182,20 @@ func play_footstep():
 	Global.active_footstep_count -= 1
 	
 func handle_footsteps(delta, direction):
+	
 	if direction == Vector2.ZERO:
+		if attacking_animation == false:
+			sprite.play("idle")
 		footstep_timer = 0.0
 		return
 	
 	footstep_timer -= delta
 	if footstep_timer <= 0.0:
+		if attacking_animation == false:
+			sprite.play("move")
 		play_footstep()
 		footstep_timer = footstep_interval
+
+func _on_animation_finished():
+	if sprite.animation == "attack":
+		attacking_animation = false

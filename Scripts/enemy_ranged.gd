@@ -19,12 +19,14 @@ var last_move_dir: Vector2 = Vector2.RIGHT
 @onready var shoot_sound = $ShootEnemy
 
 
-
 func _ready() -> void:
 	super()
 	max_hp = ranged_max_hp
 	hp = max_hp
-
+	sprite.sprite_frames.set_animation_speed("idle", 9)
+	sprite.sprite_frames.set_animation_speed("run", 9)
+	sprite.sprite_frames.set_animation_speed("attack", 9)
+	sprite.play("idle")
 
 func _physics_process(delta: float) -> void:
 	var target = find_closest_player()
@@ -54,6 +56,10 @@ func _physics_process(delta: float) -> void:
 	var separation = compute_separation()
 	var move_velocity = (direction * SPEED) + separation
 	velocity = move_velocity + knockback_velocity
+	if ( velocity.x != 0 || velocity.y != 0):
+		sprite.play("run")
+	if velocity.x != 0:
+		sprite.flip_h = velocity.x < 0
 	knockback_velocity *= 0.85
 
 	shoot_cooldown -= delta
@@ -67,6 +73,7 @@ func _physics_process(delta: float) -> void:
 
 
 func shoot_projectile(shoot_dir: Vector2) -> void:
+	sprite.play("attack")
 	if projectile_scene == null:
 		return
 

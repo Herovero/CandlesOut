@@ -2,7 +2,7 @@
 
 [ext_resource type="Script" uid="uid://bdj6c82bjbyf7" path="res://Scripts/enemy_boss.gd" id="1_script"]
 [ext_resource type="Texture2D" uid="uid://b7fvyw61qmnl7" path="res://icon.svg" id="2_icon"]
-[ext_resource type="SpriteFrames" uid="uid://bv5v4e3wtb12c" path="res://addons/duelyst_animated_sprites/assets/spritesheets/units/boss_manaman.tres" id="3_648fd"]
+[ext_resource type="SpriteFrames" path="res://addons/duelyst_animated_sprites/assets/spritesheets/units/f4_blacksolus.tres" id="3_648fd"]
 
 [sub_resource type="RectangleShape2D" id="RectangleShape2D_body"]
 size = Vector2(120, 120)
@@ -33,7 +33,6 @@ shape = SubResource("CircleShape2D_hitbox")
 [node name="AnimatedSprite2D" type="AnimatedSprite2D" parent="." unique_id=255919478]
 scale = Vector2(3, 3)
 sprite_frames = ExtResource("3_648fd")
-animation = &"breathing"
-frame_progress = 0.30004326
+animation = &"death"
 
 [connection signal="body_entered" from="Hitbox" to="." method="_on_hitbox_body_entered"]

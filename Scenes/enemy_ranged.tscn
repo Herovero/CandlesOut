@@ -1,7 +1,7 @@
 [gd_scene format=3 uid="uid://dcnm854vbpf8x"]
 
 [ext_resource type="Script" uid="uid://d1p4qmphbpcfa" path="res://Scripts/enemy_ranged.gd" id="1_script"]
-[ext_resource type="Texture2D" uid="uid://b7fvyw61qmnl7" path="res://icon.svg" id="2_icon"]
+[ext_resource type="SpriteFrames" uid="uid://d37mqsibmayj6" path="res://addons/duelyst_animated_sprites/assets/spritesheets/units/neutral_tribalranged2.tres" id="2_kowwf"]
 [ext_resource type="AudioStream" uid="uid://b4lhmwb55wd4b" path="res://SFX/Enemy/EneShoot.wav" id="3_htpsb"]
 [ext_resource type="AudioStream" uid="uid://cxcdt0cwv4g4v" path="res://SFX/Enemy/EneFootstep.wav" id="4_t233f"]
 [ext_resource type="AudioStream" uid="uid://do4d7expdd4hw" path="res://SFX/Enemy/EneDead.wav" id="5_kowwf"]
@@ -15,10 +15,10 @@ size = Vector2(68, 68)
 [node name="EnemyRanged" type="CharacterBody2D" unique_id=1320265069 groups=["Enemies"]]
 script = ExtResource("1_script")
 
-[node name="Sprite2D" type="Sprite2D" parent="." unique_id=1164631735]
-self_modulate = Color(0.4, 0.8, 1, 1)
-scale = Vector2(0.5, 0.5)
-texture = ExtResource("2_icon")
+[node name="AnimatedSprite2D" type="AnimatedSprite2D" parent="." unique_id=1472503625]
+scale = Vector2(3, 3)
+sprite_frames = ExtResource("2_kowwf")
+animation = &"attack"
 
 [node name="CollisionShape2D" type="CollisionShape2D" parent="." unique_id=2040590797]
 shape = SubResource("RectangleShape2D_body")
