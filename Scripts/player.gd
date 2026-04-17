@@ -17,7 +17,7 @@ var base_speed: float = 200.0 # Store reference
 
 @export var max_stamina: float = 100.0
 var current_stamina: float = 100.0
-@export var depletion_rate: float = 10.0
+@export var depletion_rate: float = 30.0
 @export var recharge_rate: float = 10.0
 #@export var depletion_rate: float = 10.0
 #@export var recharge_rate: float = 5.0
@@ -45,8 +45,8 @@ func _ready():
 	motion_mode = CharacterBody2D.MOTION_MODE_FLOATING
 	stamina_bar.max_value = max_stamina
 	stamina_bar.value = max_stamina
-	anim.sprite_frames.set_animation_speed("default", 8)
-	anim.play()
+	anim.sprite_frames.set_animation_speed("idle", 4)
+	anim.play("idle")
 
 	SignalBus.connect("restore_stamina", _on_restore_stamina)
 	SignalBus.connect("apply_speed_boost", _on_speed_boost_received)
@@ -83,6 +83,8 @@ func _physics_process(delta: float) -> void:
 		consume_stamina(delta)
 	else:
 		velocity = knockback_velocity
+		anim.sprite_frames.set_animation_speed("idle", 4)
+		anim.play("idle")
 
 	if not is_hit_stunned and shoot_cooldown <= 0.0:
 		var target_in_radius = find_autoaim_target()
@@ -92,8 +94,9 @@ func _physics_process(delta: float) -> void:
 
 	move_and_slide()
 
-
 func consume_stamina(delta):
+	anim.sprite_frames.set_animation_speed("walking", 8)
+	anim.play("walking")
 	current_stamina -= depletion_rate * delta
 	if current_stamina <= 0:
 		enter_sleep()

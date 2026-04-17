@@ -5,10 +5,15 @@ extends CharacterBody2D
 @export var throw_distance: float = 250.0
 
 @onready var interaction_area: Area2D = $InteractionArea
+@onready var anim := $AnimatedSprite2D
 
 var is_picking: bool = false
 var held_item: Node2D = null
 var current_dir: Vector2 = Vector2.ZERO # Store the latest movement
+
+func _ready():
+	anim.sprite_frames.set_animation_speed("default", 10)
+	anim.play()
 
 func _physics_process(_delta: float) -> void:
 	if is_picking:

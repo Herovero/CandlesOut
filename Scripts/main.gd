@@ -9,7 +9,7 @@ func _ready():
 	gameover_label.hide()
 	restart_button.hide()
 	
-	SignalBus.connect("game_over", _on_game_over)
+	# SignalBus.connect("game_over", _on_game_over)
 
 # Called every frame. 'delta' is the elapsed time since the previous frame.
 # In a central script (e.g., Main.gd or GameManager.gd)

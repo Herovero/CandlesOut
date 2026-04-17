@@ -1,10 +1,23 @@
 [gd_scene format=3 uid="uid://c4sy607bwof83"]
 
 [ext_resource type="Script" uid="uid://dwsroubvetdac" path="res://Scripts/player.gd" id="1_ndhuy"]
-[ext_resource type="Texture2D" uid="uid://6txbpuv8e3py" path="res://Assets/walk.png" id="2_cvnsp"]
+[ext_resource type="Texture2D" uid="uid://cfbf3whkdulbr" path="res://Assets/idle.png" id="2_6t5aa"]
+[ext_resource type="Texture2D" uid="uid://dl6caqu10wpsb" path="res://Assets/walk.png" id="2_cvnsp"]
 
 [sub_resource type="RectangleShape2D" id="RectangleShape2D_cvnsp"]
 size = Vector2(64, 64)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_8erm5"]
+atlas = ExtResource("2_6t5aa")
+region = Rect2(0, 0, 20, 23)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_f1ek2"]
+atlas = ExtResource("2_6t5aa")
+region = Rect2(20, 0, 20, 23)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_tx1dd"]
+atlas = ExtResource("2_6t5aa")
+region = Rect2(40, 0, 20, 23)
 
 [sub_resource type="AtlasTexture" id="AtlasTexture_6t5aa"]
 atlas = ExtResource("2_cvnsp")
@@ -30,6 +43,20 @@ region = Rect2(80, 0, 20, 23)
 animations = [{
 "frames": [{
 "duration": 1.0,
+"texture": SubResource("AtlasTexture_8erm5")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_f1ek2")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_tx1dd")
+}],
+"loop": true,
+"name": &"idle",
+"speed": 5.0
+}, {
+"frames": [{
+"duration": 1.0,
 "texture": SubResource("AtlasTexture_6t5aa")
 }, {
 "duration": 1.0,
@@ -45,7 +72,7 @@ animations = [{
 "texture": SubResource("AtlasTexture_3smsa")
 }],
 "loop": true,
-"name": &"default",
+"name": &"walking",
 "speed": 8.0
 }]
 
@@ -82,8 +109,7 @@ one_shot = true
 [node name="AnimatedSprite2D" type="AnimatedSprite2D" parent="." unique_id=755746103]
 scale = Vector2(3, 3)
 sprite_frames = SubResource("SpriteFrames_8erm5")
-frame = 4
-frame_progress = 0.72662973
+animation = &"idle"
 
 [connection signal="timeout" from="HitStunTimer" to="." method="_on_hit_stun_timer_timeout"]
 [connection signal="timeout" from="InvincibilityTimer" to="." method="_on_invincibility_timer_timeout"]
