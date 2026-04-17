@@ -1,6 +1,6 @@
 extends Area2D
 
-@export var speed: float = 250.0
+@export var speed: float = 200.0
 @export var damage: float = 1.0
 @export var lifetime: float = 2.0
 
@@ -27,7 +27,13 @@ func _on_body_entered(body: Node) -> void:
 		return
 
 	if body.is_in_group("Players"):
-		SignalBus.emit_signal("take_damage", damage, body.input_prefix)
+		if body.has_method("receive_hit"):
+			body.receive_hit(damage)
+		elif body.has_method("is_damage_blocked") and body.is_damage_blocked():
+			queue_free()
+			return
+		else:
+			SignalBus.emit_signal("take_damage", damage, body.input_prefix)
 	elif body.is_in_group("Enemies") and body.has_method("take_damage"):
 		body.take_damage(damage)
 

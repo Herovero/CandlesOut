@@ -13,7 +13,7 @@ size = Vector2(68, 68)
 script = ExtResource("1_67vpr")
 
 [node name="Sprite2D" type="Sprite2D" parent="." unique_id=617358100]
-self_modulate = Color(1, 0, 0, 1)
+self_modulate = Color(1, 1, 1, 1)
 scale = Vector2(0.5, 0.5)
 texture = ExtResource("1_q8xid")
 
@@ -29,3 +29,5 @@ shape = SubResource("RectangleShape2D_kxk0d")
 one_shot = true
 
 [connection signal="body_entered" from="Hitbox" to="." method="_on_hitbox_body_entered"]
+[connection signal="body_exited" from="Hitbox" to="." method="_on_hitbox_body_exited"]
+[connection signal="timeout" from="AttackTimer" to="." method="_on_attack_timer_timeout"]

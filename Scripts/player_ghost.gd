@@ -1,7 +1,7 @@
 extends CharacterBody2D
 
 @export var input_prefix: String = "p1_"
-@export var speed: float = 200.0 # Maybe ghosts move faster?
+@export var speed: float = 300.0 # Maybe ghosts move faster?
 @export var throw_distance: float = 250.0
 
 @onready var interaction_area: Area2D = $InteractionArea
@@ -61,7 +61,14 @@ func drop_item():
 func throw_item(dir: Vector2):
 	if held_item and held_item.has_method("on_thrown"):
 		is_picking = true
-		# Calculate target based on current movement direction
-		var target_pos = global_position + (dir.normalized() * throw_distance)
+		
+		# Check if the item has a custom distance, otherwise use ghost default
+		var dist = throw_distance
+		if "custom_throw_distance" in held_item:
+			dist = held_item.custom_throw_distance
+			
+		# Calculate target based on the ITEM'S preferred distance
+		var target_pos = global_position + (dir.normalized() * dist)
+		
 		held_item.on_thrown(target_pos)
 		held_item = null

@@ -5,8 +5,8 @@ signal wave_completed(wave_number : int)
 			
 const WAVE_DATA = {
 	1: [
-		{"scene": preload("res://Scenes/enemy_test.tscn"), "count": 1},
-		{"scene": preload("res://Scenes/enemy_ranged.tscn"), "count": 0},
+		{"scene": preload("res://Scenes/enemy_test.tscn"), "count": 10},
+		{"scene": preload("res://Scenes/enemy_ranged.tscn"), "count": 10},
 		],
 	2: [
 		{"scene": preload("res://Scenes/enemy_ranged.tscn"), "count": 15},
