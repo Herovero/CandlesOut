@@ -1,9 +1,12 @@
 [gd_scene format=3 uid="uid://cqts1yegiva4h"]
 
 [ext_resource type="Script" uid="uid://sq7a06lesyka" path="res://Scripts/Spawners/wave_manager.gd" id="1_4ji1e"]
+[ext_resource type="Script" uid="uid://do5vq5635mvb7" path="res://Scripts/ost_manager.gd" id="2_6v3by"]
+[ext_resource type="AudioStream" uid="uid://fa35qe6vqden" path="res://SFX/Ost/Wave_Intro_New.ogg" id="3_851f6"]
 
-[node name="WaveManager" type="Node2D" unique_id=657000445]
+[node name="WaveManager" type="Node2D" unique_id=657000445 node_paths=PackedStringArray("ost_manager")]
 script = ExtResource("1_4ji1e")
+ost_manager = NodePath("OstManager")
 
 [node name="Timer" type="Timer" parent="." unique_id=244623680]
 autostart = true
@@ -11,6 +14,16 @@ autostart = true
 [node name="StartTimer" type="Timer" parent="." unique_id=1682759024]
 one_shot = true
 autostart = true
+
+[node name="OstManager" type="Node" parent="." unique_id=1168447620]
+script = ExtResource("2_6v3by")
+
+[node name="OST1" type="AudioStreamPlayer" parent="OstManager" unique_id=749956570]
+stream = ExtResource("3_851f6")
+
+[node name="OST2" type="AudioStreamPlayer" parent="OstManager" unique_id=1111258901]
+
+[node name="OST3" type="AudioStreamPlayer" parent="OstManager" unique_id=1614400420]
 
 [connection signal="timeout" from="Timer" to="." method="_on_timer_timeout"]
 [connection signal="timeout" from="StartTimer" to="." method="_on_start_timer_timeout"]
