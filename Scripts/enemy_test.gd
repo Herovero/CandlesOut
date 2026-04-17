@@ -5,7 +5,7 @@ const SEPARATION_RADIUS: float = 40.0
 const SEPARATION_FORCE: float = 200.0
 
 @export var damage_amount: float = 1.0
-@export var max_hp: float = 50
+@export var max_hp: float = 5
 @export var melee_attack_buffer: float = 1.2
 @export var hurt_tint_color: Color = Color(1.0, 0.35, 0.35, 1.0)
 @export var hurt_tint_duration: float = 0.12

@@ -4,7 +4,7 @@ extends CharacterBody2D
 @export var speed: float = 150.0
 
 @export var projectile_scene: PackedScene = preload("res://Scenes/projectile.tscn")
-@export var shoot_interval: float = 0.35
+@export var shoot_interval: float = 0.5
 @export var projectile_speed: float = 200.0
 @export var projectile_damage: float = 1.0
 @export var muzzle_offset: float = 24.0
