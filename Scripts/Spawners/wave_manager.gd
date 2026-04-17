@@ -1,12 +1,13 @@
 extends Node2D
 
+@export var ost_manager: Node
 @onready var spawn_timer = $Timer  # add a Timer node as child of WaveManager
 signal wave_completed(wave_number : int)
 			
 const WAVE_DATA = {
 	1: [
-		{"scene": preload("res://Scenes/enemy_test.tscn"), "count": 10},
-		{"scene": preload("res://Scenes/enemy_ranged.tscn"), "count": 2},
+		{"scene": preload("res://Scenes/enemy_test.tscn"), "count": 1},
+		{"scene": preload("res://Scenes/enemy_ranged.tscn"), "count": 1},
 		{"scene": preload("res://Scenes/enemy_boss.tscn"), "count": 0}
 		],
 	2: [
@@ -31,9 +32,7 @@ var spawner_ref = null
 func _ready() -> void:
 	wave_completed.connect(_on_wave_completed)
 	Global.wave = self
-	print("Children:", get_children())
-	print("I am:", self)
-	print("Path:", get_path())
+	print("OST:", ost_manager)
 	pass # Replace with function body.
 
 func start_wave(wave_number: int):
@@ -100,6 +99,7 @@ func on_enemy_died():
 
 
 func _on_start_timer_timeout() -> void:
+	ost_manager.play_wave_ost(1)
 	start_wave(1)
 	pass # Replace with function body.
 

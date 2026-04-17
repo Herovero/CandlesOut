@@ -3,6 +3,7 @@ extends Node
 var wave
 var spawners: Array = []
 var item_spawner
+var ost_manager
 
 var active_footstep_count: int = 0
 const MAX_ENEMY_FOOTSTEPS: int = 3
