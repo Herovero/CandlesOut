@@ -1,0 +1,16 @@
+[gd_scene format=3 uid="uid://cqts1yegiva4h"]
+
+[ext_resource type="Script" uid="uid://sq7a06lesyka" path="res://Scripts/Spawners/wave_manager.gd" id="1_4ji1e"]
+
+[node name="WaveManager" type="Node2D" unique_id=657000445]
+script = ExtResource("1_4ji1e")
+
+[node name="Timer" type="Timer" parent="." unique_id=244623680]
+autostart = true
+
+[node name="StartTimer" type="Timer" parent="." unique_id=1682759024]
+one_shot = true
+autostart = true
+
+[connection signal="timeout" from="Timer" to="." method="_on_timer_timeout"]
+[connection signal="timeout" from="StartTimer" to="." method="_on_start_timer_timeout"]

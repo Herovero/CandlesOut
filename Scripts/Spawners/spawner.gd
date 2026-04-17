@@ -2,28 +2,28 @@ extends Node2D
 
 
 @onready var enemy = preload("res://Scenes/enemy_test.tscn")
+@onready var ranged_enemy = preload("res://Scenes/enemy_ranged.tscn")
 @onready var spawn_area = $Area2D/CollisionShape2D
-@export var min_x: float = 640.0
-@export var min_y: float = 400.0
+@export var min_x: float = 0
+@export var min_y: float = 0
+@export var ranged_spawn_chance: float = 0.35
 
 var wave_ref = null
 # Called when the node enters the scene tree for the first time.
 func _ready() -> void:
-	Global.spawn = self
+	add_to_group("spawner")
+	Global.spawners.append(self)
 	pass # Replace with function body.
 
 
 func get_random_spawn_position() -> Vector2:
 	var shape = spawn_area.shape as RectangleShape2D
 	var extents = shape.size / 2
-	
+
 	# minimum distance from center
-	var min_x = 640.0
-	var min_y = 400.0
-	
 	var rand_x: float
 	var rand_y: float
-	
+
 	# randomly pick a side to spawn on
 	if randf() > 0.5:
 		# spawn on left or right side
@@ -41,20 +41,21 @@ func _process(_delta: float) -> void:
 	pass
 
 
-func _on_timer_timeout() -> void:
-	var wm = Global.wave
-	wm.start_wave(1)
-	pass
-
-
 func spawn_n(count: int, enemy_toSpawn):
 	for i in count:
 		spawn_one(enemy_toSpawn)
 
 func spawn_one(enemy_toSpawn):
-	var ene = enemy_toSpawn.instantiate()
+	var scene_to_spawn = enemy_toSpawn
+	if enemy_toSpawn == enemy and randf() < ranged_spawn_chance:
+		scene_to_spawn = ranged_enemy
+
+	var ene = scene_to_spawn.instantiate()
 	ene.position = get_random_spawn_position()
-	get_parent().add_child(ene)
+	get_tree().current_scene.add_child(ene)
 	# tell wave manager when this enemy dies
 	var wm = Global.wave
 	ene.tree_exited.connect(wm.on_enemy_died)
+
+func _exit_tree() -> void:
+	Global.spawners.erase(self)

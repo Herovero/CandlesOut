@@ -28,7 +28,7 @@ func _on_body_entered(body: Node) -> void:
 
 	if body.is_in_group("Players"):
 		SignalBus.emit_signal("take_damage", damage, body.input_prefix)
-	elif body.has_method("take_damage"):
+	elif body.is_in_group("Enemies") and body.has_method("take_damage"):
 		body.take_damage(damage)
 
 	queue_free()
