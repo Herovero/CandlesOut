@@ -2,6 +2,7 @@ extends "res://Scripts/item.gd"
 
 @export var speed_multiplier: float = 2.0
 @export var duration: float = 10.0
+@onready var shoe_sfx: AudioStreamPlayer2D = $ShoeSFX
 
 # Called when the node enters the scene tree for the first time.
 func _ready():

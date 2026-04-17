@@ -6,9 +6,11 @@ extends "res://Scripts/item.gd"
 @onready var left_wing = $LeftWing   # Your AnimatedSprite2D
 @onready var right_wing = $RightWing # Your AnimatedSprite2D
 @onready var explosion_sfx: AudioStreamPlayer2D = $ExplosionSFX
+@onready var fly_sfx: AudioStreamPlayer2D = $FlySFX
 
 @export var bomb_throw_distance: float = 450.0
 var is_stalking: bool = false
+var was_stalking := false
 @export var max_stalk_time: float = 5.0
 var stalk_timer: float = 0.0
 
@@ -36,6 +38,7 @@ func explode():
 	anim_sprite.visible = true
 	anim_sprite.play("explode")
 	
+	print("explode sounds")
 	explosion_sfx.global_position = global_position
 	explosion_sfx.play()
 	# AOE Logic
@@ -63,17 +66,18 @@ func start_stalking():
 func _physics_process(delta):
 	if is_stalking:
 		stalk_timer += delta
-		
+		if not was_stalking:
+			fly_sfx.play()
 		# Condition: Explode if chase lasts too long
 		if stalk_timer >= max_stalk_time:
 			explode()
 			return
-			
 		var target = find_active_player()
 		if target:
 			var dir = global_position.direction_to(target.global_position)
 			global_position += dir * 150.0 * delta # Speed of the flying bomb
-
+	was_stalking = is_stalking
+	
 func find_active_player() -> CharacterBody2D:
 	var players = get_tree().get_nodes_in_group("Players")
 	for p in players:

@@ -1,4 +1,4 @@
-[gd_scene format=3 uid="uid://druku4bp3uv5i"]
+[gd_scene format=3 uid="uid://yffq7cs5cqdf"]
 
 [ext_resource type="Script" uid="uid://dp74dcckad6rf" path="res://Scripts/shoe.gd" id="1_rcbwc"]
 [ext_resource type="Texture2D" uid="uid://cc4crx8b6y3ft" path="res://Assets/Sprites/item_shoe.png" id="2_rcbwc"]
@@ -17,5 +17,7 @@ texture = ExtResource("2_rcbwc")
 
 [node name="CollisionShape2D" type="CollisionShape2D" parent="." unique_id=40545649]
 shape = SubResource("CircleShape2D_1weea")
+
+[node name="ShoeSFX" type="AudioStreamPlayer2D" parent="." unique_id=1064114064]
 
 [connection signal="body_entered" from="." to="." method="_on_body_entered"]

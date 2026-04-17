@@ -4,7 +4,7 @@ var is_thrown: bool = false
 var throwing_ghost: CharacterBody2D = null
 @export var custom_throw_distance: float = 250.0
 
-@onready var heart_sfx: AudioStreamPlayer2D = $HeartSFX
+@onready var heart_sfx: AudioStreamPlayer2D = get_node_or_null("HeartSFX")
 
 # Called when the node enters the scene tree for the first time.
 func _ready():
@@ -139,7 +139,8 @@ func _on_body_entered(body):
 		SignalBus.emit_signal("take_damage", -1.0, p_id)
 		
 		# Item is 'consumed'
-		play_heart_sfx()
+		if heart_sfx:
+			play_heart_sfx()
 		queue_free()
 		
 func play_heart_sfx():

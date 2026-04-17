@@ -1,7 +1,7 @@
 [gd_scene format=3 uid="uid://d4mmodq5hen4l"]
 
 [ext_resource type="Script" uid="uid://bg4yvuv83bq3f" path="res://Scripts/item.gd" id="1_pkys8"]
-[ext_resource type="Texture2D" uid="uid://dyy8151t8djhp" path="res://Assets/UIs/heart_full.png" id="2_1o0s7"]
+[ext_resource type="Texture2D" uid="uid://slrcerdwiuo" path="res://Assets/UIs/heart_full.png" id="2_1o0s7"]
 [ext_resource type="AudioStream" uid="uid://boyho6ynvl272" path="res://SFX/ItemSound/Heart.wav" id="3_1weea"]
 
 [sub_resource type="CircleShape2D" id="CircleShape2D_1weea"]
