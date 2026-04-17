@@ -62,8 +62,10 @@ func _physics_process(delta: float) -> void:
 		velocity = knockback_velocity
 
 	if shoot_cooldown <= 0.0:
-		shoot_projectile()
-		shoot_cooldown = shoot_interval
+		var target_in_cone = find_autoaim_target(last_move_dir)
+		if target_in_cone:
+			shoot_projectile(target_in_cone)
+			shoot_cooldown = shoot_interval
 
 	move_and_slide()
 
@@ -110,6 +112,9 @@ func apply_knockback(force: Vector2):
 
 
 func find_autoaim_target(shoot_dir: Vector2) -> Node2D:
+	if not autoaim_enabled:
+		return null
+
 	var enemies = get_tree().get_nodes_in_group("Enemies")
 	var best_target: Node2D = null
 	var best_dot := -1.0
@@ -139,15 +144,13 @@ func find_autoaim_target(shoot_dir: Vector2) -> Node2D:
 	return best_target
 
 
-func shoot_projectile() -> void:
+func shoot_projectile(target: Node2D = null) -> void:
 	if projectile_scene == null:
 		return
 
 	var shot_dir = last_move_dir
-	if autoaim_enabled:
-		var target = find_autoaim_target(last_move_dir)
-		if target:
-			shot_dir = global_position.direction_to(target.global_position)
+	if target:
+		shot_dir = global_position.direction_to(target.global_position)
 
 	var projectile = projectile_scene.instantiate()
 	projectile.global_position = global_position + (shot_dir * muzzle_offset)
