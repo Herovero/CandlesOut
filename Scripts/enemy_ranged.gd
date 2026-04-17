@@ -15,7 +15,7 @@ var last_move_dir: Vector2 = Vector2.RIGHT
 
 
 func _ready() -> void:
-	motion_mode = CharacterBody2D.MOTION_MODE_FLOATING
+	super()
 	max_hp = ranged_max_hp
 	hp = max_hp
 
