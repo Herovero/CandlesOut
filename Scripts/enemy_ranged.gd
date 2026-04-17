@@ -13,6 +13,9 @@ extends "res://Scripts/enemy_test.gd"
 var shoot_cooldown: float = 0.0
 var last_move_dir: Vector2 = Vector2.RIGHT
 
+@onready var shoot_sound = $ShootEnemy
+
+
 
 func _ready() -> void:
 	super()
@@ -62,7 +65,27 @@ func shoot_projectile() -> void:
 	projectile.owner_group = "Enemies"
 	projectile.target_group = "Players"
 	get_tree().current_scene.add_child(projectile)
+	play_shoot_sound()
 
+func play_footstep():
+	if Global.active_footstep_count >= Global.MAX_ENEMY_FOOTSTEPS:
+		return
+	Global.active_footstep_count += 1
+	footstep_enemy.pitch_scale = randf_range(1.1, 1.4)  # higher pitch than base enemy
+	footstep_enemy.volume_db = randf_range(-6.0, 0.0)
+	footstep_enemy.play()
+	await footstep_enemy.finished
+	Global.active_footstep_count -= 1
 
 func _on_hitbox_body_entered(_body):
 	return
+	
+func play_shoot_sound():
+	if Global.active_shoot_sound_count >= Global.MAX_SHOOT_SOUNDS:
+		return
+	Global.active_shoot_sound_count += 1
+	shoot_sound.pitch_scale = randf_range(0.95, 1.05)
+	shoot_sound.play()
+	await shoot_sound.finished
+	Global.active_shoot_sound_count -= 1
+	

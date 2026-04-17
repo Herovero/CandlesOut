@@ -5,8 +5,8 @@ signal wave_completed(wave_number : int)
 			
 const WAVE_DATA = {
 	1: [
-		{"scene": preload("res://Scenes/enemy_test.tscn"), "count": 10},
-		{"scene": preload("res://Scenes/enemy_ranged.tscn"), "count": 10},
+		{"scene": preload("res://Scenes/enemy_test.tscn"), "count": 1},
+		{"scene": preload("res://Scenes/enemy_ranged.tscn"), "count": 0},
 		],
 	2: [
 		{"scene": preload("res://Scenes/enemy_ranged.tscn"), "count": 15},
@@ -56,6 +56,9 @@ func start_wave(wave_number: int):
 
 
 func try_spawn():
+	if not is_inside_tree():
+		return
+	
 	var slots_available = MAX_ENEMIES_ON_SCREEN - enemies_alive
 	
 	if slots_available <= 0 or spawn_queue.is_empty():

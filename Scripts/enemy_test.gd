@@ -20,6 +20,11 @@ var base_sprite_modulate: Color = Color(1, 1, 1, 1)
 @onready var hitbox: Area2D = $Hitbox
 @onready var sprite: Sprite2D = $Sprite2D
 
+@onready var death_sound = $EnemyDies
+var is_dying: bool = false
+@onready var footstep_enemy = $EnemyFootStep
+@export var footstep_interval: float = 0.5
+var footstep_timer: float = 0.0
 
 func _ready() -> void:
 	motion_mode = CharacterBody2D.MOTION_MODE_FLOATING
@@ -29,6 +34,9 @@ func _ready() -> void:
 
 
 func _physics_process(delta: float) -> void:
+	if is_dying:
+		return
+		
 	var target = find_closest_player()
 	var direction = Vector2.ZERO
 
@@ -42,6 +50,7 @@ func _physics_process(delta: float) -> void:
 	knockback_velocity *= 0.85
 
 	move_and_slide()
+	handle_footsteps(delta,direction)
 
 
 func find_closest_player() -> CharacterBody2D:
@@ -90,8 +99,14 @@ func play_hurt_tint() -> void:
 
 
 func take_damage(amount: float) -> void:
+	if is_dying:
+		return
 	hp = clamp(hp - amount, 0.0, max_hp)
 	if hp <= 0.0:
+		is_dying = true
+		print(self, " is dying")
+		death_sound.play()
+		await death_sound.finished
 		queue_free()
 		return
 
@@ -137,3 +152,23 @@ func _on_attack_timer_timeout() -> void:
 
 	deal_melee_hit(current_melee_target)
 	attack_timer.start()
+	
+func play_footstep():
+	if Global.active_footstep_count >= Global.MAX_ENEMY_FOOTSTEPS:
+		return
+	Global.active_footstep_count += 1
+	footstep_enemy.pitch_scale = randf_range(0.85, 1.15)
+	footstep_enemy.volume_db = randf_range(-6.0, 0.0)
+	footstep_enemy.play()
+	await footstep_enemy.finished
+	Global.active_footstep_count -= 1
+	
+func handle_footsteps(delta, direction):
+	if direction == Vector2.ZERO:
+		footstep_timer = 0.0
+		return
+	
+	footstep_timer -= delta
+	if footstep_timer <= 0.0:
+		play_footstep()
+		footstep_timer = footstep_interval

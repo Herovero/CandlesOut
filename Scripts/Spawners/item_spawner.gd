@@ -2,9 +2,9 @@ extends Node2D
 
 var items = [
 	preload("res://Scenes/item1.tscn"),
-	preload("res://Scenes/item1.tscn"),
-	preload("res://Scenes/item1.tscn"),
-	preload("res://Scenes/item1.tscn")
+	preload("res://Scenes/item_bomb.tscn"),
+	preload("res://Scenes/item_coffee.tscn"),
+	preload("res://Scenes/item_shoe.tscn")
 ]
 
 var can_spawn : bool = false
