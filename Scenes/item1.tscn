@@ -1,11 +1,10 @@
 [gd_scene format=3 uid="uid://d4mmodq5hen4l"]
 
 [ext_resource type="Script" uid="uid://bg4yvuv83bq3f" path="res://Scripts/item.gd" id="1_pkys8"]
+[ext_resource type="Texture2D" uid="uid://dyy8151t8djhp" path="res://Assets/UIs/heart_full.png" id="2_1o0s7"]
 
-[sub_resource type="CanvasTexture" id="CanvasTexture_yk461"]
-
-[sub_resource type="RectangleShape2D" id="RectangleShape2D_1o0s7"]
-size = Vector2(50, 50)
+[sub_resource type="CircleShape2D" id="CircleShape2D_1weea"]
+radius = 20.024984
 
 [node name="item1" type="Area2D" unique_id=839316503 groups=["Items"]]
 collision_layer = 3
@@ -13,10 +12,10 @@ collision_mask = 3
 script = ExtResource("1_pkys8")
 
 [node name="Sprite2D" type="Sprite2D" parent="." unique_id=171564091]
-scale = Vector2(50, 50)
-texture = SubResource("CanvasTexture_yk461")
+scale = Vector2(0.2, 0.2)
+texture = ExtResource("2_1o0s7")
 
 [node name="CollisionShape2D" type="CollisionShape2D" parent="." unique_id=40545649]
-shape = SubResource("RectangleShape2D_1o0s7")
+shape = SubResource("CircleShape2D_1weea")
 
 [connection signal="body_entered" from="." to="." method="_on_body_entered"]
