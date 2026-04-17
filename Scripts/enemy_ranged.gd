@@ -1,7 +1,7 @@
 extends "res://Scripts/enemy_test.gd"
 
 @export var projectile_scene: PackedScene = preload("res://Scenes/projectile.tscn")
-@export var shoot_interval: float = 1.0
+@export var shoot_interval: float = 3.0
 @export var projectile_speed: float = 250.0
 @export var projectile_damage: float = 1.0
 @export var muzzle_offset: float = 24.0
