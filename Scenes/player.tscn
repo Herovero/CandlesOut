@@ -31,3 +31,11 @@ offset_right = 2.0
 offset_bottom = 13.5
 grow_horizontal = 2
 grow_vertical = 2
+
+[node name="HitStunTimer" type="Timer" parent="."]
+one_shot = true
+
+[node name="FlashTimer" type="Timer" parent="."]
+
+[connection signal="timeout" from="HitStunTimer" to="." method="_on_hit_stun_timer_timeout"]
+[connection signal="timeout" from="FlashTimer" to="." method="_on_flash_timer_timeout"]

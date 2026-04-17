@@ -27,6 +27,9 @@ func _on_body_entered(body: Node) -> void:
 		return
 
 	if body.is_in_group("Players"):
+		if body.has_method("is_damage_blocked") and body.is_damage_blocked():
+			queue_free()
+			return
 		SignalBus.emit_signal("take_damage", damage, body.input_prefix)
 	elif body.is_in_group("Enemies") and body.has_method("take_damage"):
 		body.take_damage(damage)

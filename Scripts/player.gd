@@ -10,6 +10,8 @@ extends CharacterBody2D
 @export var muzzle_offset: float = 24.0
 @export var autoaim_enabled: bool = true
 @export var autoaim_range: float = 300.0
+@export var hit_stun_duration: float = 0.32
+@export var flash_interval: float = 0.06
 
 @export var max_stamina: float = 100.0
 var current_stamina: float = 100.0
@@ -25,14 +27,22 @@ var active_ghost: CharacterBody2D = null
 var knockback_velocity: Vector2 = Vector2.ZERO
 var shoot_cooldown: float = 0.0
 var last_move_dir: Vector2 = Vector2.RIGHT
+var is_hit_stunned: bool = false
+var is_invincible: bool = false
+var flash_tint_on: bool = false
 
 @onready var stamina_bar = $Stats/StaminaBar
+@onready var sprite: Sprite2D = $Sprite2D
+@onready var hit_stun_timer: Timer = $HitStunTimer
+@onready var flash_timer: Timer = $FlashTimer
 
 
 func _ready():
 	motion_mode = CharacterBody2D.MOTION_MODE_FLOATING
 	stamina_bar.max_value = max_stamina
 	stamina_bar.value = max_stamina
+	hit_stun_timer.wait_time = hit_stun_duration
+	flash_timer.wait_time = flash_interval
 
 
 func _physics_process(delta: float) -> void:
@@ -42,25 +52,29 @@ func _physics_process(delta: float) -> void:
 		handle_sleep(delta)
 		return
 
-	var direction = Input.get_vector(
-		input_prefix + "move_left",
-		input_prefix + "move_right",
-		input_prefix + "move_up",
-		input_prefix + "move_down"
-	)
+	var direction = Vector2.ZERO
+	if not is_hit_stunned:
+		direction = Input.get_vector(
+			input_prefix + "move_left",
+			input_prefix + "move_right",
+			input_prefix + "move_up",
+			input_prefix + "move_down"
+		)
 
 	var move_velocity = direction * speed
 	velocity = move_velocity + knockback_velocity
-	knockback_velocity *= 0.85
+	knockback_velocity *= 0.91
+	if knockback_velocity.length() < 15.0:
+		knockback_velocity = Vector2.ZERO
 
 	shoot_cooldown -= delta
-	if direction != Vector2.ZERO:
+	if not is_hit_stunned and direction != Vector2.ZERO:
 		last_move_dir = direction
 		consume_stamina(delta)
 	else:
 		velocity = knockback_velocity
 
-	if shoot_cooldown <= 0.0:
+	if not is_hit_stunned and shoot_cooldown <= 0.0:
 		var target_in_radius = find_autoaim_target()
 		if target_in_radius:
 			shoot_projectile(target_in_radius)
@@ -106,8 +120,22 @@ func wake_up():
 func update_ui():
 	stamina_bar.value = current_stamina
 
+func is_damage_blocked() -> bool:
+	return is_invincible
+
+
+func start_hit_stun() -> void:
+	is_hit_stunned = true
+	is_invincible = true
+	flash_tint_on = true
+	sprite.modulate = Color(1.0, 0.35, 0.35, 1.0)
+	hit_stun_timer.start()
+	flash_timer.start()
+
+
 func apply_knockback(force: Vector2):
 	knockback_velocity = force
+	start_hit_stun()
 
 
 func find_autoaim_target() -> Node2D:
@@ -151,3 +179,19 @@ func shoot_projectile(target: Node2D = null) -> void:
 	projectile.owner_group = "Players"
 	projectile.target_group = "Enemies"
 	get_tree().current_scene.add_child(projectile)
+
+
+func _on_flash_timer_timeout() -> void:
+	flash_tint_on = not flash_tint_on
+	if flash_tint_on:
+		sprite.modulate = Color(1.0, 0.35, 0.35, 1.0)
+	else:
+		sprite.modulate = Color(1.0, 1.0, 1.0, 1.0)
+
+
+func _on_hit_stun_timer_timeout() -> void:
+	is_hit_stunned = false
+	is_invincible = false
+	flash_timer.stop()
+	flash_tint_on = false
+	sprite.modulate = Color(1.0, 1.0, 1.0, 1.0)
