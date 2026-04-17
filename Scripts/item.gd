@@ -122,6 +122,7 @@ func _finish_throw(ghost):
 	monitorable = true
 	if is_instance_valid(ghost):
 		ghost.is_picking = false
+	queue_free()
 
 func _on_body_entered(body):
 	# Only trigger if the item is currently flying

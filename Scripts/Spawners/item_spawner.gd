@@ -12,7 +12,7 @@ var can_spawn : bool = false
 @export var min_x: float = 0
 @export var min_y: float = 0
 var items_alive:int = 0
-const MAX_ITEMS:int = 2
+const MAX_ITEMS:int = 5
 
 func get_random_spawn_position() -> Vector2:
 	var shape = spawn_area.shape as RectangleShape2D
