@@ -11,6 +11,8 @@ signal game_over(reason: String)
 signal restore_stamina(amount: float, player_id: String)
 @warning_ignore("unused_signal")
 signal apply_speed_boost(speed_multiplier: float, duration: float, player_id: String)
+@warning_ignore("unused_signal")
+signal swap_player()
 
 # ghost mode
 @warning_ignore("unused_signal")
