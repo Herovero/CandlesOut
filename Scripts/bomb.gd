@@ -5,6 +5,7 @@ extends "res://Scripts/item.gd"
 @onready var sprite = $Sprite2D # Your original bomb sprite
 @onready var left_wing = $LeftWing   # Your AnimatedSprite2D
 @onready var right_wing = $RightWing # Your AnimatedSprite2D
+@onready var explosion_sfx: AudioStreamPlayer2D = $ExplosionSFX
 
 @export var bomb_throw_distance: float = 450.0
 var is_stalking: bool = false
@@ -35,6 +36,8 @@ func explode():
 	anim_sprite.visible = true
 	anim_sprite.play("explode")
 	
+	explosion_sfx.global_position = global_position
+	explosion_sfx.play()
 	# AOE Logic
 	var targets = explosion_area.get_overlapping_bodies()
 	for target in targets:

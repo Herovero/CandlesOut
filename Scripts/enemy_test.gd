@@ -108,6 +108,7 @@ func take_damage(amount: float) -> void:
 	if hp <= 0.0:
 		is_dying = true
 		print(self, " is dying")
+		death_sound.volume_db = -10.0 
 		death_sound.play()
 		await death_sound.finished
 		queue_free()

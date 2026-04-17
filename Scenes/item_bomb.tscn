@@ -13,6 +13,7 @@
 [ext_resource type="Texture2D" uid="uid://ck34pnwuibdjv" path="res://Assets/explosion pack 1/Explosions pack/explosion-1-g/Sprites/frame5.png" id="7_rfdoe"]
 [ext_resource type="Texture2D" uid="uid://dpyunhjmi8pc0" path="res://Assets/explosion pack 1/Explosions pack/explosion-1-g/Sprites/frame6.png" id="8_gv38b"]
 [ext_resource type="Texture2D" uid="uid://b0qsbw6wygg0r" path="res://Assets/explosion pack 1/Explosions pack/explosion-1-g/Sprites/frame7.png" id="9_b4i02"]
+[ext_resource type="AudioStream" uid="uid://c5d83f6xvuxgt" path="res://SFX/ItemSound/Bomb.wav" id="14_gv38b"]
 
 [sub_resource type="SpriteFrames" id="SpriteFrames_5b00u"]
 animations = [{
@@ -112,5 +113,8 @@ visible = false
 [node name="CollisionShape2D" type="CollisionShape2D" parent="ExplosionArea" unique_id=1631850397]
 position = Vector2(1, 0)
 shape = SubResource("CircleShape2D_84vf5")
+
+[node name="ExplosionSFX" type="AudioStreamPlayer2D" parent="." unique_id=609944901]
+stream = ExtResource("14_gv38b")
 
 [connection signal="body_entered" from="." to="." method="_on_body_entered"]
