@@ -11,6 +11,7 @@ extends CharacterBody2D
 @export var autoaim_enabled: bool = true
 @export var autoaim_range: float = 300.0
 @export var hit_stun_duration: float = 0.32
+@export var invincibility_duration: float = 0.32
 @export var flash_interval: float = 0.06
 
 @export var max_stamina: float = 100.0
@@ -34,6 +35,7 @@ var flash_tint_on: bool = false
 @onready var stamina_bar = $Stats/StaminaBar
 @onready var sprite: Sprite2D = $Sprite2D
 @onready var hit_stun_timer: Timer = $HitStunTimer
+@onready var invincibility_timer: Timer = $InvincibilityTimer
 @onready var flash_timer: Timer = $FlashTimer
 
 
@@ -42,6 +44,7 @@ func _ready():
 	stamina_bar.max_value = max_stamina
 	stamina_bar.value = max_stamina
 	hit_stun_timer.wait_time = hit_stun_duration
+	invincibility_timer.wait_time = invincibility_duration
 	flash_timer.wait_time = flash_interval
 
 
@@ -124,17 +127,36 @@ func is_damage_blocked() -> bool:
 	return is_invincible
 
 
-func start_hit_stun() -> void:
-	is_hit_stunned = true
+func start_invincibility_flash() -> void:
 	is_invincible = true
 	flash_tint_on = true
 	sprite.modulate = Color(1.0, 0.35, 0.35, 1.0)
-	hit_stun_timer.start()
+	invincibility_timer.start()
 	flash_timer.start()
+
+
+func start_hit_stun() -> void:
+	is_hit_stunned = true
+	hit_stun_timer.start()
+
+
+func receive_hit(damage_amount: float, knockback_force: Vector2 = Vector2.ZERO, apply_stun: bool = false) -> void:
+	if is_damage_blocked():
+		return
+
+	SignalBus.emit_signal("take_damage", damage_amount, input_prefix)
+	start_invincibility_flash()
+
+	if knockback_force != Vector2.ZERO:
+		knockback_velocity = knockback_force
+
+	if apply_stun:
+		start_hit_stun()
 
 
 func apply_knockback(force: Vector2):
 	knockback_velocity = force
+	start_invincibility_flash()
 	start_hit_stun()
 
 
@@ -191,6 +213,9 @@ func _on_flash_timer_timeout() -> void:
 
 func _on_hit_stun_timer_timeout() -> void:
 	is_hit_stunned = false
+
+
+func _on_invincibility_timer_timeout() -> void:
 	is_invincible = false
 	flash_timer.stop()
 	flash_tint_on = false

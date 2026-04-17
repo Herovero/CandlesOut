@@ -81,14 +81,15 @@ func take_damage(amount: float) -> void:
 
 
 func deal_melee_hit(body) -> void:
+	var dir = (body.global_position - global_position).normalized()
+	if body.has_method("receive_hit"):
+		body.receive_hit(damage_amount, dir * 240, true)
+		return
+
 	if body.has_method("is_damage_blocked") and body.is_damage_blocked():
 		return
 
 	SignalBus.emit_signal("take_damage", damage_amount, body.input_prefix)
-
-	var dir = (body.global_position - global_position).normalized()
-	if body.has_method("apply_knockback"):
-		body.apply_knockback(dir * 240)
 
 
 func _on_hitbox_body_entered(body):

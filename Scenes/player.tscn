@@ -35,7 +35,11 @@ grow_vertical = 2
 [node name="HitStunTimer" type="Timer" parent="."]
 one_shot = true
 
+[node name="InvincibilityTimer" type="Timer" parent="."]
+one_shot = true
+
 [node name="FlashTimer" type="Timer" parent="."]
 
 [connection signal="timeout" from="HitStunTimer" to="." method="_on_hit_stun_timer_timeout"]
+[connection signal="timeout" from="InvincibilityTimer" to="." method="_on_invincibility_timer_timeout"]
 [connection signal="timeout" from="FlashTimer" to="." method="_on_flash_timer_timeout"]
