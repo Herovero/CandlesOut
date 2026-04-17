@@ -2,6 +2,8 @@
 
 [ext_resource type="Script" uid="uid://dp74dcckad6rf" path="res://Scripts/shoe.gd" id="1_rcbwc"]
 [ext_resource type="Texture2D" uid="uid://cc4crx8b6y3ft" path="res://Assets/Sprites/item_shoe.png" id="2_rcbwc"]
+[ext_resource type="AudioStream" uid="uid://b022n1i7p3bbw" path="res://SFX/ItemSound/Shoe.wav" id="3_snoq3"]
+[ext_resource type="AudioStream" uid="uid://brmsskfv354bh" path="res://SFX/ItemSound/Shoe_Fast.wav" id="4_b58n5"]
 
 [sub_resource type="CircleShape2D" id="CircleShape2D_1weea"]
 radius = 20.024984
@@ -19,5 +21,9 @@ texture = ExtResource("2_rcbwc")
 shape = SubResource("CircleShape2D_1weea")
 
 [node name="ShoeSFX" type="AudioStreamPlayer2D" parent="." unique_id=1064114064]
+stream = ExtResource("3_snoq3")
+
+[node name="ShoesFastSFX" type="AudioStreamPlayer2D" parent="." unique_id=184065863]
+stream = ExtResource("4_b58n5")
 
 [connection signal="body_entered" from="." to="." method="_on_body_entered"]
