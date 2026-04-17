@@ -5,7 +5,7 @@ signal wave_completed(wave_number : int)
 			
 const WAVE_DATA = {
 	1: [
-		{"scene": preload("res://Scenes/enemy_test.tscn"), "count": 3},
+		{"scene": preload("res://Scenes/enemy_test.tscn"), "count": 10},
 		{"scene": preload("res://Scenes/enemy_ranged.tscn"), "count": 2},
 		{"scene": preload("res://Scenes/enemy_boss.tscn"), "count": 0}
 		],
@@ -19,7 +19,7 @@ const WAVE_DATA = {
 	]
 }
 
-const MAX_ENEMIES_ON_SCREEN = 0
+const MAX_ENEMIES_ON_SCREEN = 10
 const WAVE_1_TOTAL = 50
 
 var spawn_queue: Array = []  # will hold one entry per enemy to spawn
@@ -60,6 +60,7 @@ func try_spawn():
 	var slots_available = MAX_ENEMIES_ON_SCREEN - enemies_alive
 	
 	if slots_available <= 0 or spawn_queue.is_empty():
+		print("Max enemy on screen")
 		return
 	
 	if not spawn_timer.is_stopped():

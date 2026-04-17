@@ -31,8 +31,8 @@ func check_total_sleep_condition():
 func _on_game_over(reason: String):
 	#print("Game Over: ", reason)
 	## Pause the game
-	#gameover_label.show()
-	#restart_button.show()
-	#get_tree().paused = true
+	gameover_label.show()
+	restart_button.show()
+	get_tree().paused = true
 	# Show your Game Over UI here
 	pass
