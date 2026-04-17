@@ -10,6 +10,7 @@
 [ext_resource type="PackedScene" uid="uid://cqts1yegiva4h" path="res://Scenes/Spawners/WaveManager.tscn" id="6_21xkr"]
 [ext_resource type="Texture2D" uid="uid://banibmuufdg3x" path="res://Assets/UIs/button UI.png" id="6_hptm8"]
 [ext_resource type="Script" uid="uid://0a15j6p2c2ts" path="res://Scripts/restart_button.gd" id="7_d1ilt"]
+[ext_resource type="Shader" uid="uid://thycqxh6hcb7" path="res://Scenes/crt.gdshader" id="11_d1ilt"]
 
 [sub_resource type="AtlasTexture" id="AtlasTexture_d1ilt"]
 atlas = ExtResource("6_hptm8")
@@ -140,6 +141,13 @@ texture = ExtResource("5_kry3j")
 physics_layer_0/collision_layer = 1
 sources/0 = SubResource("TileSetAtlasSource_21xkr")
 
+[sub_resource type="ShaderMaterial" id="ShaderMaterial_d1ilt"]
+shader = ExtResource("11_d1ilt")
+shader_parameter/curvature = 0.1830000086925
+shader_parameter/scanline_strength = 0.05
+shader_parameter/vignette_strength = 0.25
+shader_parameter/chromatic_aberration = 0.15
+
 [node name="main" type="Node2D" unique_id=1941177541]
 script = ExtResource("1_ynf5e")
 
@@ -186,6 +194,7 @@ offset_left = 28.000004
 offset_top = 33.0
 offset_right = 1399.0
 offset_bottom = 289.0
+metadata/_edit_use_anchors_ = true
 
 [node name="Player2" type="Control" parent="HUDs" unique_id=364119189]
 layout_mode = 3
@@ -201,6 +210,7 @@ offset_top = 31.000004
 offset_right = 2343.0
 offset_bottom = 287.0
 my_player_id = "p2_"
+metadata/_edit_use_anchors_ = true
 
 [node name="gameover_label" type="Label" parent="HUDs" unique_id=1777338280]
 visible = false
@@ -263,6 +273,18 @@ rotation = -1.5707964
 position = Vector2(-10, 24)
 
 [node name="WaveManager" parent="." unique_id=657000445 instance=ExtResource("6_21xkr")]
+
+[node name="CanvasLayer" type="CanvasLayer" parent="." unique_id=1148152921]
+
+[node name="ColorRect" type="ColorRect" parent="CanvasLayer" unique_id=1650887843]
+material = SubResource("ShaderMaterial_d1ilt")
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+color = Color(1, 1, 1, 0)
+metadata/_edit_use_anchors_ = true
 
 [connection signal="pressed" from="HUDs/restart_button" to="HUDs/restart_button" method="_on_pressed"]
 
