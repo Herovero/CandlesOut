@@ -1,7 +1,6 @@
 [gd_scene format=4 uid="uid://b4jda3svu4fmh"]
 
 [ext_resource type="PackedScene" uid="uid://c4sy607bwof83" path="res://Scenes/player.tscn" id="1_jjgbg"]
-[ext_resource type="PackedScene" uid="uid://d4mmodq5hen4l" path="res://Scenes/item1.tscn" id="1_jjvhh"]
 [ext_resource type="PackedScene" uid="uid://cqbq35ef7qsmd" path="res://Scenes/heart.tscn" id="2_8gbba"]
 [ext_resource type="PackedScene" uid="uid://ct8trhua4tgaq" path="res://Scenes/Spawners/Spawner.tscn" id="5_21xkr"]
 [ext_resource type="Texture2D" uid="uid://biv8vykh0s88f" path="res://Assets/2D Pixel Dungeon Asset Pack/character and tileset/Dungeon_Tileset.png" id="5_kry3j"]
@@ -134,21 +133,6 @@ physics_layer_0/collision_layer = 1
 sources/0 = SubResource("TileSetAtlasSource_21xkr")
 
 [node name="main" type="Node2D" unique_id=1941177541]
-
-[node name="item1" parent="." unique_id=839316503 instance=ExtResource("1_jjvhh")]
-position = Vector2(28, -164)
-
-[node name="item2" parent="." unique_id=1533824678 instance=ExtResource("1_jjvhh")]
-position = Vector2(-292, -71)
-
-[node name="item3" parent="." unique_id=1161662603 instance=ExtResource("1_jjvhh")]
-position = Vector2(372, 94)
-
-[node name="item4" parent="." unique_id=747266027 instance=ExtResource("1_jjvhh")]
-position = Vector2(-223, 174)
-
-[node name="item5" parent="." unique_id=1677040398 instance=ExtResource("1_jjvhh")]
-position = Vector2(147, 198)
 
 [node name="Player1" parent="." unique_id=687220319 groups=["Players"] instance=ExtResource("1_jjgbg")]
 position = Vector2(-80, 0)

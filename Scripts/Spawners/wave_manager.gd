@@ -80,7 +80,7 @@ func _on_timer_timeout():
 	
 	var enemy_scene = spawn_queue.pop_front()  # grab next enemy from queue
 	var random_spawner = Global.spawners[randi() % Global.spawners.size()]
-	print("spawning %d", enemy_scene)
+	#print("spawning %d", enemy_scene)
 	random_spawner.spawn_one(enemy_scene)
 	enemies_alive += 1
 	
@@ -99,7 +99,6 @@ func on_enemy_died():
 
 func _on_start_timer_timeout() -> void:
 	start_wave(1)
-	Global.item_spawner.set_spawn_state(true)
 	pass # Replace with function body.
 
 func _on_wave_completed(wave_number: int):

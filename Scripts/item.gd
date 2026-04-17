@@ -9,7 +9,7 @@ func _ready():
 	monitorable = false
 	monitoring = false
 	
-	SignalBus.connect("ghost_mode_started", show_item)
+	SignalBus.connect("item_spawned", show_item)
 	SignalBus.connect("ghost_mode_ended", hide_item)
 
 # Called every frame. 'delta' is the elapsed time since the previous frame.
