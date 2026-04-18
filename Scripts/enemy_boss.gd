@@ -132,9 +132,11 @@ func handle_charge_attack() -> void:
 		is_charging = false
 		velocity = Vector2.ZERO
 		facing_dir = charge_dir
+		sprite.stop()
+		sprite.play("attack")
 		do_cone_attack()
 		charge_cone_fired = true
-		state_time_left = cone_recover
+		state_time_left = sprite.sprite_frames.get_frame_count("attack") / sprite.sprite_frames.get_animation_speed("attack")
 	elif state_time_left <= 0.0 and charge_cone_fired:
 		enter_idle()
 	#	enter_idle()
@@ -318,5 +320,7 @@ func _on_animation_finished() -> void:
 		BossState.ATTACK_RADIAL, BossState.ATTACK_CONE:
 			enter_idle()
 		BossState.ATTACK_CHARGE:
-			if not is_charging:
+			if charge_cone_fired:
 				enter_idle()
+			# if not is_charging:
+			#	enter_idle()

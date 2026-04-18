@@ -19,6 +19,7 @@ script = ExtResource("1_script")
 scale = Vector2(3, 3)
 sprite_frames = ExtResource("2_kowwf")
 animation = &"attack"
+frame_progress = 0.3440335
 
 [node name="CollisionShape2D" type="CollisionShape2D" parent="." unique_id=2040590797]
 shape = SubResource("RectangleShape2D_body")
