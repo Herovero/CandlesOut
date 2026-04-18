@@ -1,7 +1,10 @@
 extends CharacterBody2D
 
 @export var input_prefix: String = "p1_"
+@export var walk_speed: float = 70.0
+var is_sprinting: bool = false
 var speed: float = 200.0
+var sprint_speed:float = 200.0
 var base_speed: float = 200.0 # Store reference
 
 @export var projectile_scene: PackedScene = preload("res://Scenes/projectile.tscn")
@@ -116,6 +119,13 @@ func _ready():
 func _physics_process(delta: float) -> void:
 	update_ui()
 	update_effect_state(delta)
+	
+	is_sprinting = Input.is_action_pressed(input_prefix + "sprint") and current_stamina > 0
+	if speed > sprint_speed:
+		speed = speed
+	else:
+		speed = sprint_speed if is_sprinting else walk_speed
+		
 	update_candle_glow(delta)
 
 	if is_sleeping:
@@ -130,6 +140,9 @@ func _physics_process(delta: float) -> void:
 			input_prefix + "move_up",
 			input_prefix + "move_down"
 		)
+		is_sprinting = Input.is_action_pressed(input_prefix + "sprint") and current_stamina > 0
+	else:
+		is_sprinting = false
 
 	var move_velocity = direction * speed
 	velocity = move_velocity + knockback_velocity
@@ -137,13 +150,17 @@ func _physics_process(delta: float) -> void:
 	if knockback_velocity.length() < 15.0:
 		knockback_velocity = Vector2.ZERO
 		
-	if speed != base_speed:
+	if speed > base_speed:
 		spawn_afterimage()
 
 	shoot_cooldown -= delta
 	if not is_hit_stunned and direction != Vector2.ZERO:
 		last_move_dir = direction
-		consume_stamina(delta)
+		if is_sprinting:
+			consume_stamina(delta)
+			if current_stamina <= 0:
+				enter_sleep()
+				return
 		sprite.play("walking")
 
 	else:
@@ -551,7 +568,9 @@ func handle_footsteps(delta, direction):
 
 func play_sleep_sfx():
 	var sfx = AudioStreamPlayer2D.new()
-	sfx.stream = sleep_sfx[randi() % sleep_sfx.size()].stream
+	var picked_sfx = sleep_sfx[randi() % sleep_sfx.size()]
+	sfx.volume_db = 10.0
+	sfx.stream = picked_sfx.stream
 	sfx.global_position = global_position
 	
 	get_tree().current_scene.add_child(sfx)

@@ -62,10 +62,17 @@ var aoe_tint_visible: bool = false
 var aoe_tint_token: int = 0
 var hurt_tint_token: int = 0
 var base_sprite_modulate: Color = Color(1, 1, 1, 1)
+var is_playing_sfx: bool = false
+
+
 
 @onready var hitbox: Area2D = $Hitbox
 @onready var sprite: AnimatedSprite2D = $AnimatedSprite2D
 @onready var cone_sprite: AnimatedSprite2D = $AnimatedSprite2D2
+
+@onready var boss_radial: AudioStreamPlayer2D = $Boss_Radial
+@onready var boss_slash: AudioStreamPlayer2D = $Boss_Slash
+@onready var boss_charge: AudioStreamPlayer2D = $Boss_Charge
 
 func _ready() -> void:
 	sprite.animation_finished.connect(_on_animation_finished)
@@ -129,6 +136,7 @@ func handle_radial_attack() -> void:
 	velocity = Vector2.ZERO
 
 	if not radial_fired and state_time_left <= radial_recover:
+		play_sfx(boss_radial)
 		radial_fired = true
 		fire_radial_burst()
 
@@ -141,6 +149,7 @@ func handle_charge_attack() -> void:
 		velocity = Vector2.ZERO
 		charge_cone_fired = false
 	elif not charge_cone_fired:
+		play_sfx(boss_charge)
 		is_charging = true
 		velocity = charge_dir * charge_speed
 	else:
@@ -244,7 +253,8 @@ func do_cone_attack() -> void:
 	cone_sprite.play()
 	var players = get_tree().get_nodes_in_group("Players")
 	var min_dot = cos(deg_to_rad(cone_angle_deg * 0.5))
-
+	
+	play_sfx(boss_slash)
 	for p in players:
 		if not (p is Node2D):
 			continue
@@ -388,6 +398,25 @@ func _on_animation_finished() -> void:
 		BossState.ATTACK_CHARGE:
 			if not is_charging:
 				enter_idle()
+				
+func play_sfx(sound):
+	if is_playing_sfx:
+		return
+	is_playing_sfx = true
+	
+	var sfx = AudioStreamPlayer2D.new()
+	sfx.volume_db = -5.0
+	sfx.stream = sound.stream
+	sfx.global_position = global_position
+	
+	get_tree().current_scene.add_child(sfx)
+	sfx.play()
+	
+	sfx.finished.connect(func():
+		sfx.queue_free()
+		is_playing_sfx = false  # unlock when done
+	)
+
 
 
 func _on_cone_animation_finished() -> void:

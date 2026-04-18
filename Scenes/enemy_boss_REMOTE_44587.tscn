@@ -3,9 +3,6 @@
 [ext_resource type="Script" uid="uid://bdj6c82bjbyf7" path="res://Scripts/enemy_boss.gd" id="1_script"]
 [ext_resource type="Texture2D" uid="uid://b7fvyw61qmnl7" path="res://icon.svg" id="2_icon"]
 [ext_resource type="SpriteFrames" uid="uid://4vx4exne13hu" path="res://addons/duelyst_animated_sprites/assets/spritesheets/units/f4_blacksolus.tres" id="3_648fd"]
-[ext_resource type="AudioStream" uid="uid://y0injyjl1" path="res://SFX/Enemy/Boss_charge.mp3" id="4_pbt5j"]
-[ext_resource type="AudioStream" uid="uid://squieeun2ryy" path="res://SFX/Enemy/Boss_slash.ogg" id="5_upulu"]
-[ext_resource type="AudioStream" uid="uid://b2f47r500har3" path="res://SFX/Enemy/Radial Attack.mp3" id="6_1cb30"]
 [ext_resource type="Texture2D" uid="uid://dtxjao2mqwjx2" path="res://Assets/cone_attack.png" id="4_03pj2"]
 
 [sub_resource type="RectangleShape2D" id="RectangleShape2D_body"]
@@ -62,13 +59,10 @@ sprite_frames = ExtResource("3_648fd")
 animation = &"attack"
 
 [node name="Boss_Charge" type="AudioStreamPlayer2D" parent="." unique_id=2045071018]
-stream = ExtResource("4_pbt5j")
 
 [node name="Boss_Slash" type="AudioStreamPlayer2D" parent="." unique_id=541605855]
-stream = ExtResource("5_upulu")
 
 [node name="Boss_Radial" type="AudioStreamPlayer2D" parent="." unique_id=498696474]
-stream = ExtResource("6_1cb30")
 
 [node name="AnimatedSprite2D2" type="AnimatedSprite2D" parent="." unique_id=266123421]
 position = Vector2(-1, 0)

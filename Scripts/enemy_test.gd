@@ -1,6 +1,6 @@
 extends CharacterBody2D
 
-const SPEED: float = 120.0
+const SPEED: float = 90.0
 const SEPARATION_RADIUS: float = 40.0
 const SEPARATION_FORCE: float = 200.0
 
@@ -11,7 +11,7 @@ const SEPARATION_FORCE: float = 200.0
 @export var attack_hit_delay: float = 0.14
 @export var attack_cone_range: float = 92.0
 @export var attack_cone_angle_deg: float = 85.0
-@export var post_hit_pause_duration: float = 0.25
+@export var post_hit_pause_duration: float = 1
 @export var hurt_tint_color: Color = Color(1.0, 0.35, 0.35, 1.0)
 @export var hurt_tint_duration: float = 0.12
 
@@ -230,7 +230,7 @@ func _on_animation_finished():
 func play_slash_sfx():
 	await get_tree().create_timer(0.5).timeout
 	var sfx = AudioStreamPlayer2D.new()
-	slash_sfx.volume_db = -5.0
+	sfx.volume_db = -5.0
 	sfx.stream = slash_sfx.stream
 	sfx.global_position = global_position
 

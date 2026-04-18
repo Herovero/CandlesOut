@@ -10,7 +10,7 @@ var items = [
 	preload("res://Scenes/item_shield.tscn")
 ]
 
-var normal_weights = [30, 10, 30, 10, 10, 10, 10]
+var normal_weights = [15, 10, 15, 10, 5, 10, 10]
 var bomb_weights =   [10,  10, 10,  0,  5,  0, 0]  # bomb is index 1, much higher chance
 var current_weights: Array
 

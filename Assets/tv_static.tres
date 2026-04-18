@@ -7,3 +7,5 @@ shader = ExtResource("1_m1y24")
 shader_parameter/intensity = 1.0
 shader_parameter/time_scale = 20.0
 shader_parameter/color_shift = 1.5
+shader_parameter/wave_strength = 0.75
+shader_parameter/alpha_intensity_speed = 1.0
