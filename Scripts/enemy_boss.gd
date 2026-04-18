@@ -249,7 +249,6 @@ func find_closest_player() -> CharacterBody2D:
 
 	return closest
 
-
 func play_hurt_tint() -> void:
 	hurt_tint_token += 1
 	var token := hurt_tint_token
@@ -272,7 +271,6 @@ func take_damage(amount: float) -> void:
 		return
 
 	play_hurt_tint()
-
 
 func take_bomb_damage(amount: float = 1.0) -> void:
 	if is_phase_transitioning:
