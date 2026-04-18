@@ -4,6 +4,8 @@ extends Node2D
 @onready var spawn_timer = $Timer  # add a Timer node as child of WaveManager
 signal wave_completed(wave_number : int)
 
+@onready var wave_notice_label = $"../HUDs/wave_label"
+
 const WAVE_DATA = {
 	1: [
 		{"scene": preload("res://Scenes/enemy_test.tscn"), "count": 1},
@@ -51,6 +53,29 @@ func start_wave(wave_number: int):
 
 	# optional: shuffle so enemy types are mixed
 	spawn_queue.shuffle()
+	
+	if wave_notice_label:
+		wave_notice_label.text = "WAVE " + str(wave_number)
+		wave_notice_label.modulate.a = 0 # Start fully transparent
+		wave_notice_label.show()
+		
+		# Create a tween for the sequence
+		var tween = create_tween()
+		
+		# 1. Fade In (0.5 seconds)
+		tween.tween_property(wave_notice_label, "modulate:a", 1.0, 0.5)
+		
+		# 2. Stay visible
+		tween.tween_interval(2.0)
+		
+		# 3. Fade Out (0.5 seconds)
+		tween.tween_property(wave_notice_label, "modulate:a", 0.0, 0.5)
+		
+		# 4. Final Cleanup
+		tween.tween_callback(wave_notice_label.hide)
+		
+		# Wait for the whole sequence to finish before spawning
+		await tween.finished
 
 	print("Wave %d started! Total enemies: %d" % [current_wave, spawn_queue.size()])
 	try_spawn()
