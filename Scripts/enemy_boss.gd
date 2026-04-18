@@ -71,6 +71,10 @@ func _ready() -> void:
 	SignalBus.emit_signal("boss_hp_changed", hp, get_current_phase_max_hp(), is_phase_two)
 
 func _physics_process(delta: float) -> void:
+	if is_phase_transitioning:
+		velocity = Vector2.ZERO
+		return
+
 	var target = find_closest_player()
 	if target:
 		var to_target = global_position.direction_to(target.global_position)
