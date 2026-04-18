@@ -74,7 +74,10 @@ func destroy_all_items() -> void:
 	# get all children of current scene and remove items
 	print("destroy all items")
 	for item in get_tree().get_nodes_in_group("items"):
-		item.queue_free()
+		if item.has_method("hide_item"):
+			item.hide_item() # This triggers your new fade-out tween!
+		else:
+			item.queue_free()
 	items_alive = 0
 
 # Called every frame. 'delta' is the elapsed time since the previous frame.
