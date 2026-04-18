@@ -69,6 +69,8 @@ func _ready():
 	stamina_bar.max_value = max_stamina
 	stamina_bar.value = max_stamina
 	sprite.sprite_frames.set_animation_speed("idle", 4)
+	sprite.sprite_frames.set_animation_speed("sleep", 2)
+	sprite.sprite_frames.set_animation_speed("walking", 8)
 	sprite.play("idle")
 	
 	shield_visual.hide()
@@ -123,6 +125,8 @@ func _physics_process(delta: float) -> void:
 	if not is_hit_stunned and direction != Vector2.ZERO:
 		last_move_dir = direction
 		consume_stamina(delta)
+		sprite.play("walking")
+
 	else:
 		velocity = knockback_velocity
 		sprite.sprite_frames.set_animation_speed("idle", 4)
@@ -151,8 +155,6 @@ func _physics_process(delta: float) -> void:
 
 func consume_stamina(delta):
 	current_stamina -= depletion_rate * delta
-	sprite.sprite_frames.set_animation_speed("walking", 8)
-	sprite.play("walking")
 
 	if current_stamina <= 0:
 		enter_sleep()
@@ -165,7 +167,7 @@ func enter_sleep():
 	is_transitioning_to_ghost = true
 	is_sleeping = true
 	velocity = Vector2.ZERO
-	modulate = Color(0.5, 0.5, 1.0) # Turn slightly blue/dark to show sleeping
+	# modulate = Color(0.5, 0.5, 1.0) # Turn slightly blue/dark to show sleeping
 
 	active_ghost = ghost_scene.instantiate()
 	active_ghost.input_prefix = input_prefix # Give the ghost your controls
@@ -190,6 +192,7 @@ func enter_sleep():
 	SignalBus.emit_signal("ghost_mode_started")
 
 func handle_sleep(delta):
+	sprite.play("sleeping")
 	current_stamina += recharge_rate * delta
 	current_stamina = min(current_stamina, max_stamina)
 	
@@ -233,6 +236,7 @@ func trigger_ghost_return():
 func wake_up():
 	is_sleeping = false
 	modulate = Color(1, 1, 1)
+	sprite.play("idle")
 
 	SignalBus.emit_signal("ghost_mode_ended")
 

@@ -31,3 +31,17 @@ signal apply_shield_backfire(duration: float, player_id: String)
 signal ghost_mode_started
 @warning_ignore("unused_signal")
 signal ghost_mode_ended
+
+# boss UI / phase flow
+@warning_ignore("unused_signal")
+signal boss_hp_init(boss: Node, current_hp: float, max_hp: float, is_phase_two: bool)
+@warning_ignore("unused_signal")
+signal boss_hp_changed(current_hp: float, max_hp: float, is_phase_two: bool)
+@warning_ignore("unused_signal")
+signal boss_phase_two_transition_started
+@warning_ignore("unused_signal")
+signal boss_phase_two_activated(phase_two_max_hp: float)
+@warning_ignore("unused_signal")
+signal boss_activate_phase_two
+@warning_ignore("unused_signal")
+signal boss_defeated

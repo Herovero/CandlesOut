@@ -4,6 +4,7 @@
 [ext_resource type="AudioStream" uid="uid://xo6t8svnw0p" path="res://SFX/Player/Footstep.wav" id="3_6t5aa"]
 [ext_resource type="AudioStream" uid="uid://bvuai66f8gs8i" path="res://SFX/Player/Fireball.wav" id="3_fkybt"]
 [ext_resource type="Texture2D" uid="uid://cfbf3whkdulbr" path="res://Assets/idle.png" id="4_fkybt"]
+[ext_resource type="Texture2D" uid="uid://dk7lah3oh5ikr" path="res://Assets/candle_sleep.png" id="5_3smsa"]
 [ext_resource type="Texture2D" uid="uid://dl6caqu10wpsb" path="res://Assets/walk.png" id="5_x3wgy"]
 [ext_resource type="Texture2D" uid="uid://cie2hg23dq1w8" path="res://Assets/Sprites/shield_barrier.png" id="6_x3wgy"]
 [ext_resource type="Texture2D" uid="uid://b3fbnx3osi8g1" path="res://Assets/Sprites/wall.png" id="7_3smsa"]
@@ -22,6 +23,14 @@ region = Rect2(20, 0, 20, 23)
 [sub_resource type="AtlasTexture" id="AtlasTexture_f1ek2"]
 atlas = ExtResource("4_fkybt")
 region = Rect2(40, 0, 20, 23)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_h4iuc"]
+atlas = ExtResource("5_3smsa")
+region = Rect2(0, 0, 20, 23)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_fd4e3"]
+atlas = ExtResource("5_3smsa")
+region = Rect2(20, 0, 20, 23)
 
 [sub_resource type="AtlasTexture" id="AtlasTexture_tx1dd"]
 atlas = ExtResource("5_x3wgy")
@@ -58,6 +67,17 @@ animations = [{
 "loop": true,
 "name": &"idle",
 "speed": 5.0
+}, {
+"frames": [{
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_h4iuc")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_fd4e3")
+}],
+"loop": true,
+"name": &"sleeping",
+"speed": 2.0
 }, {
 "frames": [{
 "duration": 1.0,
@@ -121,7 +141,8 @@ stream = ExtResource("3_fkybt")
 [node name="AnimatedSprite2D" type="AnimatedSprite2D" parent="." unique_id=1109616564]
 scale = Vector2(3, 3)
 sprite_frames = SubResource("SpriteFrames_h4iuc")
-animation = &"walking"
+animation = &"sleeping"
+frame_progress = 0.66868645
 
 [node name="GhostTransitionAnimation" type="AnimatedSprite2D" parent="." unique_id=52766954]
 sprite_frames = SubResource("SpriteFrames_fkybt")
