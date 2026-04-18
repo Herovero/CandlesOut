@@ -230,7 +230,7 @@ func _on_animation_finished():
 func play_slash_sfx():
 	await get_tree().create_timer(0.5).timeout
 	var sfx = AudioStreamPlayer2D.new()
-	slash_sfx.volume_db = -5.0
+	sfx.volume_db = -5.0
 	sfx.stream = slash_sfx.stream
 	sfx.global_position = global_position
 

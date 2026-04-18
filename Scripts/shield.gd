@@ -29,6 +29,7 @@ func _on_body_entered(body):
 func play_sfx(template):
 	var sfx = AudioStreamPlayer2D.new()
 	sfx.stream = template.stream
+	sfx.volume_db = 4.0
 	sfx.global_position = global_position
 	get_tree().current_scene.add_child(sfx)
 	sfx.play()
