@@ -78,6 +78,8 @@ animations = [{
 "speed": 5.0
 }]
 
+[sub_resource type="SpriteFrames" id="SpriteFrames_fkybt"]
+
 [node name="Player" type="CharacterBody2D" unique_id=687220319]
 script = ExtResource("1_ndhuy")
 
@@ -118,6 +120,9 @@ stream = ExtResource("3_fkybt")
 scale = Vector2(3, 3)
 sprite_frames = SubResource("SpriteFrames_h4iuc")
 animation = &"walking"
+
+[node name="GhostTransitionAnimation" type="AnimatedSprite2D" parent="." unique_id=52766954]
+sprite_frames = SubResource("SpriteFrames_fkybt")
 
 [connection signal="timeout" from="HitStunTimer" to="." method="_on_hit_stun_timer_timeout"]
 [connection signal="timeout" from="InvincibilityTimer" to="." method="_on_invincibility_timer_timeout"]

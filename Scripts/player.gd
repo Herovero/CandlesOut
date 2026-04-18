@@ -21,7 +21,7 @@ const SHOE_ICON = preload("res://Assets/Sprites/item_shoe.png")
 
 @export var max_stamina: float = 100.0
 var current_stamina: float = 100.0
-@export var depletion_rate: float = 50.0
+@export var depletion_rate: float = 10.0
 @export var recharge_rate: float = 5.0
 #@export var depletion_rate: float = 10.0
 #@export var recharge_rate: float = 5.0
@@ -412,6 +412,7 @@ func spawn_afterimage():
 	
 	afterimg.global_position = global_position
 	afterimg.show_afterimage(sprite)
+	afterimg.modulate = modulate
 
 func _on_flash_timer_timeout() -> void:
 	flash_tint_on = not flash_tint_on
