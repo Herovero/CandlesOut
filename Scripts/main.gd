@@ -18,6 +18,7 @@ extends Node2D
 @onready var p2_effect_icon = $HUDs/Player2/EffectIcon
 
 const UI_FONT: FontFile = preload("res://Assets/False Earthdream.ttf")
+const PAUSE_BLUR_SHADER: Shader = preload("res://Assets/ui_pause_blur.gdshader")
 
 var boss_hp_container: VBoxContainer
 var boss_hp_label: Label
@@ -26,11 +27,18 @@ var phase_overlay: Control
 var phase_overlay_bg: ColorRect
 var phase_overlay_label: Label
 
+var pause_overlay: Control
+var pause_blur_rect: ColorRect
+var pause_icon_label: Label
+
 var phase_transition_running: bool = false
 var pending_phase_two_refill: bool = false
+var is_manual_paused: bool = false
 
 
 func _ready():
+	process_mode = Node.PROCESS_MODE_ALWAYS
+	Engine.time_scale = 1.0
 	get_tree().paused = false
 	gameover_label.hide()
 	_hide_pause_menu()
@@ -42,6 +50,7 @@ func _ready():
 
 	_setup_boss_ui()
 	_setup_phase_overlay()
+	_setup_pause_overlay()
 
 	SignalBus.connect("game_over", _on_game_over)
 	SignalBus.connect("boss_hp_init", _on_boss_hp_init)
@@ -74,6 +83,17 @@ func _show_pause_menu():
 func _process(_delta):
 	check_total_sleep_condition()
 	update_effect_ui()
+
+
+func _input(event: InputEvent) -> void:
+	if not (event is InputEventKey):
+		return
+	if not event.is_action_pressed("ui_cancel") or event.is_echo():
+		return
+	if phase_transition_running:
+		return
+
+	toggle_pause()
 
 
 func _setup_boss_ui() -> void:
@@ -148,6 +168,72 @@ func _setup_phase_overlay() -> void:
 	phase_overlay.add_child(phase_overlay_label)
 
 	huds.add_child(phase_overlay)
+
+
+func _setup_pause_overlay() -> void:
+	pause_overlay = Control.new()
+	pause_overlay.name = "PauseOverlay"
+	pause_overlay.set_anchors_preset(Control.PRESET_FULL_RECT)
+	pause_overlay.offset_left = 0.0
+	pause_overlay.offset_top = 0.0
+	pause_overlay.offset_right = 0.0
+	pause_overlay.offset_bottom = 0.0
+	pause_overlay.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	pause_overlay.process_mode = Node.PROCESS_MODE_ALWAYS
+	pause_overlay.visible = false
+
+	pause_blur_rect = ColorRect.new()
+	pause_blur_rect.name = "Blur"
+	pause_blur_rect.set_anchors_preset(Control.PRESET_FULL_RECT)
+	pause_blur_rect.offset_left = 0.0
+	pause_blur_rect.offset_top = 0.0
+	pause_blur_rect.offset_right = 0.0
+	pause_blur_rect.offset_bottom = 0.0
+	pause_blur_rect.color = Color(1, 1, 1, 1)
+
+	var blur_material := ShaderMaterial.new()
+	blur_material.shader = PAUSE_BLUR_SHADER
+	pause_blur_rect.material = blur_material
+	pause_overlay.add_child(pause_blur_rect)
+
+	pause_icon_label = Label.new()
+	pause_icon_label.name = "PauseIcon"
+	pause_icon_label.set_anchors_preset(Control.PRESET_CENTER)
+	pause_icon_label.offset_left = -220
+	pause_icon_label.offset_top = -120
+	pause_icon_label.offset_right = 220
+	pause_icon_label.offset_bottom = 120
+	pause_icon_label.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+	pause_icon_label.vertical_alignment = VERTICAL_ALIGNMENT_CENTER
+	pause_icon_label.text = "II"
+	pause_icon_label.add_theme_font_override("font", UI_FONT)
+	pause_icon_label.add_theme_font_size_override("font_size", 170)
+	pause_icon_label.add_theme_color_override("font_color", Color(1.0, 0.95, 0.84, 1.0))
+	pause_icon_label.add_theme_color_override("font_outline_color", Color(0, 0, 0, 1))
+	pause_icon_label.add_theme_constant_override("outline_size", 10)
+	pause_overlay.add_child(pause_icon_label)
+
+	huds.add_child(pause_overlay)
+
+
+func toggle_pause() -> void:
+	if phase_transition_running:
+		return
+
+	if is_manual_paused:
+		is_manual_paused = false
+		pause_overlay.visible = false
+		Engine.time_scale = 1.0
+		get_tree().paused = false
+		return
+
+	if get_tree().paused:
+		return
+
+	is_manual_paused = true
+	pause_overlay.visible = true
+	Engine.time_scale = 0.0
+	get_tree().paused = true
 
 
 func _on_boss_hp_init(_boss: Node, current_hp: float, max_hp: float, is_phase_two: bool) -> void:
@@ -259,6 +345,10 @@ func update_effect_ui() -> void:
 
 
 func _on_game_over(_reason: String):
+	is_manual_paused = false
+	Engine.time_scale = 1.0
+	if pause_overlay:
+		pause_overlay.visible = false
 	wave_label.hide()
 	gameover_label.show()
 	restart_button.show()
