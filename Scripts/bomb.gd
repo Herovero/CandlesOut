@@ -49,8 +49,8 @@ func explode():
 				target.take_bomb_damage(1.0)
 			elif target.has_method("take_damage"):
 				target.take_damage(10.0)
-		elif target.is_in_group("Players"):
-			SignalBus.emit_signal("take_damage", 3.0, target.input_prefix)
+		elif target.is_in_group("Players") and is_stalking:
+			SignalBus.emit_signal("take_damage", 1.0, target.input_prefix)
 	
 	await anim_sprite.animation_finished
 	queue_free()

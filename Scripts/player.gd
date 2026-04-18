@@ -185,7 +185,7 @@ func enter_sleep():
 	
 	var tween = create_tween().set_parallel(true)
 	tween.tween_property(active_ghost, "modulate:a", 1.0, 0.5) # Fade in
-	tween.tween_property(active_ghost, "global_position", end_pos, 1.5)\
+	tween.tween_property(active_ghost, "global_position", end_pos, 0.8)\
 		.set_trans(Tween.TRANS_CUBIC).set_ease(Tween.EASE_OUT)
 	
 	# Wait for the tween to finish before allowing a Game Over
@@ -223,9 +223,9 @@ func trigger_ghost_return():
 		
 		# 3. Setup the return tween (1.0s flight as per your current code)
 		var tween = create_tween().set_parallel(true)
-		tween.tween_property(active_ghost, "global_position", global_position, 1.0)\
+		tween.tween_property(active_ghost, "global_position", global_position, 0.8)\
 			.set_trans(Tween.TRANS_BACK).set_ease(Tween.EASE_IN)
-		tween.tween_property(active_ghost, "modulate:a", 0.0, 1.0)
+		tween.tween_property(active_ghost, "modulate:a", 0.0, 0.8)
 		
 		await tween.finished
 		
@@ -338,7 +338,7 @@ func shoot_projectile(target: Node2D = null) -> void:
 
 	# Decide how many shots to fire
 	var shot_angles = [0.0]
-	if is_flamethrower_active or is_panicked_fire_active:
+	if is_flamethrower_active or is_panicked_fire_active or is_triple_shot_active:
 		shot_angles = [-0.52, 0.0, 0.52] # -30, 0, +30 degrees
 
 	for angle in shot_angles:
