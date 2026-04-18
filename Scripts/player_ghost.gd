@@ -22,7 +22,7 @@ func _physics_process(_delta: float) -> void:
 		velocity = Vector2.ZERO
 		move_and_slide()
 		return
-		
+
 	var direction = Input.get_vector(
 		input_prefix + "move_left", input_prefix + "move_right",
 		input_prefix + "move_up", input_prefix + "move_down"
