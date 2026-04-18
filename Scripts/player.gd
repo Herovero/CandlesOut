@@ -74,11 +74,13 @@ func _ready():
 	SignalBus.connect("apply_speed_boost", _on_speed_boost_received)
 	SignalBus.connect("swap_player", _on_swap_player)
 	SignalBus.connect("apply_triple_shot", _on_triple_shot_received)
+	SignalBus.connect("apply_shield_boost", _on_shield_boost_received)
 
 	# item side effects signal
 	SignalBus.connect("apply_speed_backfire", _on_speed_backfire_received)
 	SignalBus.connect("apply_flamethrower_backfire", _on_flamethrower_received)
-
+	SignalBus.connect("apply_shield_backfire", _on_shield_backfire_received)
+	
 	hit_stun_timer.wait_time = hit_stun_duration
 	invincibility_timer.wait_time = invincibility_duration
 	flash_timer.wait_time = flash_interval
@@ -414,6 +416,32 @@ func _on_speed_backfire_received(multiplier: float, duration: float, p_id: Strin
 		is_ramming_active = false
 		speed = base_speed
 		modulate = Color(1, 1, 1, 1)
+
+func _on_shield_boost_received(duration: float, p_id: String):
+	if p_id == input_prefix:
+		is_invincible = true # Reuse your existing logic [cite: 17]
+		is_shield_active = true
+		shield_visual.show()
+		
+		await get_tree().create_timer(duration).timeout
+		
+		is_shield_active = false
+		is_invincible = false
+		shield_visual.hide()
+
+func _on_shield_backfire_received(duration: float, p_id: String):
+	if p_id == input_prefix:
+		is_prison_active = true
+		speed = 0 # Prevent movement [cite: 17]
+		prison_visual.show()
+		
+		# Optional: Add a screen shake or visual glitch for "Losing Control"
+		
+		await get_tree().create_timer(duration).timeout
+		
+		is_prison_active = false
+		speed = base_speed # Restore movement [cite: 17]
+		prison_visual.hide()
 
 func _on_flash_timer_timeout() -> void:
 	flash_tint_on = not flash_tint_on
