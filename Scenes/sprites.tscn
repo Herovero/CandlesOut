@@ -1,8 +1,8 @@
 [gd_scene format=4 uid="uid://cc6i0e1kvelc8"]
 
 [ext_resource type="Script" uid="uid://bmd6hkjls56de" path="res://Scripts/main.gd" id="1_aqrgr"]
-[ext_resource type="PackedScene" uid="uid://druku4bp3uv5i" path="res://Scenes/item_shoe.tscn" id="2_t1i21"]
-[ext_resource type="PackedScene" uid="uid://e74olsliput5" path="res://Scenes/item_coffee.tscn" id="3_q15t2"]
+[ext_resource type="PackedScene" uid="uid://yffq7cs5cqdf" path="res://Scenes/item_shoe.tscn" id="2_t1i21"]
+[ext_resource type="PackedScene" uid="uid://5oxjm6ug5ncp" path="res://Scenes/item_coffee.tscn" id="3_q15t2"]
 [ext_resource type="PackedScene" uid="uid://c4sy607bwof83" path="res://Scenes/player.tscn" id="4_7icnw"]
 [ext_resource type="PackedScene" uid="uid://cqbq35ef7qsmd" path="res://Scenes/heart.tscn" id="5_8oggy"]
 [ext_resource type="Texture2D" uid="uid://banibmuufdg3x" path="res://Assets/UIs/button UI.png" id="6_kvgin"]

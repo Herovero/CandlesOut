@@ -5,6 +5,9 @@
 [ext_resource type="AudioStream" uid="uid://b022n1i7p3bbw" path="res://SFX/ItemSound/Shoe.wav" id="3_snoq3"]
 [ext_resource type="AudioStream" uid="uid://brmsskfv354bh" path="res://SFX/ItemSound/Shoe_Fast.wav" id="4_b58n5"]
 
+[sub_resource type="CanvasItemMaterial" id="CanvasItemMaterial_b58n5"]
+blend_mode = 1
+
 [sub_resource type="CircleShape2D" id="CircleShape2D_1weea"]
 radius = 20.024984
 
@@ -14,6 +17,7 @@ collision_mask = 3
 script = ExtResource("1_rcbwc")
 
 [node name="Sprite2D" type="Sprite2D" parent="." unique_id=2123573732]
+material = SubResource("CanvasItemMaterial_b58n5")
 scale = Vector2(2, 2)
 texture = ExtResource("2_rcbwc")
 

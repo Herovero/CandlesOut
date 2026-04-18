@@ -1,6 +1,7 @@
 extends Node2D
 
 @onready var gameover_label = $HUDs/gameover_label
+@onready var wave_label = $HUDs/wave_label
 @onready var restart_button = $HUDs/restart_button
 
 @onready var p1 = $Player1
@@ -21,7 +22,7 @@ func _ready():
 	p1_effect_label.visible = false
 	p2_effect_label.visible = false
 	
-	# SignalBus.connect("game_over", _on_game_over)
+	SignalBus.connect("game_over", _on_game_over)
 
 # Called every frame. 'delta' is the elapsed time since the previous frame.
 # In a central script (e.g., Main.gd or GameManager.gd)
@@ -32,14 +33,18 @@ func _process(_delta):
 func check_total_sleep_condition():
 	var players = get_tree().get_nodes_in_group("Players")
 	var sleeping_count = 0
+	var is_anybody_still_transitioning = false
 	
 	for p in players:
 		if p.is_sleeping:
 			sleeping_count += 1
+		if p.get("is_transitioning_to_ghost"):
+			is_anybody_still_transitioning = true
 			
 	# Condition 2: Both players are ghosts/sleeping
-	if players.size() > 0 and sleeping_count >= players.size():
-		SignalBus.emit_signal("game_over", "Both players fell asleep!")
+	if not is_anybody_still_transitioning:
+		if players.size() > 0 and sleeping_count >= players.size():
+			SignalBus.emit_signal("game_over", "Both players fell asleep!")
 
 func update_one_effect_ui(player, label: Label, icon: TextureRect) -> void:
 	if player and player.has_method("has_active_effect") and player.has_active_effect():
@@ -59,10 +64,10 @@ func update_effect_ui() -> void:
 
 
 func _on_game_over(reason: String):
-	pass
-	"""## Pause the game
+	#pass
+	## Pause the game
+	wave_label.hide()
 	gameover_label.show()
 	restart_button.show()
 	get_tree().paused = true
 	# Show your Game Over UI here
-	pass"""

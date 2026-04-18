@@ -8,7 +8,7 @@ extends "res://Scripts/item.gd"
 @onready var explosion_sfx: AudioStreamPlayer2D = $ExplosionSFX
 @onready var fly_sfx: AudioStreamPlayer2D = $FlySFX
 
-@export var bomb_throw_distance: float = 450.0
+@export var bomb_throw_distance: float = 350.0
 var is_stalking: bool = false
 var was_stalking := false
 @export var max_stalk_time: float = 5.0
@@ -58,6 +58,17 @@ func explode():
 func start_stalking():
 	is_stalking = true
 	stalk_timer = 0.0 # Reset timer
+	
+	# Remove from group so ghosts can't pick up
+	if is_in_group("Items"):
+		remove_from_group("Items")
+	
+	# Disconnect from the signal that hides items when players wake up 
+	if SignalBus.is_connected("ghost_mode_ended", hide_item):
+		SignalBus.disconnect("ghost_mode_ended", hide_item)
+		
+	show_item()
+		
 	left_wing.visible = true
 	right_wing.visible = true
 	left_wing.play("default")

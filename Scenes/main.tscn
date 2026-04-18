@@ -3,10 +3,6 @@
 [ext_resource type="PackedScene" uid="uid://c4sy607bwof83" path="res://Scenes/player.tscn" id="1_jjgbg"]
 [ext_resource type="Script" uid="uid://bmd6hkjls56de" path="res://Scripts/main.gd" id="1_ynf5e"]
 [ext_resource type="PackedScene" uid="uid://cqbq35ef7qsmd" path="res://Scenes/heart.tscn" id="2_8gbba"]
-[ext_resource type="PackedScene" uid="uid://nhbikyang5e7" path="res://Scenes/item_oil.tscn" id="2_d1ilt"]
-[ext_resource type="PackedScene" uid="uid://fvfcli6ddale" path="res://Scenes/item_bomb.tscn" id="2_fdnlq"]
-[ext_resource type="PackedScene" uid="uid://cdjgj0ntm6wbx" path="res://Scenes/item_lighter.tscn" id="2_hptm8"]
-[ext_resource type="PackedScene" uid="uid://yffq7cs5cqdf" path="res://Scenes/item_shoe.tscn" id="4_6iyac"]
 [ext_resource type="PackedScene" uid="uid://ct8trhua4tgaq" path="res://Scenes/Spawners/Spawner.tscn" id="5_21xkr"]
 [ext_resource type="Texture2D" uid="uid://biv8vykh0s88f" path="res://Assets/2D Pixel Dungeon Asset Pack/character and tileset/Dungeon_Tileset.png" id="5_kry3j"]
 [ext_resource type="PackedScene" uid="uid://duwadq4gka1wx" path="res://Scenes/Spawners/item_spawner.tscn" id="6_6bp64"]
@@ -153,33 +149,6 @@ shader_parameter/radius = 0.1
 [node name="main" type="Node2D" unique_id=1941177541]
 script = ExtResource("1_ynf5e")
 
-[node name="item_bomb" parent="." unique_id=839316503 instance=ExtResource("2_fdnlq")]
-position = Vector2(140, -162)
-
-[node name="item_bomb2" parent="." unique_id=930017513 instance=ExtResource("2_fdnlq")]
-position = Vector2(345, -57)
-
-[node name="item_bomb3" parent="." unique_id=1654210986 instance=ExtResource("2_fdnlq")]
-position = Vector2(-292, 124)
-
-[node name="item_oil" parent="." unique_id=1451110955 instance=ExtResource("2_d1ilt")]
-position = Vector2(-316, -107)
-
-[node name="item_oil2" parent="." unique_id=1555296276 instance=ExtResource("2_d1ilt")]
-position = Vector2(344, -147)
-
-[node name="item_oil3" parent="." unique_id=1806718288 instance=ExtResource("2_d1ilt")]
-position = Vector2(136, 176)
-
-[node name="item_lighter3" parent="." unique_id=846522892 instance=ExtResource("2_hptm8")]
-position = Vector2(354, 157)
-
-[node name="item_shoe" parent="." unique_id=2049204612 instance=ExtResource("4_6iyac")]
-position = Vector2(-114, -161)
-
-[node name="item_shoe2" parent="." unique_id=1502797259 instance=ExtResource("4_6iyac")]
-position = Vector2(-377, 151)
-
 [node name="Player1" parent="." unique_id=687220319 groups=["Players"] instance=ExtResource("1_jjgbg")]
 position = Vector2(-80, 0)
 
@@ -275,7 +244,6 @@ offset_bottom = 105.0
 text = "Effect: None"
 
 [node name="gameover_label" type="Label" parent="HUDs" unique_id=1777338280]
-visible = false
 anchors_preset = 8
 anchor_left = 0.5
 anchor_top = 0.5
@@ -287,8 +255,13 @@ offset_right = 287.0
 offset_bottom = 12.5
 grow_horizontal = 2
 grow_vertical = 2
+theme_override_colors/font_color = Color(1, 0.16862746, 0.08235294, 1)
+theme_override_colors/font_outline_color = Color(0, 0, 0, 1)
+theme_override_fonts/font = ExtResource("8_wsu2k")
 theme_override_font_sizes/font_size = 100
 text = "GAME OVER"
+horizontal_alignment = 1
+vertical_alignment = 1
 
 [node name="wave_label" type="Label" parent="HUDs" unique_id=1837905852]
 visible = false

@@ -8,8 +8,8 @@ signal wave_completed(wave_number : int)
 
 const WAVE_DATA = {
 	1: [
-		{"scene": preload("res://Scenes/enemy_test.tscn"), "count": 1},
-		{"scene": preload("res://Scenes/enemy_ranged.tscn"), "count": 1},
+		{"scene": preload("res://Scenes/enemy_test.tscn"), "count": 10},
+		{"scene": preload("res://Scenes/enemy_ranged.tscn"), "count": 0},
 		{"scene": preload("res://Scenes/enemy_boss.tscn"), "count": 0}
 		],
 	2: [
@@ -132,9 +132,18 @@ func _on_start_timer_timeout() -> void:
 func _on_wave_completed(wave_number: int):
 	print("Wave signal emmitted")
 	
-	ost_manager.stop_all()
+	if ost_manager:
+		ost_manager.stop_all()
+	
+	# Guard against null tree during scene transitions/restarts 
+	if not is_inside_tree():
+		return
 	
 	await get_tree().create_timer(2.0).timeout
+	
+	# Re-check after the await, as the scene might have changed during the 2s wait
+	if not is_inside_tree():
+		return
 	
 	match wave_number:
 		1:
