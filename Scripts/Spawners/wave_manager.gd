@@ -131,6 +131,9 @@ func _on_start_timer_timeout() -> void:
 
 func _on_wave_completed(wave_number: int):
 	print("Wave signal emmitted")
+	
+	await get_tree().create_timer(2.0).timeout
+	
 	match wave_number:
 		1:
 			start_wave(2)
