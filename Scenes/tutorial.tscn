@@ -135,7 +135,7 @@ text = "Controls"
 layout_mode = 2
 theme_override_colors/font_color = Color(0.905882, 0.862745, 0.768627, 0.96)
 theme_override_fonts/font = ExtResource("2_font")
-theme_override_font_sizes/font_size = 20
+theme_override_font_sizes/font_size = 26
 text = "Player 1 Move: WASD\nPlayer 2 Move: Arrow Keys\nPick up / throw pillow: Space"
 
 [node name="RightColumn" type="VBoxContainer" parent="Center/TutorialCard/Margin/Content"]
@@ -155,8 +155,8 @@ text = "Objective"
 layout_mode = 2
 theme_override_colors/font_color = Color(0.905882, 0.862745, 0.768627, 0.96)
 theme_override_fonts/font = ExtResource("2_font")
-theme_override_font_sizes/font_size = 20
-text = "Survive enemy waves together.\nPass items, manage stamina, and protect sleeping teammates.\nDefeat the final boss."
+theme_override_font_sizes/font_size = 26
+text = "Survive enemy waves together.\nPass items, manage stamina, protect sleeping teammates.\nDefeat the final boss."
 
 [node name="PageNav" type="HBoxContainer" parent="Center"]
 layout_mode = 2
