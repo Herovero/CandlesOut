@@ -7,14 +7,59 @@
 [ext_resource type="Texture2D" uid="uid://biv8vykh0s88f" path="res://Assets/2D Pixel Dungeon Asset Pack/character and tileset/Dungeon_Tileset.png" id="5_kry3j"]
 [ext_resource type="PackedScene" uid="uid://duwadq4gka1wx" path="res://Scenes/Spawners/item_spawner.tscn" id="6_6bp64"]
 [ext_resource type="PackedScene" uid="uid://cqts1yegiva4h" path="res://Scenes/Spawners/WaveManager.tscn" id="6_21xkr"]
-[ext_resource type="Texture2D" uid="uid://banibmuufdg3x" path="res://Assets/UIs/button UI.png" id="6_hptm8"]
 [ext_resource type="Script" uid="uid://0a15j6p2c2ts" path="res://Scripts/restart_button.gd" id="7_d1ilt"]
+[ext_resource type="Script" uid="uid://dfqibvf74fdsq" path="res://Scripts/restart_button2.gd" id="7_fdnlq"]
 [ext_resource type="Shader" path="res://Assets/vig.gdshader" id="8_344ge"]
+[ext_resource type="Script" uid="uid://chmejb7w7i52" path="res://Scripts/main_menu_button.gd" id="8_fdnlq"]
 [ext_resource type="FontFile" uid="uid://nwcgismvm2jy" path="res://Assets/False Earthdream.ttf" id="8_wsu2k"]
 
-[sub_resource type="AtlasTexture" id="AtlasTexture_d1ilt"]
-atlas = ExtResource("6_hptm8")
-region = Rect2(143.5381, 0, 17.599411, 16.972132)
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_jkdf5"]
+bg_color = Color(0.172549, 0.0901961, 0.243137, 1)
+border_width_left = 2
+border_width_top = 2
+border_width_right = 2
+border_width_bottom = 2
+border_color = Color(0.905882, 0.760784, 0.435294, 1)
+corner_radius_top_left = 14
+corner_radius_top_right = 14
+corner_radius_bottom_right = 14
+corner_radius_bottom_left = 14
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_wsu2k"]
+bg_color = Color(0.235294, 0.117647, 0.345098, 1)
+border_width_left = 2
+border_width_top = 2
+border_width_right = 2
+border_width_bottom = 2
+border_color = Color(1, 0.839216, 0.482353, 1)
+corner_radius_top_left = 14
+corner_radius_top_right = 14
+corner_radius_bottom_right = 14
+corner_radius_bottom_left = 14
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_k12tt"]
+bg_color = Color(0.172549, 0.0901961, 0.243137, 1)
+border_width_left = 2
+border_width_top = 2
+border_width_right = 2
+border_width_bottom = 2
+border_color = Color(0.905882, 0.760784, 0.435294, 1)
+corner_radius_top_left = 14
+corner_radius_top_right = 14
+corner_radius_bottom_right = 14
+corner_radius_bottom_left = 14
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_h1bgf"]
+bg_color = Color(0.235294, 0.117647, 0.345098, 1)
+border_width_left = 2
+border_width_top = 2
+border_width_right = 2
+border_width_bottom = 2
+border_color = Color(1, 0.839216, 0.482353, 1)
+corner_radius_top_left = 14
+corner_radius_top_right = 14
+corner_radius_bottom_right = 14
+corner_radius_bottom_left = 14
 
 [sub_resource type="TileSetAtlasSource" id="TileSetAtlasSource_21xkr"]
 texture = ExtResource("5_kry3j")
@@ -281,23 +326,87 @@ text = "Wave"
 horizontal_alignment = 1
 vertical_alignment = 1
 
-[node name="restart_button" type="TextureButton" parent="HUDs" unique_id=526946638]
+[node name="restart_button2" type="Button" parent="HUDs" unique_id=622124291]
 process_mode = 2
 visible = false
+custom_minimum_size = Vector2(300, 82)
 anchors_preset = 8
 anchor_left = 0.5
 anchor_top = 0.5
 anchor_right = 0.5
 anchor_bottom = 0.5
-offset_left = -64.99994
-offset_top = 8.0
-offset_right = -47.99994
-offset_bottom = 24.0
+offset_left = -150.0
+offset_top = 23.0
+offset_right = 150.0
+offset_bottom = 105.0
 grow_horizontal = 2
 grow_vertical = 2
-scale = Vector2(8.985192, 8.985192)
-texture_normal = SubResource("AtlasTexture_d1ilt")
+theme_override_colors/font_color = Color(1, 0.964706, 0.866667, 1)
+theme_override_fonts/font = ExtResource("8_wsu2k")
+theme_override_font_sizes/font_size = 46
+theme_override_styles/normal = SubResource("StyleBoxFlat_jkdf5")
+theme_override_styles/hover = SubResource("StyleBoxFlat_wsu2k")
+text = "RESTART"
 script = ExtResource("7_d1ilt")
+
+[node name="PauseContainer" type="VBoxContainer" parent="HUDs" unique_id=815398817]
+anchors_preset = 8
+anchor_left = 0.5
+anchor_top = 0.5
+anchor_right = 0.5
+anchor_bottom = 0.5
+offset_left = -150.0
+offset_top = -182.5
+offset_right = 150.0
+offset_bottom = 182.5
+grow_horizontal = 2
+grow_vertical = 2
+
+[node name="paused_label" type="Label" parent="HUDs/PauseContainer" unique_id=79639740]
+visible = false
+layout_mode = 2
+size_flags_horizontal = 4
+theme_override_fonts/font = ExtResource("8_wsu2k")
+theme_override_font_sizes/font_size = 100
+text = "PAUSED"
+
+[node name="resume_button" type="Button" parent="HUDs/PauseContainer" unique_id=1317930885]
+process_mode = 2
+visible = false
+custom_minimum_size = Vector2(300, 82)
+layout_mode = 2
+theme_override_colors/font_color = Color(1, 0.964706, 0.866667, 1)
+theme_override_fonts/font = ExtResource("8_wsu2k")
+theme_override_font_sizes/font_size = 46
+theme_override_styles/normal = SubResource("StyleBoxFlat_k12tt")
+theme_override_styles/hover = SubResource("StyleBoxFlat_h1bgf")
+text = "RESUME"
+
+[node name="restart_button" type="Button" parent="HUDs/PauseContainer" unique_id=1789423673]
+process_mode = 2
+visible = false
+custom_minimum_size = Vector2(300, 82)
+layout_mode = 2
+theme_override_colors/font_color = Color(1, 0.964706, 0.866667, 1)
+theme_override_fonts/font = ExtResource("8_wsu2k")
+theme_override_font_sizes/font_size = 46
+theme_override_styles/normal = SubResource("StyleBoxFlat_jkdf5")
+theme_override_styles/hover = SubResource("StyleBoxFlat_wsu2k")
+text = "RESTART"
+script = ExtResource("7_fdnlq")
+
+[node name="main_menu_button" type="Button" parent="HUDs/PauseContainer" unique_id=815714171]
+process_mode = 2
+visible = false
+custom_minimum_size = Vector2(300, 82)
+layout_mode = 2
+theme_override_colors/font_color = Color(1, 0.964706, 0.866667, 1)
+theme_override_fonts/font = ExtResource("8_wsu2k")
+theme_override_font_sizes/font_size = 46
+theme_override_styles/normal = SubResource("StyleBoxFlat_jkdf5")
+theme_override_styles/hover = SubResource("StyleBoxFlat_wsu2k")
+text = "MAIN MENU"
+script = ExtResource("8_fdnlq")
 
 [node name="TileMapLayer" type="TileMapLayer" parent="." unique_id=184758336]
 z_index = -1
@@ -338,7 +447,10 @@ grow_horizontal = 2
 grow_vertical = 2
 color = Color(1, 1, 1, 0)
 
-[connection signal="pressed" from="HUDs/restart_button" to="HUDs/restart_button" method="_on_pressed"]
+[connection signal="pressed" from="HUDs/restart_button2" to="HUDs/restart_button2" method="_on_pressed"]
+[connection signal="pressed" from="HUDs/PauseContainer/resume_button" to="." method="_on_resume_button_pressed"]
+[connection signal="pressed" from="HUDs/PauseContainer/restart_button" to="HUDs/PauseContainer/restart_button" method="_on_pressed"]
+[connection signal="pressed" from="HUDs/PauseContainer/main_menu_button" to="HUDs/PauseContainer/main_menu_button" method="_on_pressed"]
 
 [editable path="Player1"]
 [editable path="Player2"]
