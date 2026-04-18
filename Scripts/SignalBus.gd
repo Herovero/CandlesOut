@@ -16,8 +16,7 @@ signal apply_triple_shot(duration: float, player_id: String)
 @warning_ignore("unused_signal")
 signal swap_player()
 @warning_ignore("unused_signal")
-signal apply_shield_boost
-@warning_ignore("unused_signal")
+signal apply_shield_boost(duration: float, player_id: String)
 
 # item effects (losing control)
 @warning_ignore("unused_signal")
@@ -25,6 +24,7 @@ signal apply_flamethrower_backfire(duration: float, player_id: String)
 @warning_ignore("unused_signal")
 signal apply_speed_backfire(multiplier: float, duration: float, player_id: String)
 @warning_ignore("unused_signal")
+signal apply_shield_backfire(duration: float, player_id: String)
 
 # ghost mode
 @warning_ignore("unused_signal")
