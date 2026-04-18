@@ -6,12 +6,12 @@
 [ext_resource type="Texture2D" uid="uid://cfbf3whkdulbr" path="res://Assets/idle.png" id="4_fkybt"]
 [ext_resource type="Texture2D" uid="uid://dk7lah3oh5ikr" path="res://Assets/candle_sleep.png" id="5_3smsa"]
 [ext_resource type="Texture2D" uid="uid://dl6caqu10wpsb" path="res://Assets/walk.png" id="5_x3wgy"]
-[ext_resource type="Texture2D" uid="uid://cie2hg23dq1w8" path="res://Assets/Sprites/shield_barrier.png" id="6_x3wgy"]
-[ext_resource type="Texture2D" uid="uid://b3fbnx3osi8g1" path="res://Assets/Sprites/wall.png" id="7_3smsa"]
+[ext_resource type="Texture2D" uid="uid://orbsx8772jct" path="res://Assets/iron_bars.png" id="7_pu2lt"]
 [ext_resource type="AudioStream" uid="uid://d2l8cmgm4bmaw" path="res://SFX/Player/Sleep_1.wav" id="9_tx1dd"]
 [ext_resource type="AudioStream" uid="uid://bgby2m44b4drh" path="res://SFX/Player/Sleep_2.wav" id="10_gymyn"]
 [ext_resource type="AudioStream" uid="uid://bdfei55y80m1o" path="res://SFX/Player/Blocked_bullet.wav" id="11_gymyn"]
 [ext_resource type="Material" uid="uid://d2fpvm2xbtuil" path="res://Assets/tv_static.tres" id="12_pu2lt"]
+[ext_resource type="Texture2D" uid="uid://boyuk3s5nujmx" path="res://Assets/500 Bullet 24x24 Free/Bullet 24x24 Free Part 4A.png" id="12_ukyrk"]
 
 [sub_resource type="RectangleShape2D" id="RectangleShape2D_cvnsp"]
 size = Vector2(64, 64)
@@ -139,6 +139,70 @@ fill_to = Vector2(1, 0.5)
 
 [sub_resource type="SpriteFrames" id="SpriteFrames_fkybt"]
 
+[sub_resource type="AtlasTexture" id="AtlasTexture_qqcod"]
+atlas = ExtResource("12_ukyrk")
+region = Rect2(192, 0, 24, 24)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_igrcy"]
+atlas = ExtResource("12_ukyrk")
+region = Rect2(216, 0, 24, 24)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_fs7ks"]
+atlas = ExtResource("12_ukyrk")
+region = Rect2(240, 0, 24, 24)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_l6n3p"]
+atlas = ExtResource("12_ukyrk")
+region = Rect2(264, 0, 24, 24)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_olqyp"]
+atlas = ExtResource("12_ukyrk")
+region = Rect2(288, 0, 24, 24)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_wpjfl"]
+atlas = ExtResource("12_ukyrk")
+region = Rect2(312, 0, 24, 24)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_bi64h"]
+atlas = ExtResource("12_ukyrk")
+region = Rect2(336, 0, 24, 24)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_2ijsl"]
+atlas = ExtResource("12_ukyrk")
+region = Rect2(360, 0, 24, 24)
+
+[sub_resource type="SpriteFrames" id="SpriteFrames_p1odr"]
+animations = [{
+"frames": [{
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_qqcod")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_igrcy")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_fs7ks")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_l6n3p")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_olqyp")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_wpjfl")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_bi64h")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_2ijsl")
+}],
+"loop": true,
+"name": &"default",
+"speed": 10.0
+}]
+
 [node name="Player" type="CharacterBody2D" unique_id=687220319]
 script = ExtResource("1_ndhuy")
 
@@ -197,15 +261,10 @@ texture = SubResource("GradientTexture2D_candle_glow")
 [node name="GhostTransitionAnimation" type="AnimatedSprite2D" parent="." unique_id=52766954]
 sprite_frames = SubResource("SpriteFrames_fkybt")
 
-[node name="shield_barrier" type="Sprite2D" parent="." unique_id=116752027]
-visible = false
-scale = Vector2(5, 5)
-texture = ExtResource("6_x3wgy")
-
 [node name="wall" type="Sprite2D" parent="." unique_id=320224061]
-modulate = Color(1, 0, 0, 1)
-scale = Vector2(5, 5)
-texture = ExtResource("7_3smsa")
+visible = false
+scale = Vector2(2, 2)
+texture = ExtResource("7_pu2lt")
 
 [node name="Sleep_1" type="AudioStreamPlayer2D" parent="." unique_id=1246371200]
 stream = ExtResource("9_tx1dd")
@@ -226,6 +285,14 @@ anchor_bottom = 1.0
 grow_horizontal = 2
 grow_vertical = 2
 color = Color(1, 1, 1, 0)
+
+[node name="shield_barrier" type="AnimatedSprite2D" parent="." unique_id=1491964724]
+visible = false
+z_index = -1
+scale = Vector2(3, 3)
+sprite_frames = SubResource("SpriteFrames_p1odr")
+autoplay = "default"
+frame_progress = 0.5180779
 
 [connection signal="timeout" from="HitStunTimer" to="." method="_on_hit_stun_timer_timeout"]
 [connection signal="timeout" from="InvincibilityTimer" to="." method="_on_invincibility_timer_timeout"]

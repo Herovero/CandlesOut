@@ -6,7 +6,8 @@ enum BossState {
 	IDLE,
 	ATTACK_RADIAL,
 	ATTACK_CHARGE,
-	ATTACK_CONE
+	ATTACK_CONE,
+	ATTACK_AOE
 }
 
 @export var max_hp: float = 10.0
@@ -38,6 +39,12 @@ enum BossState {
 @export var cone_windup: float = 0.35
 @export var cone_recover: float = 0.45
 
+@export var aoe_radius: float = 120.0
+@export var aoe_windup: float = 0.4
+@export var aoe_recover: float = 0.45
+@export var aoe_tint_color: Color = Color(1.0, 0.1, 0.1, 0.28)
+@export var aoe_tint_duration: float = 0.2
+
 var hp: float = 100.0
 var is_phase_two: bool = false
 var is_phase_transitioning: bool = false
@@ -50,6 +57,9 @@ var is_charging: bool = false
 var radial_fired: bool = false
 var cone_fired: bool = false
 var charge_cone_fired: bool = false
+var aoe_fired: bool = false
+var aoe_tint_visible: bool = false
+var aoe_tint_token: int = 0
 var hurt_tint_token: int = 0
 var base_sprite_modulate: Color = Color(1, 1, 1, 1)
 var is_playing_sfx: bool = false
@@ -107,6 +117,8 @@ func _physics_process(delta: float) -> void:
 			handle_charge_attack()
 		BossState.ATTACK_CONE:
 			handle_cone_attack()
+		BossState.ATTACK_AOE:
+			handle_aoe_attack()
 
 	move_and_slide()
 
@@ -171,6 +183,9 @@ func pick_random_attack(target: CharacterBody2D) -> void:
 		BossState.ATTACK_CHARGE
 	]
 
+	if is_phase_two:
+		candidates.append(BossState.ATTACK_AOE)
+
 	if candidates.size() > 1 and candidates.has(last_attack_state):
 		candidates.erase(last_attack_state)
 
@@ -197,6 +212,10 @@ func pick_random_attack(target: CharacterBody2D) -> void:
 		BossState.ATTACK_CONE:
 			cone_fired = false
 			state_time_left = cone_windup + cone_recover
+			sprite.play("attack")
+		BossState.ATTACK_AOE:
+			aoe_fired = false
+			state_time_left = aoe_windup + aoe_recover
 			sprite.play("attack")
 
 func enter_idle() -> void:
@@ -250,6 +269,47 @@ func do_cone_attack() -> void:
 
 		if p.has_method("receive_hit"):
 			p.receive_hit(cone_damage)
+
+
+func handle_aoe_attack() -> void:
+	velocity = Vector2.ZERO
+
+	if not aoe_fired and state_time_left <= aoe_recover:
+		aoe_fired = true
+		do_aoe_attack()
+		show_aoe_tint()
+
+	if state_time_left <= 0.0:
+		enter_idle()
+
+
+func do_aoe_attack() -> void:
+	var players = get_tree().get_nodes_in_group("Players")
+	for p in players:
+		if not (p is Node2D):
+			continue
+
+		if global_position.distance_to((p as Node2D).global_position) > aoe_radius:
+			continue
+
+		if p.has_method("receive_hit"):
+			p.receive_hit(charge_damage)
+
+
+func show_aoe_tint() -> void:
+	aoe_tint_token += 1
+	var token := aoe_tint_token
+	aoe_tint_visible = true
+	queue_redraw()
+	await get_tree().create_timer(aoe_tint_duration).timeout
+	if token == aoe_tint_token:
+		aoe_tint_visible = false
+		queue_redraw()
+
+
+func _draw() -> void:
+	if aoe_tint_visible:
+		draw_circle(Vector2.ZERO, aoe_radius, aoe_tint_color)
 
 
 func find_closest_player() -> CharacterBody2D:
