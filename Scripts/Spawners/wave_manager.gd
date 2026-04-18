@@ -23,7 +23,7 @@ const WAVE_DATA = {
 	]
 }
 
-const MAX_ENEMIES_ON_SCREEN = 10
+const MAX_ENEMIES_ON_SCREEN = 1
 const WAVE_1_TOTAL = 50
 
 var spawn_queue: Array = []  # will hold one entry per enemy to spawn
