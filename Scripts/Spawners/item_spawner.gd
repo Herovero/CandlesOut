@@ -11,7 +11,7 @@ var items = [
 ]
 
 var normal_weights = [30, 10, 30, 10, 10, 10, 10]
-var bomb_weights =   [5,  40, 5,  5,  5,  5, 5]  # bomb is index 1, much higher chance
+var bomb_weights =   [10,  10, 10,  0,  5,  0, 0]  # bomb is index 1, much higher chance
 var current_weights: Array
 
 var can_spawn : bool = false
@@ -19,7 +19,7 @@ var can_spawn : bool = false
 @export var min_x: float = 0
 @export var min_y: float = 0
 var items_alive:int = 0
-const MAX_ITEMS:int = 7
+const MAX_ITEMS:int = 10
 
 func get_random_spawn_position() -> Vector2:
 	var shape = spawn_area.shape as RectangleShape2D
