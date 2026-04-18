@@ -19,12 +19,13 @@ const SHOE_ICON = preload("res://Assets/Sprites/item_shoe.png")
 
 @export var max_stamina: float = 100.0
 var current_stamina: float = 100.0
-@export var depletion_rate: float = 10.0
-@export var recharge_rate: float = 10.0
+@export var depletion_rate: float = 50.0
+@export var recharge_rate: float = 20.0
 #@export var depletion_rate: float = 10.0
 #@export var recharge_rate: float = 5.0
 
 var is_sleeping: bool = false
+var is_returning: bool = false
 var ghost_scene = preload("res://Scenes/player_ghost.tscn")
 var active_ghost: CharacterBody2D = null
 
@@ -153,23 +154,58 @@ func enter_sleep():
 	active_ghost = ghost_scene.instantiate()
 	active_ghost.input_prefix = input_prefix # Give the ghost your controls
 	active_ghost.global_position = global_position # Start at player's body
+	
+	active_ghost.modulate.a = 0.0 # Start invisible
+	var start_pos = global_position
+	var end_pos = global_position + Vector2(0, -60) # Float up slightly
+	
 	get_parent().call_deferred("add_child", active_ghost)
+	
+	await get_tree().process_frame
+	
+	var tween = create_tween().set_parallel(true)
+	tween.tween_property(active_ghost, "modulate:a", 1.0, 0.5) # Fade in
+	tween.tween_property(active_ghost, "global_position", end_pos, 1.5)\
+		.set_trans(Tween.TRANS_CUBIC).set_ease(Tween.EASE_OUT)
 
 	SignalBus.emit_signal("ghost_mode_started")
 
 func handle_sleep(delta):
 	current_stamina += recharge_rate * delta
-
 	current_stamina = min(current_stamina, max_stamina)
+	
+	if current_stamina >= max_stamina and not is_returning:
+		if active_ghost:
+			trigger_ghost_return()
+		else:
+			wake_up() # Fallback if ghost was already destroyed
 
-	if current_stamina >= max_stamina:
-		wake_up()
+func trigger_ghost_return():
+	is_returning = true
+	
+	if active_ghost:
+		# Disable ghost movement while it's returning
+		active_ghost.set_physics_process(false)
+		active_ghost.set_process_input(false)
+		
+		var tween = create_tween().set_parallel(true)
+		# Fly back to the sleeping player's position
+		tween.tween_property(active_ghost, "global_position", global_position, 1.0)\
+			.set_trans(Tween.TRANS_BACK).set_ease(Tween.EASE_IN)
+		# Fade out as it arrives
+		#tween.tween_property(active_ghost, "modulate:a", 0.0, 1.0)
+		
+		await tween.finished
+		
+		active_ghost.queue_free()
+		active_ghost = null
+	
+	is_returning = false
+	wake_up()
 
 func wake_up():
 	is_sleeping = false
 	modulate = Color(1, 1, 1)
-	if active_ghost:
-		active_ghost.queue_free() # Remove the ghost when waking up
 
 	SignalBus.emit_signal("ghost_mode_ended")
 
