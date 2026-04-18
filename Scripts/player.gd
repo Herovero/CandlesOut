@@ -16,6 +16,8 @@ var base_speed: float = 200.0 # Store reference
 @export var invincibility_duration: float = 0.32
 @export var flash_interval: float = 0.06
 @export var spawn_interval: float = 0.05
+@onready var static_fx: ColorRect = $CanvasLayer/TvStatic
+var static_tween: Tween
 
 const SHOE_ICON = preload("res://Assets/Sprites/item_shoe.png")
 
@@ -74,6 +76,7 @@ func _ready():
 	sprite.sprite_frames.set_animation_speed("sleep", 2)
 	sprite.sprite_frames.set_animation_speed("walking", 8)
 	sprite.play("idle")
+	play_tv_static(0.001)
 	
 	shield_visual.hide()
 	prison_visual.hide()
@@ -419,6 +422,7 @@ func _on_speed_boost_received(multiplier: float, duration: float, p_id: String):
 		clear_active_effect()
 
 func _on_speed_backfire_received(multiplier: float, duration: float, p_id: String):
+	play_tv_static(0.25)
 	if p_id == input_prefix:
 		var original_speed = base_speed
 		is_ramming_active = true
@@ -447,6 +451,7 @@ func _on_shield_boost_received(duration: float, p_id: String):
 		shield_visual.hide()
 
 func _on_shield_backfire_received(duration: float, p_id: String):
+	play_tv_static(0.25)
 	print_debug("shield side effect boost")
 	if p_id == input_prefix:
 		is_prison_active = true
@@ -518,3 +523,39 @@ func play_block_sfx():
 	sfx.play()
 	
 	sfx.finished.connect(sfx.queue_free)
+
+func play_tv_static(duration: float = 0.2) -> void:
+	if static_tween:
+		static_tween.kill()
+
+	var mat := static_fx.material as ShaderMaterial
+	if mat == null:
+		return
+
+	static_fx.visible = true
+	mat.set_shader_parameter("intensity", 0.0)
+
+	static_tween = create_tween()
+
+	# FAST fade in
+	static_tween.tween_method(
+		func(v): mat.set_shader_parameter("intensity", v),
+		0.0,
+		1.0,
+		0.05
+	)
+
+	# short hold
+	static_tween.tween_interval(duration)
+
+	# FAST fade out
+	static_tween.tween_method(
+		func(v): mat.set_shader_parameter("intensity", v),
+		1.0,
+		0.0,
+		0.08
+	)
+
+	static_tween.tween_callback(func():
+		static_fx.visible = false
+	)
