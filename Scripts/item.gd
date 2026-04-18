@@ -77,8 +77,10 @@ func on_dropped():
 func _finish_drop(ghost):
 	monitoring = true
 	monitorable = true
-	if is_instance_valid(ghost):
-		ghost.is_picking = false
+	
+	if is_instance_valid(ghost) and ghost is CharacterBody2D:
+		if "is_picking" in ghost:
+			ghost.is_picking = false
 		
 func _attach_to_ghost(ghost: CharacterBody2D, offset: Vector2):
 	if is_instance_valid(ghost):
@@ -123,8 +125,10 @@ func _finish_throw(ghost):
 	# Re-enable detection so it can be picked up again at its new location
 	monitoring = true
 	monitorable = true
-	if is_instance_valid(ghost):
-		ghost.is_picking = false
+	
+	if is_instance_valid(ghost) and ghost is CharacterBody2D:
+		if "is_picking" in ghost:
+			ghost.is_picking = false
 
 func _on_body_entered(body):
 	# Only trigger if the item is currently flying

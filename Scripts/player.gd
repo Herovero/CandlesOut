@@ -190,7 +190,7 @@ func trigger_ghost_return():
 			active_ghost.drop_item()
 			
 			# Give it a tiny moment to finish the drop tween before flying back
-			await get_tree().create_timer(0.2).timeout
+			await get_tree().create_timer(0.5).timeout
 		
 		# 2. Disable ghost input/movement for the return journey
 		active_ghost.set_physics_process(false)
