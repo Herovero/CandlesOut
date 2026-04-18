@@ -16,6 +16,10 @@ var base_speed: float = 200.0 # Store reference
 @export var invincibility_duration: float = 0.32
 @export var flash_interval: float = 0.06
 @export var spawn_interval: float = 0.05
+@export var glow_base_energy: float = 0.72
+@export var glow_flicker_strength: float = 0.10
+@export var glow_flicker_speed: float = 4.2
+@export var glow_sleep_multiplier: float = 0.42
 
 const SHOE_ICON = preload("res://Assets/Sprites/item_shoe.png")
 
@@ -63,7 +67,9 @@ var speed_boost_token: int = 0
 @onready var sleep_sfx = [$Sleep_1, $Sleep_2]
 @export var footstep_interval: float = 0.35  # time between footstep sounds
 var footstep_timer: float = 0.0
+var glow_time: float = 0.0
 @onready var blocked_sfx: AudioStreamPlayer2D = $Blocked
+@onready var candle_light: Sprite2D = $CandleLight
 
 
 func _ready():
@@ -95,11 +101,15 @@ func _ready():
 	flash_timer.wait_time = flash_interval
 
 	shoot_sound.pitch_scale = randf_range(0.95, 1.05)
+	glow_time = randf_range(0.0, TAU)
+	if candle_light:
+		candle_light.modulate.a = glow_base_energy
 
 
 func _physics_process(delta: float) -> void:
 	update_ui()
 	update_effect_state(delta)
+	update_candle_glow(delta)
 
 	if is_sleeping:
 		handle_sleep(delta)
@@ -261,6 +271,28 @@ func _on_swap_player():
 
 func update_ui():
 	stamina_bar.value = current_stamina
+
+
+func update_candle_glow(delta: float) -> void:
+	if not candle_light:
+		return
+
+	glow_time += delta * glow_flicker_speed
+
+	var flicker := 0.0
+	flicker += sin(glow_time) * 0.55
+	flicker += sin((glow_time * 2.23) + 1.7) * 0.3
+	flicker += sin((glow_time * 3.97) + 0.4) * 0.15
+	flicker = clamp(flicker, -1.0, 1.0)
+
+	var target_energy = glow_base_energy + (flicker * glow_flicker_strength)
+	if is_sleeping:
+		target_energy *= glow_sleep_multiplier
+
+	candle_light.modulate.a = clamp(target_energy, 0.28, 0.95)
+	var scale_jitter = 1.38 + (flicker * 0.05)
+	candle_light.scale = Vector2.ONE * clamp(scale_jitter, 4.30, 3.48)
+
 
 func is_damage_blocked() -> bool:
 	return is_invincible

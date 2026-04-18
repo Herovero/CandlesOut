@@ -33,6 +33,21 @@ border_width_bottom = 2
 border_color = Color(0.152941, 0.458824, 0.309804, 1)
 anti_aliasing = false
 
+[sub_resource type="Gradient" id="Gradient_candle_glow"]
+offsets = PackedFloat32Array(0, 0.16, 0.42, 1)
+colors = PackedColorArray(1, 0.807843, 0.501961, 0.9, 1, 0.65098, 0.266667, 0.45, 0.960784, 0.34902, 0.12549, 0.16, 0, 0, 0, 0)
+
+[sub_resource type="GradientTexture2D" id="GradientTexture2D_candle_glow"]
+gradient = SubResource("Gradient_candle_glow")
+width = 48
+height = 48
+fill = 1
+fill_from = Vector2(0.5, 0.5)
+fill_to = Vector2(1, 0.5)
+
+[sub_resource type="CanvasItemMaterial" id="CanvasItemMaterial_candle_glow"]
+blend_mode = 1
+
 [sub_resource type="AtlasTexture" id="AtlasTexture_3smsa"]
 atlas = ExtResource("4_fkybt")
 region = Rect2(0, 0, 20, 23)
@@ -168,6 +183,15 @@ scale = Vector2(3, 3)
 sprite_frames = SubResource("SpriteFrames_h4iuc")
 animation = &"sleeping"
 frame_progress = 0.66868645
+
+[node name="CandleLight" type="Sprite2D" parent="."]
+position = Vector2(0, -16)
+texture = SubResource("GradientTexture2D_candle_glow")
+material = SubResource("CanvasItemMaterial_candle_glow")
+texture_filter = 1
+scale = Vector2(1.38, 1.38)
+modulate = Color(1, 0.733333, 0.423529, 0.78)
+z_index = 1
 
 [node name="GhostTransitionAnimation" type="AnimatedSprite2D" parent="." unique_id=52766954]
 sprite_frames = SubResource("SpriteFrames_fkybt")
