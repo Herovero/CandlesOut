@@ -69,7 +69,7 @@ func _physics_process(delta: float) -> void:
 
 	if attack_in_progress:
 		attack_elapsed += delta
-		if not attack_damage_applied and attack_elapsed >= attack_hit_delay:
+		if not attack_damage_applied and sprite.animation == "attack" and sprite.frame == 4:
 			attack_damage_applied = true
 			perform_cone_attack()
 			post_hit_pause_left = post_hit_pause_duration
@@ -155,7 +155,6 @@ func take_damage(amount: float) -> void:
 func start_attack() -> void:
 	attack_in_progress = true
 	attack_damage_applied = false
-	attack_elapsed = 0.0
 	attacking_animation = true
 
 	sprite.play("attack")

@@ -127,13 +127,16 @@ func _ready():
 func _physics_process(delta: float) -> void:
 	update_ui()
 	update_effect_state(delta)
-
-	is_sprinting = Input.is_action_pressed(input_prefix + "sprint") and current_stamina > 0
-	if speed > sprint_speed:
-		speed = speed
+	
+	if is_prison_active:
+		speed = 0.0
 	else:
-		speed = sprint_speed if is_sprinting else walk_speed
-
+		is_sprinting = Input.is_action_pressed(input_prefix + "sprint") and current_stamina > 0
+		if speed > sprint_speed:
+			speed = speed
+		else:
+			speed = sprint_speed if is_sprinting else walk_speed
+		
 	update_candle_glow(delta)
 
 	if is_sleeping:
