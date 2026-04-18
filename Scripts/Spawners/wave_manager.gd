@@ -8,17 +8,17 @@ signal wave_completed(wave_number : int)
 
 const WAVE_DATA = {
 	1: [
-		{"scene": preload("res://Scenes/enemy_test.tscn"), "count": 10},
+		{"scene": preload("res://Scenes/enemy_test.tscn"), "count": 8},
 		{"scene": preload("res://Scenes/enemy_ranged.tscn"), "count": 0},
 		{"scene": preload("res://Scenes/enemy_boss.tscn"), "count": 0}
 		],
 	2: [
-		{"scene": preload("res://Scenes/enemy_ranged.tscn"), "count": 5},
-		{"scene": preload("res://Scenes/enemy_test.tscn"), "count": 5},
+		{"scene": preload("res://Scenes/enemy_ranged.tscn"), "count": 2},
+		{"scene": preload("res://Scenes/enemy_test.tscn"), "count": 4},
 		],
 	3: [
-		{"scene": preload("res://Scenes/enemy_ranged.tscn"), "count": 8},
-		{"scene": preload("res://Scenes/enemy_test.tscn"), "count": 15},
+		{"scene": preload("res://Scenes/enemy_ranged.tscn"), "count": 6},
+		{"scene": preload("res://Scenes/enemy_test.tscn"), "count": 6},
 		{"scene": preload("res://Scenes/enemy_boss.tscn"), "count": 0}
 	],
 	4: [
@@ -161,12 +161,13 @@ func _on_wave_completed(wave_number: int):
 			ost_manager.play_wave_ost(1)
 		2:
 			await get_tree().create_timer(2.0).timeout
-			set_max_enemy(5)
+			set_max_enemy(4)
 			start_wave(3)
 			ost_manager.play_wave_ost(2)
 			Global.item_spawner.set_bomb_phase(true)
 		3:
 			await get_tree().create_timer(2.0).timeout
+			set_max_enemy(5)
 			start_wave(4)
 			ost_manager.play_wave_ost(3)
 			Global.item_spawner.set_bomb_phase(true)

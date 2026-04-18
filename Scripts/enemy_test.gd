@@ -1,6 +1,6 @@
 extends CharacterBody2D
 
-const SPEED: float = 120.0
+const SPEED: float = 80.0
 const SEPARATION_RADIUS: float = 40.0
 const SEPARATION_FORCE: float = 200.0
 
@@ -11,7 +11,7 @@ const SEPARATION_FORCE: float = 200.0
 @export var attack_hit_delay: float = 0.14
 @export var attack_cone_range: float = 92.0
 @export var attack_cone_angle_deg: float = 85.0
-@export var post_hit_pause_duration: float = 0.25
+@export var post_hit_pause_duration: float = 1
 @export var hurt_tint_color: Color = Color(1.0, 0.35, 0.35, 1.0)
 @export var hurt_tint_duration: float = 0.12
 
