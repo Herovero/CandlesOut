@@ -69,7 +69,7 @@ var is_playing_sfx: bool = false
 @onready var hitbox: Area2D = $Hitbox
 @onready var sprite: AnimatedSprite2D = $AnimatedSprite2D
 @onready var cone_sprite: AnimatedSprite2D = $AnimatedSprite2D2
-
+@onready var aoe_sprite: Sprite2D = $aoe
 @onready var boss_radial: AudioStreamPlayer2D = $Boss_Radial
 @onready var boss_slash: AudioStreamPlayer2D = $Boss_Slash
 @onready var boss_charge: AudioStreamPlayer2D = $Boss_Charge
@@ -77,6 +77,8 @@ var is_playing_sfx: bool = false
 func _ready() -> void:
 	sprite.animation_finished.connect(_on_animation_finished)
 	cone_sprite.animation_finished.connect(_on_cone_animation_finished)
+	update_aoe_sprite_scale()
+	aoe_sprite.visible = false
 	motion_mode = CharacterBody2D.MOTION_MODE_FLOATING
 	hp = max_hp
 	base_sprite_modulate = sprite.modulate
@@ -92,6 +94,8 @@ func _ready() -> void:
 	SignalBus.emit_signal("boss_hp_changed", hp, get_current_phase_max_hp(), is_phase_two)
 
 func _physics_process(delta: float) -> void:
+	if aoe_sprite.visible:
+		aoe_sprite.rotation += 3 * delta
 	cone_sprite.flip_h = velocity.x < 0
 	if velocity.x != 0:
 		sprite.flip_h = velocity.x < 0
@@ -277,7 +281,8 @@ func handle_aoe_attack() -> void:
 	if not aoe_fired and state_time_left <= aoe_recover:
 		aoe_fired = true
 		do_aoe_attack()
-		show_aoe_tint()
+		
+		show_aoe_sprite()
 
 	if state_time_left <= 0.0:
 		enter_idle()
@@ -295,7 +300,18 @@ func do_aoe_attack() -> void:
 		if p.has_method("receive_hit"):
 			p.receive_hit(charge_damage)
 
-
+func update_aoe_sprite_scale() -> void:
+	if aoe_sprite.texture == null:
+		return
+	
+	var tex_size = aoe_sprite.texture.get_size()
+	var target_size = aoe_radius * 2.0
+	
+	aoe_sprite.scale = Vector2(
+		target_size / tex_size.x,
+		target_size / tex_size.y
+	)
+	
 func show_aoe_tint() -> void:
 	aoe_tint_token += 1
 	var token := aoe_tint_token
@@ -306,10 +322,20 @@ func show_aoe_tint() -> void:
 		aoe_tint_visible = false
 		queue_redraw()
 
+func show_aoe_sprite() -> void:
+	aoe_sprite.visible = true
+	
+	await get_tree().create_timer(aoe_windup).timeout
+	
+	# optional: keep visible during recover
+	await get_tree().create_timer(aoe_recover).timeout
+	
+	aoe_sprite.visible = false
+	aoe_sprite.rotation = 0.0
 
 func _draw() -> void:
 	if aoe_tint_visible:
-		draw_circle(Vector2.ZERO, aoe_radius, aoe_tint_color)
+		draw_circle(Vector2.ZERO, 3 * aoe_radius, aoe_tint_color)
 
 func find_closest_player() -> CharacterBody2D:
 	var players = get_tree().get_nodes_in_group("Players")
