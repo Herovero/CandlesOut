@@ -183,20 +183,28 @@ func handle_sleep(delta):
 func trigger_ghost_return():
 	is_returning = true
 	
-	if active_ghost:
-		# Disable ghost movement while it's returning
+	if is_instance_valid(active_ghost):
+		# Check if the ghost is holding an item
+		if active_ghost.held_item != null:
+			# Force the ghost to drop the item properly
+			active_ghost.drop_item()
+			
+			# Give it a tiny moment to finish the drop tween before flying back
+			await get_tree().create_timer(0.2).timeout
+		
+		# 2. Disable ghost input/movement for the return journey
 		active_ghost.set_physics_process(false)
 		active_ghost.set_process_input(false)
 		
+		# 3. Setup the return tween (1.0s flight as per your current code)
 		var tween = create_tween().set_parallel(true)
-		# Fly back to the sleeping player's position
 		tween.tween_property(active_ghost, "global_position", global_position, 1.0)\
 			.set_trans(Tween.TRANS_BACK).set_ease(Tween.EASE_IN)
-		# Fade out as it arrives
-		#tween.tween_property(active_ghost, "modulate:a", 0.0, 1.0)
+		tween.tween_property(active_ghost, "modulate:a", 0.0, 1.0)
 		
 		await tween.finished
 		
+		# 4. Cleanup
 		active_ghost.queue_free()
 		active_ghost = null
 	
