@@ -2,6 +2,7 @@
 
 [ext_resource type="Script" path="res://Scripts/tutorial.gd" id="1_script"]
 [ext_resource type="FontFile" path="res://Assets/False Earthdream.ttf" id="2_font"]
+[ext_resource type="Texture2D" uid="uid://dnj0vitf5j7fb" path="res://Assets/Background.png" id="3_bg"]
 
 [sub_resource type="StyleBoxFlat" id="StyleBoxFlat_card"]
 bg_color = Color(0.137255, 0.0823529, 0.211765, 0.92)
@@ -48,33 +49,15 @@ grow_horizontal = 2
 grow_vertical = 2
 script = ExtResource("1_script")
 
-[node name="Background" type="ColorRect" parent="."]
+[node name="Background" type="TextureRect" parent="."]
 layout_mode = 1
 anchors_preset = 15
 anchor_right = 1.0
 anchor_bottom = 1.0
 grow_horizontal = 2
 grow_vertical = 2
-color = Color(0.0588235, 0.0431373, 0.0941176, 1)
-
-[node name="TopGlow" type="ColorRect" parent="."]
-layout_mode = 1
-anchors_preset = 10
-anchor_right = 1.0
-offset_bottom = 210.0
-grow_horizontal = 2
-color = Color(0.533333, 0.309804, 0.760784, 0.12)
-
-[node name="BottomAccent" type="ColorRect" parent="."]
-layout_mode = 1
-anchors_preset = 12
-anchor_top = 1.0
-anchor_right = 1.0
-anchor_bottom = 1.0
-offset_top = -160.0
-grow_horizontal = 2
-grow_vertical = 0
-color = Color(0.996078, 0.760784, 0.439216, 0.06)
+texture = ExtResource("3_bg")
+stretch_mode = 6
 
 [node name="Center" type="VBoxContainer" parent="."]
 layout_mode = 1
