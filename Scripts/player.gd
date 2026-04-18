@@ -21,7 +21,7 @@ const SHOE_ICON = preload("res://Assets/Sprites/item_shoe.png")
 
 @export var max_stamina: float = 100.0
 var current_stamina: float = 100.0
-@export var depletion_rate: float = 50.0
+@export var depletion_rate: float = 10.0
 @export var recharge_rate: float = 5.0
 #@export var depletion_rate: float = 10.0
 #@export var recharge_rate: float = 5.0
@@ -60,8 +60,10 @@ var speed_boost_token: int = 0
 
 @onready var footstep_player = $FootstepPlayer
 @onready var shoot_sound = $ShootPlayer
+@onready var sleep_sfx = [$Sleep_1, $Sleep_2]
 @export var footstep_interval: float = 0.35  # time between footstep sounds
 var footstep_timer: float = 0.0
+@onready var blocked_sfx: AudioStreamPlayer2D = $Blocked
 
 
 func _ready():
@@ -168,7 +170,8 @@ func enter_sleep():
 	is_sleeping = true
 	velocity = Vector2.ZERO
 	# modulate = Color(0.5, 0.5, 1.0) # Turn slightly blue/dark to show sleeping
-
+	
+	play_sleep_sfx()
 	active_ghost = ghost_scene.instantiate()
 	active_ghost.input_prefix = input_prefix # Give the ghost your controls
 	active_ghost.global_position = global_position # Start at player's body
@@ -278,6 +281,7 @@ func start_hit_stun() -> void:
 
 func receive_hit(damage_amount: float, knockback_force: Vector2 = Vector2.ZERO, apply_stun: bool = false) -> void:
 	if is_damage_blocked():
+		play_block_sfx()
 		return
 
 	SignalBus.emit_signal("take_damage", damage_amount, input_prefix)
@@ -493,3 +497,24 @@ func handle_footsteps(delta, direction):
 		footstep_player.pitch_scale = randf_range(0.9, 1.1)
 		footstep_player.play()
 		footstep_timer = footstep_interval
+
+func play_sleep_sfx():
+	var sfx = AudioStreamPlayer2D.new()
+	sfx.stream = sleep_sfx[randi() % sleep_sfx.size()].stream
+	sfx.global_position = global_position
+	
+	get_tree().current_scene.add_child(sfx)
+	sfx.play()
+	
+	sfx.finished.connect(sfx.queue_free)
+	
+func play_block_sfx():
+	var sfx = AudioStreamPlayer2D.new()
+	sfx.volume_db = -5.0
+	sfx.stream = blocked_sfx.stream
+	sfx.global_position = global_position
+	
+	get_tree().current_scene.add_child(sfx)
+	sfx.play()
+	
+	sfx.finished.connect(sfx.queue_free)

@@ -10,12 +10,16 @@ var items = [
 	preload("res://Scenes/item_shield.tscn")
 ]
 
+var normal_weights = [10, 10, 30, 10, 10, 10, 10]
+var bomb_weights =   [5,  40, 5,  5,  5,  5, 5]  # bomb is index 1, much higher chance
+var current_weights: Array
+
 var can_spawn : bool = false
 @onready var spawn_area = $Area2D/CollisionShape2D
 @export var min_x: float = 0
 @export var min_y: float = 0
 var items_alive:int = 0
-const MAX_ITEMS:int = 5
+const MAX_ITEMS:int = 7
 
 func get_random_spawn_position() -> Vector2:
 	var shape = spawn_area.shape as RectangleShape2D
@@ -47,7 +51,7 @@ func spawn_one() -> void:
 		print_debug("max item reached")
 		return
 	
-	var random_item = items[randi() % items.size()]
+	var random_item = get_weighted_random_item()  # replace old randi() line
 	var item_instance = random_item.instantiate()
 	print_debug("spawning item")
 	item_instance.global_position = get_random_spawn_position()
@@ -66,10 +70,16 @@ func _on_item_removed() -> void:
 	
 # Called when the node enters the scene tree for the first time.
 func _ready() -> void:
+	current_weights = normal_weights.duplicate()
+	Global.item_spawner = self
 	SignalBus.connect("ghost_mode_started",  func(): set_spawn_state(true))
 	SignalBus.connect("ghost_mode_ended",  func(): set_spawn_state(false))
 	SignalBus.connect("ghost_mode_ended", func(): destroy_all_items())
 	pass # Replace with function body.
+
+func set_bomb_phase(enabled: bool) -> void:
+	current_weights = bomb_weights.duplicate() if enabled else normal_weights.duplicate()
+
 
 func destroy_all_items() -> void:
 	# get all children of current scene and remove items
@@ -84,7 +94,19 @@ func destroy_all_items() -> void:
 # Called every frame. 'delta' is the elapsed time since the previous frame.
 func _process(delta: float) -> void:
 	pass
-
+	
+func get_weighted_random_item():
+	var total_weight = 0
+	for w in current_weights:
+		total_weight += w
+	
+	var roll = randi() % total_weight
+	var cumulative = 0
+	for i in items.size():
+		cumulative += current_weights[i]
+		if roll < cumulative:
+			return items[i]
+	return items[0]
 
 func _on_timer_timeout() -> void:
 	spawn_one()

@@ -163,7 +163,6 @@ input_prefix = "p2_"
 metadata/_edit_use_anchors_ = true
 
 [node name="Camera2D" type="Camera2D" parent="." unique_id=1658536604]
-zoom = Vector2(0.75, 0.75)
 
 [node name="HUDs" type="CanvasLayer" parent="." unique_id=518585437]
 layer = 10

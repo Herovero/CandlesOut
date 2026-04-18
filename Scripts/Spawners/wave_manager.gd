@@ -8,22 +8,27 @@ signal wave_completed(wave_number : int)
 
 const WAVE_DATA = {
 	1: [
-		{"scene": preload("res://Scenes/enemy_test.tscn"), "count": 0},
+		{"scene": preload("res://Scenes/enemy_test.tscn"), "count": 10},
 		{"scene": preload("res://Scenes/enemy_ranged.tscn"), "count": 0},
-		{"scene": preload("res://Scenes/enemy_boss.tscn"), "count": 1}
+		{"scene": preload("res://Scenes/enemy_boss.tscn"), "count": 0}
 		],
 	2: [
-		{"scene": preload("res://Scenes/enemy_ranged.tscn"), "count": 15},
-		{"scene": preload("res://Scenes/enemy_test.tscn"), "count": 30},
+		{"scene": preload("res://Scenes/enemy_ranged.tscn"), "count": 5},
+		{"scene": preload("res://Scenes/enemy_test.tscn"), "count": 5},
 		],
 	3: [
+		{"scene": preload("res://Scenes/enemy_ranged.tscn"), "count": 8},
+		{"scene": preload("res://Scenes/enemy_test.tscn"), "count": 15},
+		{"scene": preload("res://Scenes/enemy_boss.tscn"), "count": 0}
+	],
+	4: [
 		{"scene": preload("res://Scenes/enemy_ranged.tscn"), "count": 0},
 		{"scene": preload("res://Scenes/enemy_test.tscn"), "count": 0},
 		{"scene": preload("res://Scenes/enemy_boss.tscn"), "count": 1}
 	]
 }
 
-const MAX_ENEMIES_ON_SCREEN = 1
+var MAX_ENEMIES_ON_SCREEN = 0
 const WAVE_1_TOTAL = 50
 
 var spawn_queue: Array = []  # will hold one entry per enemy to spawn
@@ -31,6 +36,8 @@ var enemies_alive = 0
 var current_wave = 0
 var spawner_ref = null
 
+func set_max_enemy(number : int) -> void:
+	MAX_ENEMIES_ON_SCREEN = number
 
 func _ready() -> void:
 	wave_completed.connect(_on_wave_completed)
@@ -126,6 +133,7 @@ func on_enemy_died():
 
 func _on_start_timer_timeout() -> void:
 	ost_manager.play_wave_ost(1)
+	set_max_enemy(4)
 	start_wave(1)
 	pass # Replace with function body.
 
@@ -148,12 +156,15 @@ func _on_wave_completed(wave_number: int):
 	match wave_number:
 		1:
 			await get_tree().create_timer(2.0).timeout
+			set_max_enemy(5)
 			start_wave(2)
 			ost_manager.play_wave_ost(1)
 		2:
 			await get_tree().create_timer(2.0).timeout
+			set_max_enemy(6)
 			start_wave(3)
-			ost_manager.play_wave_ost(3)
+			ost_manager.play_wave_ost(2)
+			Global.item_spawner.set_bomb_phase(true)
 		3:
 			await get_tree().create_timer(2.0).timeout
 			start_wave(4)
