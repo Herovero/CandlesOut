@@ -30,7 +30,7 @@ const SHOE_ICON = preload("res://Assets/Sprites/item_shoe.png")
 
 @export var max_stamina: float = 100.0
 var current_stamina: float = 100.0
-@export var depletion_rate: float = 10.0
+@export var depletion_rate: float = 70.0
 @export var recharge_rate: float = 5.0
 @export var health_regen_rate: float = 0.25 # Amount of heart restored per second
 var regen_accumulator: float = 0.0
@@ -63,6 +63,7 @@ var speed_boost_token: int = 0
 
 @onready var stamina_bar = $Stats/StaminaBar
 @onready var sprite: AnimatedSprite2D = $AnimatedSprite2D
+@onready var transition: AnimatedSprite2D = $GhostTransitionAnimation
 @onready var hit_stun_timer: Timer = $HitStunTimer
 @onready var invincibility_timer: Timer = $InvincibilityTimer
 @onready var flash_timer: Timer = $FlashTimer
@@ -76,7 +77,6 @@ var glow_time: float = 0.0
 @onready var blocked_sfx: AudioStreamPlayer2D = $Blocked
 @onready var candle_light: Sprite2D = $CandleLight
 
-
 func _ready():
 	motion_mode = CharacterBody2D.MOTION_MODE_FLOATING
 	stamina_bar.max_value = max_stamina
@@ -84,8 +84,12 @@ func _ready():
 	sprite.sprite_frames.set_animation_speed("idle", 4)
 	sprite.sprite_frames.set_animation_speed("sleep", 2)
 	sprite.sprite_frames.set_animation_speed("walking", 8)
+	transition.sprite_frames.set_animation_speed("default", 12)
 	sprite.play("idle")
-	play_tv_static(0.001)
+	var mat := static_fx.material as ShaderMaterial
+	if mat:
+		mat.set_shader_parameter("intensity", 0.0)
+	static_fx.visible = false
 	
 	shield_visual.hide()
 	prison_visual.hide()
@@ -200,7 +204,10 @@ func _on_restore_stamina(amount: float, target_id: String):
 func enter_sleep():
 	is_transitioning_to_ghost = true
 	is_sleeping = true
+	transition.show()
+	transition.play("default")
 	velocity = Vector2.ZERO
+	
 	# modulate = Color(0.5, 0.5, 1.0) # Turn slightly blue/dark to show sleeping
 	
 	play_sleep_sfx()
@@ -225,6 +232,7 @@ func enter_sleep():
 	is_transitioning_to_ghost = false
 	
 	SignalBus.emit_signal("ghost_mode_started")
+	
 
 func handle_sleep(delta):
 	sprite.play("sleeping")
@@ -615,3 +623,8 @@ func play_tv_static(duration: float = 0.2) -> void:
 	static_tween.tween_callback(func():
 		static_fx.visible = false
 	)
+
+func _on_transition_animation_finished() -> void:
+	transition.visible = false
+	transition.stop()
+	transition.frame = 0

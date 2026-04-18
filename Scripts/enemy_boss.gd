@@ -311,7 +311,6 @@ func _draw() -> void:
 	if aoe_tint_visible:
 		draw_circle(Vector2.ZERO, aoe_radius, aoe_tint_color)
 
-
 func find_closest_player() -> CharacterBody2D:
 	var players = get_tree().get_nodes_in_group("Players")
 	var closest = null

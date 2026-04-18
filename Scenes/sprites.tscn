@@ -165,15 +165,36 @@ position = Vector2(-280, -121)
 [node name="Player1" parent="." unique_id=687220319 groups=["Players"] instance=ExtResource("4_7icnw")]
 position = Vector2(-80, 0)
 
-[node name="StaminaBar" parent="Player1/Stats" parent_id_path=PackedInt32Array(687220319, 1450506992) index="0" unique_id=61292380]
+[node name="Stats" parent="Player1" index="1" unique_id=1450506992]
+position = Vector2(0, -48)
+
+[node name="StaminaBar" parent="Player1/Stats" index="0" unique_id=61292380]
+custom_minimum_size = Vector2(0, 0)
+offset_left = -2.0
+offset_top = -13.5
+offset_right = 2.0
+offset_bottom = 13.5
+show_percentage = true
 metadata/_edit_use_anchors_ = true
 
 [node name="Player2" parent="." unique_id=771985895 groups=["Players"] instance=ExtResource("4_7icnw")]
 position = Vector2(80, 0)
 input_prefix = "p2_"
 
-[node name="StaminaBar" parent="Player2/Stats" parent_id_path=PackedInt32Array(771985895, 1450506992) index="0" unique_id=61292380]
+[node name="Stats" parent="Player2" index="1" unique_id=1450506992]
+position = Vector2(0, -48)
+
+[node name="StaminaBar" parent="Player2/Stats" index="0" unique_id=61292380]
+custom_minimum_size = Vector2(0, 0)
+offset_left = -2.0
+offset_top = -13.5
+offset_right = 2.0
+offset_bottom = 13.5
+show_percentage = true
 metadata/_edit_use_anchors_ = true
+
+[node name="GhostTransitionAnimation" parent="Player2" index="9" unique_id=52766954]
+visible = false
 
 [node name="Camera2D" type="Camera2D" parent="." unique_id=1658536604]
 zoom = Vector2(0.75, 0.75)
