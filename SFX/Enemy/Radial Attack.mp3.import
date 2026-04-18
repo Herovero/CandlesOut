@@ -1,0 +1,19 @@
+[remap]
+
+importer="mp3"
+type="AudioStreamMP3"
+uid="uid://b2f47r500har3"
+path="res://.godot/imported/Radial Attack.mp3-ee465aeb2c988fc2e25fb42f07cb53f2.mp3str"
+
+[deps]
+
+source_file="res://SFX/Enemy/Radial Attack.mp3"
+dest_files=["res://.godot/imported/Radial Attack.mp3-ee465aeb2c988fc2e25fb42f07cb53f2.mp3str"]
+
+[params]
+
+loop=false
+loop_offset=0
+bpm=0
+beat_count=0
+bar_beats=4
