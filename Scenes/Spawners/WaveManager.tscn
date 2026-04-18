@@ -3,6 +3,9 @@
 [ext_resource type="Script" uid="uid://sq7a06lesyka" path="res://Scripts/Spawners/wave_manager.gd" id="1_4ji1e"]
 [ext_resource type="Script" uid="uid://do5vq5635mvb7" path="res://Scripts/ost_manager.gd" id="2_6v3by"]
 [ext_resource type="AudioStream" uid="uid://ch0o747i8hffl" path="res://SFX/Ost/WaveMusic.ogg" id="3_851f6"]
+[ext_resource type="AudioStream" uid="uid://dlk4nsxhv8fur" path="res://SFX/WaveSound/Wave_enterSound.wav" id="4_8o5x6"]
+[ext_resource type="AudioStream" uid="uid://ddguvafhmvr4q" path="res://SFX/Ost/Boss_Music.ogg" id="4_av2pw"]
+[ext_resource type="AudioStream" uid="uid://be23betopbcpf" path="res://SFX/WaveSound/Boss .wav" id="6_xyvwn"]
 
 [node name="WaveManager" type="Node2D" unique_id=657000445 node_paths=PackedStringArray("ost_manager")]
 script = ExtResource("1_4ji1e")
@@ -24,6 +27,15 @@ stream = ExtResource("3_851f6")
 [node name="OST2" type="AudioStreamPlayer" parent="OstManager" unique_id=1111258901]
 
 [node name="OST3" type="AudioStreamPlayer" parent="OstManager" unique_id=1614400420]
+stream = ExtResource("4_av2pw")
+
+[node name="Intro1" type="AudioStreamPlayer" parent="OstManager" unique_id=1376964706]
+stream = ExtResource("4_8o5x6")
+
+[node name="Intro2" type="AudioStreamPlayer" parent="OstManager" unique_id=128407220]
+
+[node name="Intro3" type="AudioStreamPlayer" parent="OstManager" unique_id=746634983]
+stream = ExtResource("6_xyvwn")
 
 [connection signal="timeout" from="Timer" to="." method="_on_timer_timeout"]
 [connection signal="timeout" from="StartTimer" to="." method="_on_start_timer_timeout"]
