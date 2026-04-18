@@ -153,7 +153,19 @@ func enter_sleep():
 	active_ghost = ghost_scene.instantiate()
 	active_ghost.input_prefix = input_prefix # Give the ghost your controls
 	active_ghost.global_position = global_position # Start at player's body
+	
+	active_ghost.modulate.a = 0.0 # Start invisible
+	var start_pos = global_position
+	var end_pos = global_position + Vector2(0, -60) # Float up slightly
+	
 	get_parent().call_deferred("add_child", active_ghost)
+	
+	await get_tree().process_frame
+	
+	var tween = create_tween().set_parallel(true)
+	tween.tween_property(active_ghost, "modulate:a", 1.0, 0.5) # Fade in
+	tween.tween_property(active_ghost, "global_position", end_pos, 1.5)\
+		.set_trans(Tween.TRANS_CUBIC).set_ease(Tween.EASE_OUT)
 
 	SignalBus.emit_signal("ghost_mode_started")
 
