@@ -132,14 +132,22 @@ func _on_start_timer_timeout() -> void:
 func _on_wave_completed(wave_number: int):
 	print("Wave signal emmitted")
 	
+	ost_manager.stop_all()
+	
 	await get_tree().create_timer(2.0).timeout
 	
 	match wave_number:
 		1:
+			await get_tree().create_timer(2.0).timeout
 			start_wave(2)
+			ost_manager.play_wave_ost(1)
 		2:
+			await get_tree().create_timer(2.0).timeout
 			start_wave(3)
+			ost_manager.play_wave_ost(3)
 		3:
+			await get_tree().create_timer(2.0).timeout
 			start_wave(4)
+			ost_manager.play_wave_ost(3)
 		4:
 			print("Boss defeated! All waves complete.")

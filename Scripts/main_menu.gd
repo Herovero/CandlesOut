@@ -2,7 +2,7 @@ extends Control
 
 @onready var play_button: Button = $Center/PlayButton
 @onready var volume_slider: HSlider = $Center/SoundRow/VolumeSlider
-
+@onready var title_music: AudioStreamPlayer = $TitleMusic
 
 func _ready() -> void:
 	play_button.pressed.connect(_on_play_pressed)
@@ -21,9 +21,12 @@ func _ready() -> void:
 	var current_db = AudioServer.get_bus_volume_db(master_bus)
 	var current_linear = db_to_linear(current_db)
 	volume_slider.value = clamp(current_linear, 0.0, 1.0)
+	title_music.volume_db = -10.0 
+	title_music.play()
 
 
 func _on_play_pressed() -> void:
+	title_music.stop()
 	get_tree().change_scene_to_file("res://Scenes/main.tscn")
 
 
