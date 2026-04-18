@@ -40,6 +40,10 @@ var is_triple_shot_active: bool = false
 var is_flamethrower_active: bool = false
 var is_panicked_fire_active: bool = false
 var is_ramming_active: bool = false
+var is_shield_active: bool = false
+var is_prison_active: bool = false
+@onready var shield_visual = $Visuals/ShieldSprite # Create a blue circle sprite
+@onready var prison_visual = $Visuals/PrisonWalls  # Create a square wall sprite
 
 var active_effect_name: String = ""
 var active_effect_time_left: float = 0.0

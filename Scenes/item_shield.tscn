@@ -1,0 +1,26 @@
+[gd_scene format=3 uid="uid://43q6g2lad46p"]
+
+[ext_resource type="Script" uid="uid://mp5rd8preoc0" path="res://Scripts/shield.gd" id="1_otfoc"]
+[ext_resource type="Texture2D" uid="uid://vyfi3v5x63ji" path="res://Assets/Sprites/item_shield.png" id="2_otfoc"]
+[ext_resource type="AudioStream" uid="uid://boyho6ynvl272" path="res://SFX/ItemSound/Heart.wav" id="3_tkjbv"]
+
+[sub_resource type="CircleShape2D" id="CircleShape2D_1weea"]
+radius = 20.024984
+
+[node name="item_shield" type="Area2D" unique_id=839316503 groups=["Items"]]
+collision_layer = 3
+collision_mask = 3
+script = ExtResource("1_otfoc")
+
+[node name="Sprite2D" type="Sprite2D" parent="." unique_id=1212618555]
+position = Vector2(0, 1)
+scale = Vector2(0.13, 0.13)
+texture = ExtResource("2_otfoc")
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="." unique_id=40545649]
+shape = SubResource("CircleShape2D_1weea")
+
+[node name="ShieldSFX" type="AudioStreamPlayer2D" parent="." unique_id=2045167800]
+stream = ExtResource("3_tkjbv")
+
+[connection signal="body_entered" from="." to="." method="_on_body_entered"]
