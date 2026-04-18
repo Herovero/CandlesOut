@@ -24,7 +24,7 @@ enum BossState {
 @export var radial_windup: float = 0.5
 @export var radial_recover: float = 0.5
 
-@export var charge_damage: float = 2.0
+@export var charge_damage: float = 1.0
 @export var charge_speed: float = 360.0
 @export var charge_windup: float = 0.45
 @export var charge_duration: float = 0.5

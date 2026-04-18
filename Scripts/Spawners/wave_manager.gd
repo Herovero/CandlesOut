@@ -62,15 +62,34 @@ func start_wave(wave_number: int):
 	spawn_queue.shuffle()
 	
 	if wave_notice_label:
-		wave_notice_label.text = "WAVE " + str(wave_number)
+		if wave_number == 4:
+			wave_notice_label.text = "BOSS WAVE" # Or "THE FINAL RITUAL"
+			wave_notice_label.add_theme_color_override("font_color", Color(0.882, 0.0, 0.086, 1.0)) # Red for danger
+			wave_notice_label.pivot_offset = wave_notice_label.size / 2
+		else:
+			wave_notice_label.text = "WAVE " + str(wave_number)
+			wave_notice_label.add_theme_color_override("font_color", Color(1, 1, 1)) # White for normal waves)
+			wave_notice_label.pivot_offset = Vector2.ZERO
+		
 		wave_notice_label.modulate.a = 0 # Start fully transparent
 		wave_notice_label.show()
 		
 		# Create a tween for the sequence
 		var tween = create_tween()
 		
+		tween.set_parallel(true)
+		
 		# 1. Fade In (0.5 seconds)
-		tween.tween_property(wave_notice_label, "modulate:a", 1.0, 0.5)
+		if wave_number == 4:
+			tween.tween_property(wave_notice_label, "modulate:a", 1.0, 0.4)
+			tween.tween_property(wave_notice_label, "scale", Vector2(1.5, 1.5), 0.4)\
+			.set_trans(Tween.TRANS_BACK).set_ease(Tween.EASE_OUT)
+		else:
+			# Standard entrance for normal waves
+			tween.tween_property(wave_notice_label, "modulate:a", 1.0, 0.5)
+			tween.tween_property(wave_notice_label, "scale", Vector2(1.0, 1.0), 0.5)
+		
+		tween.set_parallel(false)
 		
 		# 2. Stay visible
 		tween.tween_interval(2.0)
