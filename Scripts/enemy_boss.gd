@@ -40,6 +40,7 @@ enum BossState {
 
 var hp: float = 100.0
 var is_phase_two: bool = false
+var is_phase_transitioning: bool = false
 var state: BossState = BossState.IDLE
 var state_time_left: float = 0.0
 var last_attack_state: BossState = BossState.IDLE
@@ -63,7 +64,17 @@ func _ready() -> void:
 	sprite.sprite_frames.set_animation_speed("idle", 10)
 	sprite.play()
 
+	if not SignalBus.is_connected("boss_activate_phase_two", activate_phase_two):
+		SignalBus.connect("boss_activate_phase_two", activate_phase_two)
+
+	SignalBus.emit_signal("boss_hp_init", self, hp, get_current_phase_max_hp(), is_phase_two)
+	SignalBus.emit_signal("boss_hp_changed", hp, get_current_phase_max_hp(), is_phase_two)
+
 func _physics_process(delta: float) -> void:
+	if is_phase_transitioning:
+		velocity = Vector2.ZERO
+		return
+
 	var target = find_closest_player()
 	if target:
 		var to_target = global_position.direction_to(target.global_position)
@@ -236,28 +247,54 @@ func play_hurt_tint() -> void:
 
 
 func take_damage(amount: float) -> void:
-	if is_phase_two:
+	if is_phase_two or is_phase_transitioning:
 		return
 
 	hp = clamp(hp - amount, 0.0, max_hp)
+	SignalBus.emit_signal("boss_hp_changed", hp, get_current_phase_max_hp(), is_phase_two)
 	if hp <= 0.0:
-		queue_free()
+		hp = 0.0
+		is_phase_transitioning = true
+		SignalBus.emit_signal("boss_phase_two_transition_started")
 		return
-
-	if hp <= phase_two_threshold:
-		hp = phase_two_threshold
-		is_phase_two = true
 
 	play_hurt_tint()
 
 
 func take_bomb_damage(amount: float = 1.0) -> void:
-	hp = clamp(hp - amount, 0.0, max_hp)
+	if is_phase_transitioning:
+		return
+
+	var phase_max_hp = get_current_phase_max_hp()
+	hp = clamp(hp - amount, 0.0, phase_max_hp)
+	SignalBus.emit_signal("boss_hp_changed", hp, phase_max_hp, is_phase_two)
 	if hp <= 0.0:
-		queue_free()
+		if is_phase_two:
+			SignalBus.emit_signal("boss_defeated")
+			queue_free()
+			return
+
+		hp = 0.0
+		is_phase_transitioning = true
+		SignalBus.emit_signal("boss_phase_two_transition_started")
 		return
 
 	play_hurt_tint()
+
+
+func activate_phase_two() -> void:
+	if is_phase_two:
+		return
+
+	is_phase_two = true
+	is_phase_transitioning = false
+	hp = phase_two_threshold
+	SignalBus.emit_signal("boss_phase_two_activated", phase_two_threshold)
+	SignalBus.emit_signal("boss_hp_changed", hp, get_current_phase_max_hp(), is_phase_two)
+
+
+func get_current_phase_max_hp() -> float:
+	return phase_two_threshold if is_phase_two else max_hp
 
 
 func _on_hitbox_body_entered(body: Node) -> void:

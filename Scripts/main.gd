@@ -3,6 +3,7 @@ extends Node2D
 @onready var gameover_label = $HUDs/gameover_label
 @onready var wave_label = $HUDs/wave_label
 @onready var restart_button = $HUDs/restart_button
+@onready var huds: CanvasLayer = $HUDs
 
 @onready var p1 = $Player1
 @onready var p2 = $Player2
@@ -11,8 +12,21 @@ extends Node2D
 @onready var p2_effect_label = $HUDs/Player2/EffectLabel
 @onready var p2_effect_icon = $HUDs/Player2/EffectIcon
 
-# Called when the node enters the scene tree for the first time.
+const UI_FONT: FontFile = preload("res://Assets/False Earthdream.ttf")
+
+var boss_hp_container: VBoxContainer
+var boss_hp_label: Label
+var boss_hp_bar: ProgressBar
+var phase_overlay: Control
+var phase_overlay_bg: ColorRect
+var phase_overlay_label: Label
+
+var phase_transition_running: bool = false
+var pending_phase_two_refill: bool = false
+
+
 func _ready():
+	process_mode = Node.PROCESS_MODE_ALWAYS
 	get_tree().paused = false
 	gameover_label.hide()
 	restart_button.hide()
@@ -21,30 +35,186 @@ func _ready():
 	p2_effect_icon.visible = false
 	p1_effect_label.visible = false
 	p2_effect_label.visible = false
-	
-	SignalBus.connect("game_over", _on_game_over)
 
-# Called every frame. 'delta' is the elapsed time since the previous frame.
-# In a central script (e.g., Main.gd or GameManager.gd)
+	_setup_boss_ui()
+	_setup_phase_overlay()
+
+	SignalBus.connect("game_over", _on_game_over)
+	SignalBus.connect("boss_hp_init", _on_boss_hp_init)
+	SignalBus.connect("boss_hp_changed", _on_boss_hp_changed)
+	SignalBus.connect("boss_phase_two_transition_started", _on_boss_phase_two_transition_started)
+	SignalBus.connect("boss_defeated", _on_boss_defeated)
+
+
 func _process(_delta):
 	check_total_sleep_condition()
 	update_effect_ui()
+
+
+func _setup_boss_ui() -> void:
+	boss_hp_container = VBoxContainer.new()
+	boss_hp_container.name = "BossHPContainer"
+	boss_hp_container.set_anchors_preset(Control.PRESET_TOP_WIDE)
+	boss_hp_container.offset_left = 300
+	boss_hp_container.offset_top = 14
+	boss_hp_container.offset_right = -300
+	boss_hp_container.offset_bottom = 78
+	boss_hp_container.alignment = BoxContainer.ALIGNMENT_CENTER
+	boss_hp_container.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	boss_hp_container.visible = false
+
+	boss_hp_label = Label.new()
+	boss_hp_label.text = "BOSS"
+	boss_hp_label.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+	boss_hp_label.modulate = Color(1.0, 0.93, 0.78, 1.0)
+	boss_hp_label.add_theme_font_override("font", UI_FONT)
+	boss_hp_label.add_theme_font_size_override("font_size", 26)
+
+	boss_hp_bar = ProgressBar.new()
+	boss_hp_bar.custom_minimum_size = Vector2(540, 24)
+	boss_hp_bar.show_percentage = false
+	boss_hp_bar.step = 0.01
+	boss_hp_bar.value = 0.0
+	boss_hp_bar.modulate = Color(0.96, 0.24, 0.24, 1.0)
+
+	boss_hp_container.add_child(boss_hp_label)
+	boss_hp_container.add_child(boss_hp_bar)
+	huds.add_child(boss_hp_container)
+
+
+func _setup_phase_overlay() -> void:
+	phase_overlay = Control.new()
+	phase_overlay.name = "PhaseOverlay"
+	phase_overlay.set_anchors_preset(Control.PRESET_FULL_RECT)
+	phase_overlay.offset_left = 0.0
+	phase_overlay.offset_top = 0.0
+	phase_overlay.offset_right = 0.0
+	phase_overlay.offset_bottom = 0.0
+	phase_overlay.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	phase_overlay.process_mode = Node.PROCESS_MODE_ALWAYS
+	phase_overlay.visible = false
+
+	phase_overlay_bg = ColorRect.new()
+	phase_overlay_bg.name = "Background"
+	phase_overlay_bg.set_anchors_preset(Control.PRESET_FULL_RECT)
+	phase_overlay_bg.offset_left = 0.0
+	phase_overlay_bg.offset_top = 0.0
+	phase_overlay_bg.offset_right = 0.0
+	phase_overlay_bg.offset_bottom = 0.0
+	phase_overlay_bg.color = Color(0, 0, 0, 1)
+	phase_overlay_bg.modulate.a = 0.0
+	phase_overlay.add_child(phase_overlay_bg)
+
+	phase_overlay_label = Label.new()
+	phase_overlay_label.name = "Title"
+	phase_overlay_label.set_anchors_preset(Control.PRESET_CENTER)
+	phase_overlay_label.offset_left = -420
+	phase_overlay_label.offset_top = -72
+	phase_overlay_label.offset_right = 420
+	phase_overlay_label.offset_bottom = 72
+	phase_overlay_label.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+	phase_overlay_label.vertical_alignment = VERTICAL_ALIGNMENT_CENTER
+	phase_overlay_label.text = "PHASE 2 STARTS"
+	phase_overlay_label.add_theme_font_override("font", UI_FONT)
+	phase_overlay_label.add_theme_font_size_override("font_size", 72)
+	phase_overlay_label.add_theme_color_override("font_outline_color", Color(0, 0, 0, 1))
+	phase_overlay_label.add_theme_constant_override("outline_size", 12)
+	phase_overlay_label.modulate = Color(0.96, 0.86, 1.0, 0.0)
+	phase_overlay.add_child(phase_overlay_label)
+
+	huds.add_child(phase_overlay)
+
+
+func _on_boss_hp_init(_boss: Node, current_hp: float, max_hp: float, is_phase_two: bool) -> void:
+	boss_hp_container.visible = true
+	boss_hp_bar.max_value = max_hp
+	boss_hp_bar.value = current_hp
+	_set_boss_bar_phase_color(is_phase_two)
+
+
+func _on_boss_hp_changed(current_hp: float, max_hp: float, is_phase_two: bool) -> void:
+	if not is_instance_valid(boss_hp_bar):
+		return
+
+	boss_hp_container.visible = true
+	boss_hp_bar.max_value = max_hp
+	_set_boss_bar_phase_color(is_phase_two)
+
+	if pending_phase_two_refill and is_phase_two:
+		pending_phase_two_refill = false
+		boss_hp_bar.value = 0.0
+		var refill_tween = create_tween()
+		refill_tween.set_pause_mode(Tween.TWEEN_PAUSE_PROCESS)
+		refill_tween.tween_property(boss_hp_bar, "value", current_hp, 0.8).set_trans(Tween.TRANS_SINE).set_ease(Tween.EASE_OUT)
+		return
+
+	boss_hp_bar.value = current_hp
+
+
+func _set_boss_bar_phase_color(is_phase_two: bool) -> void:
+	if is_phase_two:
+		boss_hp_bar.modulate = Color(0.72, 0.46, 1.0, 1.0)
+	else:
+		boss_hp_bar.modulate = Color(0.96, 0.24, 0.24, 1.0)
+
+
+func _on_boss_phase_two_transition_started() -> void:
+	if phase_transition_running:
+		return
+
+	phase_transition_running = true
+	phase_overlay.visible = true
+	phase_overlay_bg.modulate.a = 0.0
+	phase_overlay_label.modulate.a = 0.0
+
+	get_tree().paused = true
+
+	var fade_in = create_tween()
+	fade_in.set_pause_mode(Tween.TWEEN_PAUSE_PROCESS)
+	fade_in.set_parallel(true)
+	fade_in.tween_property(phase_overlay_bg, "modulate:a", 0.92, 0.45).set_trans(Tween.TRANS_SINE).set_ease(Tween.EASE_OUT)
+	fade_in.tween_property(phase_overlay_label, "modulate:a", 1.0, 0.45).set_trans(Tween.TRANS_SINE).set_ease(Tween.EASE_OUT)
+	await fade_in.finished
+
+	await get_tree().create_timer(3.0, true).timeout
+
+	var fade_out = create_tween()
+	fade_out.set_pause_mode(Tween.TWEEN_PAUSE_PROCESS)
+	fade_out.set_parallel(true)
+	fade_out.tween_property(phase_overlay_bg, "modulate:a", 0.0, 0.45).set_trans(Tween.TRANS_SINE).set_ease(Tween.EASE_IN)
+	fade_out.tween_property(phase_overlay_label, "modulate:a", 0.0, 0.45).set_trans(Tween.TRANS_SINE).set_ease(Tween.EASE_IN)
+
+	await get_tree().create_timer(0.36, true).timeout
+	get_tree().paused = false
+
+	await fade_out.finished
+
+	pending_phase_two_refill = true
+	SignalBus.emit_signal("boss_activate_phase_two")
+
+	phase_overlay.visible = false
+	phase_transition_running = false
+
+
+func _on_boss_defeated() -> void:
+	boss_hp_container.visible = false
+
 
 func check_total_sleep_condition():
 	var players = get_tree().get_nodes_in_group("Players")
 	var sleeping_count = 0
 	var is_anybody_still_transitioning = false
-	
+
 	for p in players:
 		if p.is_sleeping:
 			sleeping_count += 1
 		if p.get("is_transitioning_to_ghost"):
 			is_anybody_still_transitioning = true
-			
-	# Condition 2: Both players are ghosts/sleeping
+
 	if not is_anybody_still_transitioning:
 		if players.size() > 0 and sleeping_count >= players.size():
 			SignalBus.emit_signal("game_over", "Both players fell asleep!")
+
 
 func update_one_effect_ui(player, label: Label, icon: TextureRect) -> void:
 	if player and player.has_method("has_active_effect") and player.has_active_effect():
@@ -63,11 +233,8 @@ func update_effect_ui() -> void:
 	update_one_effect_ui(p2, p2_effect_label, p2_effect_icon)
 
 
-func _on_game_over(reason: String):
-	#pass
-	## Pause the game
+func _on_game_over(_reason: String):
 	wave_label.hide()
 	gameover_label.show()
 	restart_button.show()
 	get_tree().paused = true
-	# Show your Game Over UI here

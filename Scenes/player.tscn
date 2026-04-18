@@ -6,6 +6,8 @@
 [ext_resource type="Texture2D" uid="uid://cfbf3whkdulbr" path="res://Assets/idle.png" id="4_fkybt"]
 [ext_resource type="Texture2D" uid="uid://dk7lah3oh5ikr" path="res://Assets/candle_sleep.png" id="5_3smsa"]
 [ext_resource type="Texture2D" uid="uid://dl6caqu10wpsb" path="res://Assets/walk.png" id="5_x3wgy"]
+[ext_resource type="Texture2D" uid="uid://cie2hg23dq1w8" path="res://Assets/Sprites/shield_barrier.png" id="6_x3wgy"]
+[ext_resource type="Texture2D" uid="uid://b3fbnx3osi8g1" path="res://Assets/Sprites/wall.png" id="7_3smsa"]
 
 [sub_resource type="RectangleShape2D" id="RectangleShape2D_cvnsp"]
 size = Vector2(64, 64)
@@ -144,6 +146,16 @@ frame_progress = 0.66868645
 
 [node name="GhostTransitionAnimation" type="AnimatedSprite2D" parent="." unique_id=52766954]
 sprite_frames = SubResource("SpriteFrames_fkybt")
+
+[node name="shield_barrier" type="Sprite2D" parent="." unique_id=116752027]
+visible = false
+scale = Vector2(5, 5)
+texture = ExtResource("6_x3wgy")
+
+[node name="wall" type="Sprite2D" parent="." unique_id=320224061]
+modulate = Color(1, 0, 0, 1)
+scale = Vector2(5, 5)
+texture = ExtResource("7_3smsa")
 
 [connection signal="timeout" from="HitStunTimer" to="." method="_on_hit_stun_timer_timeout"]
 [connection signal="timeout" from="InvincibilityTimer" to="." method="_on_invincibility_timer_timeout"]

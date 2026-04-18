@@ -44,8 +44,8 @@ var is_panicked_fire_active: bool = false
 var is_ramming_active: bool = false
 var is_shield_active: bool = false
 var is_prison_active: bool = false
-@onready var shield_visual = $Visuals/ShieldSprite # Create a blue circle sprite
-@onready var prison_visual = $Visuals/PrisonWalls  # Create a square wall sprite
+@onready var shield_visual = $shield_barrier # Create a blue circle sprite
+@onready var prison_visual = $wall  # Create a square wall sprite
 
 var active_effect_name: String = ""
 var active_effect_time_left: float = 0.0
@@ -72,6 +72,9 @@ func _ready():
 	sprite.sprite_frames.set_animation_speed("sleep", 2)
 	sprite.sprite_frames.set_animation_speed("walking", 8)
 	sprite.play("idle")
+	
+	shield_visual.hide()
+	prison_visual.hide()
 
 	# item effects signal
 	SignalBus.connect("restore_stamina", _on_restore_stamina)
@@ -427,8 +430,9 @@ func _on_speed_backfire_received(multiplier: float, duration: float, p_id: Strin
 		modulate = Color(1, 1, 1, 1)
 
 func _on_shield_boost_received(duration: float, p_id: String):
+	print_debug("shield boost")
 	if p_id == input_prefix:
-		is_invincible = true # Reuse your existing logic [cite: 17]
+		is_invincible = true
 		is_shield_active = true
 		shield_visual.show()
 		
@@ -439,9 +443,10 @@ func _on_shield_boost_received(duration: float, p_id: String):
 		shield_visual.hide()
 
 func _on_shield_backfire_received(duration: float, p_id: String):
+	print_debug("shield side effect boost")
 	if p_id == input_prefix:
 		is_prison_active = true
-		speed = 0 # Prevent movement [cite: 17]
+		speed = 0 
 		prison_visual.show()
 		
 		# Optional: Add a screen shake or visual glitch for "Losing Control"
