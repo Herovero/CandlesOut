@@ -14,6 +14,14 @@ func _ready() -> void:
 	direction = direction.normalized()
 	anim.sprite_frames.set_animation_speed("default", 15)
 	anim.play()
+
+	if owner_group == "Enemies":
+		anim.modulate = Color(0.45, 0.74, 1.0, 1.0)
+		anim.scale = Vector2(2.0, 2.6)
+	else:
+		anim.modulate = Color(1.0, 1.0, 1.0, 1.0)
+		anim.scale = Vector2(3.0, 3.0)
+
 	$LifetimeTimer.wait_time = lifetime
 	$LifetimeTimer.start()
 	rotation = direction.angle()
