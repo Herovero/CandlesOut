@@ -174,18 +174,19 @@ func handle_sleep(delta):
 	current_stamina += recharge_rate * delta
 	current_stamina = min(current_stamina, max_stamina)
 	
-	if current_stamina >= max_stamina * 0.8 and not is_returning and active_ghost:
-		trigger_ghost_return()
-
-	if current_stamina >= max_stamina:
-		wake_up()
+	if current_stamina >= max_stamina and not is_returning:
+		if active_ghost:
+			trigger_ghost_return()
+		else:
+			wake_up() # Fallback if ghost was already destroyed
 
 func trigger_ghost_return():
 	is_returning = true
 	
 	if active_ghost:
 		# Disable ghost movement while it's returning
-		active_ghost.set_physics_process(false) 
+		active_ghost.set_physics_process(false)
+		active_ghost.set_process_input(false)
 		
 		var tween = create_tween().set_parallel(true)
 		# Fly back to the sleeping player's position
@@ -196,14 +197,15 @@ func trigger_ghost_return():
 		
 		await tween.finished
 		
+		active_ghost.queue_free()
+		active_ghost = null
+	
 	is_returning = false
-	wake_up() # Actually wake the player after the ghost "merges"
+	wake_up()
 
 func wake_up():
 	is_sleeping = false
 	modulate = Color(1, 1, 1)
-	if active_ghost:
-		active_ghost.queue_free() # Remove the ghost when waking up
 
 	SignalBus.emit_signal("ghost_mode_ended")
 
