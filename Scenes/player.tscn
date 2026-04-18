@@ -6,7 +6,7 @@
 [ext_resource type="Texture2D" uid="uid://cfbf3whkdulbr" path="res://Assets/idle.png" id="4_fkybt"]
 [ext_resource type="Texture2D" uid="uid://dk7lah3oh5ikr" path="res://Assets/candle_sleep.png" id="5_3smsa"]
 [ext_resource type="Texture2D" uid="uid://dl6caqu10wpsb" path="res://Assets/walk.png" id="5_x3wgy"]
-[ext_resource type="Texture2D" uid="uid://b3fbnx3osi8g1" path="res://Assets/Sprites/wall.png" id="7_3smsa"]
+[ext_resource type="Texture2D" uid="uid://orbsx8772jct" path="res://Assets/iron_bars.png" id="7_pu2lt"]
 [ext_resource type="AudioStream" uid="uid://d2l8cmgm4bmaw" path="res://SFX/Player/Sleep_1.wav" id="9_tx1dd"]
 [ext_resource type="AudioStream" uid="uid://bgby2m44b4drh" path="res://SFX/Player/Sleep_2.wav" id="10_gymyn"]
 [ext_resource type="AudioStream" uid="uid://bdfei55y80m1o" path="res://SFX/Player/Blocked_bullet.wav" id="11_gymyn"]
@@ -262,9 +262,9 @@ texture = SubResource("GradientTexture2D_candle_glow")
 sprite_frames = SubResource("SpriteFrames_fkybt")
 
 [node name="wall" type="Sprite2D" parent="." unique_id=320224061]
-modulate = Color(1, 0, 0, 1)
-scale = Vector2(5, 5)
-texture = ExtResource("7_3smsa")
+visible = false
+scale = Vector2(2, 2)
+texture = ExtResource("7_pu2lt")
 
 [node name="Sleep_1" type="AudioStreamPlayer2D" parent="." unique_id=1246371200]
 stream = ExtResource("9_tx1dd")
@@ -292,7 +292,7 @@ z_index = -1
 scale = Vector2(3, 3)
 sprite_frames = SubResource("SpriteFrames_p1odr")
 autoplay = "default"
-frame_progress = 0.885424
+frame_progress = 0.5180779
 
 [connection signal="timeout" from="HitStunTimer" to="." method="_on_hit_stun_timer_timeout"]
 [connection signal="timeout" from="InvincibilityTimer" to="." method="_on_invincibility_timer_timeout"]
