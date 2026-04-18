@@ -399,7 +399,6 @@ func _on_animation_finished() -> void:
 		BossState.ATTACK_CHARGE:
 			if not is_charging:
 				enter_idle()
-<<<<<<< HEAD
 				
 func play_sfx(sound):
 	if is_playing_sfx:
@@ -418,10 +417,9 @@ func play_sfx(sound):
 		sfx.queue_free()
 		is_playing_sfx = false  # unlock when done
 	)
-=======
+
 
 
 func _on_cone_animation_finished() -> void:
 	cone_sprite.visible = false
 	cone_sprite.frame = 0
->>>>>>> main

@@ -8,7 +8,7 @@ extends "res://Scripts/item.gd"
 @onready var explosion_sfx: AudioStreamPlayer2D = $ExplosionSFX
 @onready var fly_sfx: AudioStreamPlayer2D = $FlySFX
 
-@export var bomb_throw_distance: float = 350.0
+@export var bomb_throw_distance: float = 250.0
 var is_stalking: bool = false
 var was_stalking := false
 var is_exploding = false
@@ -89,9 +89,9 @@ func _physics_process(delta):
 		if stalk_timer >= max_stalk_time:
 			if is_exploding:
 				return
-			is_exploding = true
 			print("explode from process")
 			explode()
+			is_exploding = true
 			return
 		var target = find_active_player()
 		if target:
