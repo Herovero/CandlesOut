@@ -117,7 +117,10 @@ func on_thrown(target_global_pos: Vector2):
 	monitoring = true
 	monitorable = true
 	
-	throwing_ghost = get_parent()
+	throwing_ghost = get_parent() as CharacterBody2D
+	if not throwing_ghost:
+		push_error("Item parent is not a CharacterBody2D!")
+		return
 	
 	# 1. Identify the ghost (current parent) and the world
 	var ghost = get_parent()

@@ -30,7 +30,7 @@ const SHOE_ICON = preload("res://Assets/Sprites/item_shoe.png")
 
 @export var max_stamina: float = 100.0
 var current_stamina: float = 100.0
-@export var depletion_rate: float = 70.0
+@export var depletion_rate: float = 10.0
 @export var recharge_rate: float = 5.0
 @export var health_regen_rate: float = 0.25 # Amount of heart restored per second
 var regen_accumulator: float = 0.0
