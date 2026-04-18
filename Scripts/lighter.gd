@@ -10,7 +10,12 @@ func _on_body_entered(body):
 	if is_thrown and body.is_in_group("Players"):
 		if is_instance_valid(throwing_ghost):
 			throwing_ghost.set_deferred("is_picking", false)
+			
+		var p_id = body.input_prefix
 		
+		
+		SignalBus.emit_signal("take_damage", -3.0, p_id)
+		SignalBus.emit_signal("restore_stamina", 100, p_id)
 		SignalBus.emit_signal.call_deferred("swap_player")
 		
 		play_lighter_sfx()
