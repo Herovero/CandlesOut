@@ -323,8 +323,7 @@ func _on_game_over(_reason: String):
 	Engine.time_scale = 1.0
 	if pause_overlay:
 		pause_overlay.visible = false
-	pass
-	#wave_label.hide()
-	#gameover_label.show()
-	#restart_button.show()
-	#get_tree().paused = true
+	wave_label.hide()
+	gameover_label.show()
+	restart_button.show()
+	get_tree().paused = true

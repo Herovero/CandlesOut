@@ -500,7 +500,9 @@ func handle_footsteps(delta, direction):
 
 func play_sleep_sfx():
 	var sfx = AudioStreamPlayer2D.new()
-	sfx.stream = sleep_sfx[randi() % sleep_sfx.size()].stream
+	var picked_sfx = sleep_sfx[randi() % sleep_sfx.size()]
+	sfx.volume_db = 10.0
+	sfx.stream = picked_sfx.stream
 	sfx.global_position = global_position
 	
 	get_tree().current_scene.add_child(sfx)
