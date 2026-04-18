@@ -15,7 +15,6 @@ func _on_body_entered(body):
 		
 		
 		SignalBus.emit_signal("take_damage", -3.0, p_id)
-		SignalBus.emit_signal("restore_stamina", 100, p_id)
 		SignalBus.emit_signal.call_deferred("swap_player")
 		
 		play_lighter_sfx()

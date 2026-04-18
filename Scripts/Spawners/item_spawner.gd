@@ -48,12 +48,12 @@ func spawn_one() -> void:
 	if not can_spawn:
 		return
 	if items_alive >= MAX_ITEMS:
-		print_debug("max item reached")
+		#print_debug("max item reached")
 		return
 	
 	var random_item = get_weighted_random_item()  # replace old randi() line
 	var item_instance = random_item.instantiate()
-	print_debug("spawning item")
+	#print_debug("spawning item")
 	item_instance.global_position = get_random_spawn_position()
 	get_tree().current_scene.add_child(item_instance)
 	

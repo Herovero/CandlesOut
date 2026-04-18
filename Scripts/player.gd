@@ -30,7 +30,7 @@ const SHOE_ICON = preload("res://Assets/Sprites/item_shoe.png")
 
 @export var max_stamina: float = 100.0
 var current_stamina: float = 100.0
-@export var depletion_rate: float = 70.0
+@export var depletion_rate: float = 10.0
 @export var recharge_rate: float = 5.0
 @export var health_regen_rate: float = 0.25 # Amount of heart restored per second
 var regen_accumulator: float = 0.0
@@ -196,8 +196,10 @@ func consume_stamina(delta):
 		enter_sleep()
 
 func _on_restore_stamina(amount: float, target_id: String):
-	print("restore?")
-	current_stamina += amount
+	if target_id == input_prefix:
+		current_stamina += amount
+		# Prevent stamina from exceeding the maximum limit 
+		current_stamina = min(current_stamina, max_stamina)
 
 func enter_sleep():
 	is_transitioning_to_ghost = true
@@ -253,29 +255,26 @@ func trigger_ghost_return():
 	is_returning = true
 	
 	if is_instance_valid(active_ghost):
-		# Check if the ghost is holding an item
 		if active_ghost.held_item != null:
-			# Force the ghost to drop the item properly
 			active_ghost.drop_item()
-			
-			# Give it a tiny moment to finish the drop tween before flying back
 			await get_tree().create_timer(0.5).timeout
 		
-		# 2. Disable ghost input/movement for the return journey
-		active_ghost.set_physics_process(false)
-		active_ghost.set_process_input(false)
-		
-		# 3. Setup the return tween (1.0s flight as per your current code)
-		var tween = create_tween().set_parallel(true)
-		tween.tween_property(active_ghost, "global_position", global_position, 0.8)\
-			.set_trans(Tween.TRANS_BACK).set_ease(Tween.EASE_IN)
-		tween.tween_property(active_ghost, "modulate:a", 0.0, 0.8)
-		
-		await tween.finished
-		
-		# 4. Cleanup
-		active_ghost.queue_free()
-		active_ghost = null
+		# Ensure ghost is still valid after the await
+		if is_instance_valid(active_ghost):
+			active_ghost.set_physics_process(false)
+			active_ghost.set_process_input(false)
+			
+			var tween = create_tween().set_parallel(true)
+			tween.tween_property(active_ghost, "global_position", global_position, 0.8)\
+				.set_trans(Tween.TRANS_BACK).set_ease(Tween.EASE_IN)
+			tween.tween_property(active_ghost, "modulate:a", 0.0, 0.8)
+			
+			await tween.finished
+			
+			# Second check before cleanup
+			if is_instance_valid(active_ghost):
+				active_ghost.queue_free()
+				active_ghost = null
 	
 	is_returning = false
 	wake_up()
