@@ -10,10 +10,6 @@ func _ready():
 	super()
 	custom_throw_distance = 250.0 # Shoes are aerodynamic!
 
-# Called every frame. 'delta' is the elapsed time since the previous frame.
-func _process(delta):
-	pass
-
 func _on_body_entered(body):
 	if is_thrown and body.is_in_group("Players"):
 		if is_instance_valid(throwing_ghost):

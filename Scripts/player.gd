@@ -224,8 +224,18 @@ func wake_up():
 
 func _on_swap_player():
 	if is_sleeping:
+		# 1. Force the ghost to disappear immediately on swap
+		if is_instance_valid(active_ghost):
+			active_ghost.queue_free()
+			active_ghost = null
+		
+		# 2. Reset the transition flag just in case it was mid-entrance
+		is_transitioning_to_ghost = false
+		is_returning = false
+		
 		wake_up()
 	else:
+		# 3. If waking player is hit by lighter, they fall asleep
 		enter_sleep()
 
 func update_ui():
