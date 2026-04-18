@@ -49,6 +49,7 @@ var charge_dir: Vector2 = Vector2.RIGHT
 var is_charging: bool = false
 var radial_fired: bool = false
 var cone_fired: bool = false
+var charge_cone_fired: bool = false
 var hurt_tint_token: int = 0
 var base_sprite_modulate: Color = Color(1, 1, 1, 1)
 
@@ -62,7 +63,7 @@ func _ready() -> void:
 	base_sprite_modulate = sprite.modulate
 	enter_idle()
 	sprite.sprite_frames.set_animation_speed("idle", 10)
-	sprite.play()
+	sprite.play("idle")
 
 	if not SignalBus.is_connected("boss_activate_phase_two", activate_phase_two):
 		SignalBus.connect("boss_activate_phase_two", activate_phase_two)
@@ -120,12 +121,22 @@ func handle_charge_attack() -> void:
 	if state_time_left > charge_duration:
 		is_charging = false
 		velocity = Vector2.ZERO
-	else:
+		charge_cone_fired = false
+	elif not charge_cone_fired:
 		is_charging = true
 		velocity = charge_dir * charge_speed
-
-	if state_time_left <= 0.0:
+	else:
 		is_charging = false
+		velocity = Vector2.ZERO
+
+	if state_time_left <= 0.0 and not charge_cone_fired:
+		is_charging = false
+		velocity = Vector2.ZERO
+		facing_dir = charge_dir
+		do_cone_attack()
+		charge_cone_fired = true
+		state_time_left = cone_recover
+	elif state_time_left <= 0.0 and charge_cone_fired:
 		enter_idle()
 
 
@@ -142,8 +153,7 @@ func handle_cone_attack() -> void:
 func pick_random_attack(target: CharacterBody2D) -> void:
 	var candidates = [
 		BossState.ATTACK_RADIAL,
-		BossState.ATTACK_CHARGE,
-		BossState.ATTACK_CONE
+		BossState.ATTACK_CHARGE
 	]
 
 	if candidates.size() > 1 and candidates.has(last_attack_state):
@@ -159,6 +169,7 @@ func pick_random_attack(target: CharacterBody2D) -> void:
 			state_time_left = radial_windup + radial_recover
 		BossState.ATTACK_CHARGE:
 			is_charging = false
+			charge_cone_fired = false
 			state_time_left = charge_windup + charge_duration
 			if target:
 				charge_dir = global_position.direction_to(target.global_position)
@@ -176,7 +187,7 @@ func enter_idle() -> void:
 	state_time_left = idle_duration
 	is_charging = false
 	velocity = Vector2.ZERO
-
+	sprite.play("idle")
 
 func fire_radial_burst() -> void:
 	if projectile_scene == null:
@@ -297,11 +308,7 @@ func get_current_phase_max_hp() -> float:
 	return phase_two_threshold if is_phase_two else max_hp
 
 
-func _on_hitbox_body_entered(body: Node) -> void:
-	if not body.is_in_group("Players") or not body.has_method("receive_hit"):
-		return
-
-	if is_charging:
-		body.receive_hit(charge_damage, charge_dir * charge_knockback, true)
-	else:
-		body.receive_hit(contact_damage)
+func _on_hitbox_body_entered(_body: Node) -> void:
+	# Collision with boss body no longer deals damage.
+	# Damage is now applied by explicit attack patterns only.
+	return
