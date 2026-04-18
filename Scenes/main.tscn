@@ -363,13 +363,13 @@ tile_set = SubResource("TileSet_6bp64")
 [node name="Spawners" type="Node" parent="." unique_id=1638346625]
 
 [node name="Spawner" parent="Spawners" unique_id=1677051792 instance=ExtResource("5_21xkr")]
-position = Vector2(24, -386)
+position = Vector2(24, -376)
 
 [node name="Spawner2" parent="Spawners" unique_id=281733100 instance=ExtResource("5_21xkr")]
-position = Vector2(23, 529)
+position = Vector2(27, 376)
 
 [node name="Spawner3" parent="Spawners" unique_id=1006731115 instance=ExtResource("5_21xkr")]
-position = Vector2(-896, -1)
+position = Vector2(-656, -1)
 rotation = -1.5707964
 
 [node name="Spawner4" parent="Spawners" unique_id=139584195 instance=ExtResource("5_21xkr")]

@@ -11,6 +11,7 @@ extends "res://Scripts/item.gd"
 @export var bomb_throw_distance: float = 350.0
 var is_stalking: bool = false
 var was_stalking := false
+var is_exploding = false
 @export var max_stalk_time: float = 5.0
 var stalk_timer: float = 0.0
 
@@ -23,11 +24,13 @@ func _finish_throw(ghost):
 	
 	# 50% chance to grow wings instead of exploding
 	if randf() < 0.5:
-		start_stalking()
-	else:
 		explode()
+	else:
+		start_stalking()
 
 func explode():
+	if is_exploding:
+		return
 	# Stop the bomb from moving/being picked up again
 	is_thrown = false 
 	set_deferred("monitoring", false)
@@ -46,10 +49,13 @@ func explode():
 	for target in targets:
 		if target.is_in_group("Enemies"):
 			if target.has_method("take_bomb_damage"):
+				is_exploding = true
 				target.take_bomb_damage(1.0)
 			elif target.has_method("take_damage"):
+				is_exploding = true
 				target.take_damage(10.0)
 		elif target.is_in_group("Players") and is_stalking:
+			is_exploding = true
 			SignalBus.emit_signal("take_damage", 1.0, target.input_prefix)
 	
 	await anim_sprite.animation_finished
@@ -81,6 +87,10 @@ func _physics_process(delta):
 			fly_sfx.play()
 		# Condition: Explode if chase lasts too long
 		if stalk_timer >= max_stalk_time:
+			if is_exploding:
+				return
+			is_exploding = true
+			print("explode from process")
 			explode()
 			return
 		var target = find_active_player()
@@ -100,4 +110,5 @@ func find_active_player() -> CharacterBody2D:
 func _on_body_entered(body):
 	# If the bomb is stalking and hits the active player
 	if is_stalking and body.is_in_group("Players") and not body.is_sleeping:
+		print("stalk explode")
 		explode()
