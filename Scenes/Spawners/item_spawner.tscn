@@ -9,7 +9,7 @@ size = Vector2(1069.25, 571)
 script = ExtResource("1_qdwl7")
 
 [node name="Timer" type="Timer" parent="." unique_id=1505893970]
-wait_time = 1.5
+wait_time = 0.4
 autostart = true
 
 [node name="Area2D" type="Area2D" parent="." unique_id=1857333751]

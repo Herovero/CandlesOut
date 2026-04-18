@@ -183,13 +183,16 @@ func _on_boss_phase_two_transition_started() -> void:
 	fade_out.set_parallel(true)
 	fade_out.tween_property(phase_overlay_bg, "modulate:a", 0.0, 0.45).set_trans(Tween.TRANS_SINE).set_ease(Tween.EASE_IN)
 	fade_out.tween_property(phase_overlay_label, "modulate:a", 0.0, 0.45).set_trans(Tween.TRANS_SINE).set_ease(Tween.EASE_IN)
+
+	await get_tree().create_timer(0.36, true).timeout
+	get_tree().paused = false
+
 	await fade_out.finished
 
 	pending_phase_two_refill = true
 	SignalBus.emit_signal("boss_activate_phase_two")
 
 	phase_overlay.visible = false
-	get_tree().paused = false
 	phase_transition_running = false
 
 
@@ -231,7 +234,8 @@ func update_effect_ui() -> void:
 
 
 func _on_game_over(_reason: String):
-	wave_label.hide()
-	gameover_label.show()
-	restart_button.show()
-	get_tree().paused = true
+	pass
+	#wave_label.hide()
+	#gameover_label.show()
+	#restart_button.show()
+	#get_tree().paused = true

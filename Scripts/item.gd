@@ -164,7 +164,7 @@ func _on_body_entered(body):
 		var p_id = body.input_prefix
 		
 		# Trigger the heal via SignalBus [cite: 5]
-		SignalBus.emit_signal("take_damage", -1.0, p_id)
+		SignalBus.emit_signal("take_damage", -3.0, p_id)
 		
 		# Item is 'consumed'
 		if heart_sfx:

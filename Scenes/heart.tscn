@@ -4,8 +4,8 @@
 [ext_resource type="Texture2D" uid="uid://slrcerdwiuo" path="res://Assets/UIs/heart_full.png" id="2_jgxw8"]
 
 [node name="Hearts" type="HBoxContainer" unique_id=706036972]
-script = ExtResource("1_v4aiu")
 theme_override_constants/separation = 4
+script = ExtResource("1_v4aiu")
 
 [node name="heart1" type="TextureRect" parent="." unique_id=1972595632]
 custom_minimum_size = Vector2(32, 32)
