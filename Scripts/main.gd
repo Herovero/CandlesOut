@@ -234,7 +234,8 @@ func update_effect_ui() -> void:
 
 
 func _on_game_over(_reason: String):
-	wave_label.hide()
-	gameover_label.show()
-	restart_button.show()
-	get_tree().paused = true
+	pass
+	#wave_label.hide()
+	#gameover_label.show()
+	#restart_button.show()
+	#get_tree().paused = true

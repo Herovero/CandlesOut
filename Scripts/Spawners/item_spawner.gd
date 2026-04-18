@@ -1,17 +1,17 @@
 extends Node2D
 
 var items = [
-	#preload("res://Scenes/item1.tscn"),
-	#preload("res://Scenes/item_bomb.tscn"),
-	#preload("res://Scenes/item_coffee.tscn"),
-	#preload("res://Scenes/item_shoe.tscn"),
-	#preload("res://Scenes/item_lighter.tscn"),
-	#preload("res://Scenes/item_oil.tscn"),
+	preload("res://Scenes/item1.tscn"),
+	preload("res://Scenes/item_bomb.tscn"),
+	preload("res://Scenes/item_coffee.tscn"),
+	preload("res://Scenes/item_shoe.tscn"),
+	preload("res://Scenes/item_lighter.tscn"),
+	preload("res://Scenes/item_oil.tscn"),
 	preload("res://Scenes/item_shield.tscn")
 ]
 
-var normal_weights = [10, 10, 10, 10, 10, 10]
-var bomb_weights =   [5,  40, 5,  5,  5,  5]  # bomb is index 1, much higher chance
+var normal_weights = [10, 10, 30, 10, 10, 10, 10]
+var bomb_weights =   [5,  40, 5,  5,  5,  5, 5]  # bomb is index 1, much higher chance
 var current_weights: Array
 
 var can_spawn : bool = false
@@ -19,7 +19,7 @@ var can_spawn : bool = false
 @export var min_x: float = 0
 @export var min_y: float = 0
 var items_alive:int = 0
-const MAX_ITEMS:int = 5
+const MAX_ITEMS:int = 7
 
 func get_random_spawn_position() -> Vector2:
 	var shape = spawn_area.shape as RectangleShape2D
