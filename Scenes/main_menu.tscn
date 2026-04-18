@@ -196,7 +196,7 @@ layout_mode = 2
 theme_override_colors/font_color = Color(0.835294, 0.792157, 0.713726, 0.9)
 theme_override_fonts/font = ExtResource("2_font")
 theme_override_font_sizes/font_size = 30
-text = "LIGHT THE NIGHT & SURVIVE TOGETHER"
+text = "LIGHT THE NIGHT 🔥 SURVIVE TOGETHER"
 horizontal_alignment = 1
 
 [node name="PlayButton" type="Button" parent="Center" unique_id=475627193]
