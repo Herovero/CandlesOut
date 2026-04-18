@@ -106,7 +106,7 @@ theme_override_colors/font_outline_color = Color(0.145098, 0.0901961, 0.223529, 
 theme_override_constants/outline_size = 3
 theme_override_fonts/font = ExtResource("2_font")
 theme_override_font_sizes/font_size = 86
-text = "Project Candle"
+text = "Candles Out"
 horizontal_alignment = 1
 
 [node name="Subtitle" type="Label" parent="Center" unique_id=1527924551]
