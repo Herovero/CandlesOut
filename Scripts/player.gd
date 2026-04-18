@@ -28,6 +28,13 @@ var static_tween: Tween
 
 const SHOE_ICON = preload("res://Assets/Sprites/item_shoe.png")
 
+const SHOE_EFFECT_LABEL := "Speed Boost"
+const SHOE_CHAOS_LABEL := "Hedgehog Shoes?"
+const SHIELD_EFFECT_LABEL := "Immune"
+const SHIELD_CHAOS_LABEL := "Social Distancing"
+const OIL_EFFECT_LABEL := "Triple Shot"
+const OIL_CHAOS_LABEL := "Minigun"
+
 @export var max_stamina: float = 100.0
 var current_stamina: float = 100.0
 @export var depletion_rate: float = 10.0
@@ -60,6 +67,7 @@ var active_effect_name: String = ""
 var active_effect_time_left: float = 0.0
 var active_effect_icon: Texture2D = null
 var speed_boost_token: int = 0
+var active_effect_token: int = 0
 
 @onready var stamina_bar = $Stats/StaminaBar
 @onready var sprite: AnimatedSprite2D = $AnimatedSprite2D
@@ -90,7 +98,7 @@ func _ready():
 	if mat:
 		mat.set_shader_parameter("intensity", 0.0)
 	static_fx.visible = false
-	
+
 	shield_visual.hide()
 	prison_visual.hide()
 
@@ -105,7 +113,7 @@ func _ready():
 	SignalBus.connect("apply_speed_backfire", _on_speed_backfire_received)
 	SignalBus.connect("apply_flamethrower_backfire", _on_flamethrower_received)
 	SignalBus.connect("apply_shield_backfire", _on_shield_backfire_received)
-	
+
 	hit_stun_timer.wait_time = hit_stun_duration
 	invincibility_timer.wait_time = invincibility_duration
 	flash_timer.wait_time = flash_interval
@@ -152,7 +160,7 @@ func _physics_process(delta: float) -> void:
 	knockback_velocity *= 0.91
 	if knockback_velocity.length() < 15.0:
 		knockback_velocity = Vector2.ZERO
-		
+
 	if speed > base_speed:
 		spawn_afterimage()
 
@@ -201,7 +209,7 @@ func consume_stamina(delta):
 func _on_restore_stamina(amount: float, target_id: String):
 	if target_id == input_prefix:
 		current_stamina += amount
-		# Prevent stamina from exceeding the maximum limit 
+		# Prevent stamina from exceeding the maximum limit
 		current_stamina = min(current_stamina, max_stamina)
 
 func enter_sleep():
@@ -210,44 +218,44 @@ func enter_sleep():
 	transition.show()
 	transition.play("default")
 	velocity = Vector2.ZERO
-	
+
 	# modulate = Color(0.5, 0.5, 1.0) # Turn slightly blue/dark to show sleeping
-	
+
 	play_sleep_sfx()
 	active_ghost = ghost_scene.instantiate()
 	active_ghost.input_prefix = input_prefix # Give the ghost your controls
 	active_ghost.global_position = global_position # Start at player's body
-	
+
 	active_ghost.modulate.a = 0.0 # Start invisible
 	var end_pos = global_position + Vector2(0, -60) # Float up slightly
-	
+
 	get_parent().call_deferred("add_child", active_ghost)
-	
+
 	await get_tree().process_frame
-	
+
 	var tween = create_tween().set_parallel(true)
 	tween.tween_property(active_ghost, "modulate:a", 1.0, 0.5) # Fade in
 	tween.tween_property(active_ghost, "global_position", end_pos, 0.8)\
 		.set_trans(Tween.TRANS_CUBIC).set_ease(Tween.EASE_OUT)
-	
+
 	# Wait for the tween to finish before allowing a Game Over
 	await tween.finished
 	is_transitioning_to_ghost = false
-	
+
 	SignalBus.emit_signal("ghost_mode_started")
-	
+
 
 func handle_sleep(delta):
 	sprite.play("sleeping")
 	current_stamina += recharge_rate * delta
 	current_stamina = min(current_stamina, max_stamina)
-	
+
 	regen_accumulator += health_regen_rate * delta
-	if regen_accumulator >= 0.5: # Heal in half-heart increments 
-		# Sending negative damage to the SignalBus restores health 
+	if regen_accumulator >= 0.5: # Heal in half-heart increments
+		# Sending negative damage to the SignalBus restores health
 		SignalBus.emit_signal("take_damage", -0.5, input_prefix)
 		regen_accumulator = 0.0
-	
+
 	if current_stamina >= max_stamina and not is_returning:
 		if active_ghost:
 			trigger_ghost_return()
@@ -256,29 +264,29 @@ func handle_sleep(delta):
 
 func trigger_ghost_return():
 	is_returning = true
-	
+
 	if is_instance_valid(active_ghost):
 		if active_ghost.held_item != null:
 			active_ghost.drop_item()
 			await get_tree().create_timer(0.5).timeout
-		
+
 		# Ensure ghost is still valid after the await
 		if is_instance_valid(active_ghost):
 			active_ghost.set_physics_process(false)
 			active_ghost.set_process_input(false)
-			
+
 			var tween = create_tween().set_parallel(true)
 			tween.tween_property(active_ghost, "global_position", global_position, 0.8)\
 				.set_trans(Tween.TRANS_BACK).set_ease(Tween.EASE_IN)
 			tween.tween_property(active_ghost, "modulate:a", 0.0, 0.8)
-			
+
 			await tween.finished
-			
+
 			# Second check before cleanup
 			if is_instance_valid(active_ghost):
 				active_ghost.queue_free()
 				active_ghost = null
-	
+
 	is_returning = false
 	wake_up()
 
@@ -295,11 +303,11 @@ func _on_swap_player():
 		if is_instance_valid(active_ghost):
 			active_ghost.queue_free()
 			active_ghost = null
-		
+
 		# 2. Reset the transition flag just in case it was mid-entrance
 		is_transitioning_to_ghost = false
 		is_returning = false
-		
+
 		wake_up()
 	else:
 		# 3. If waking player is hit by lighter, they fall asleep
@@ -427,12 +435,15 @@ func shoot_projectile(target: Node2D = null) -> void:
 func _on_triple_shot_received(duration: float, p_id: String):
 	if p_id == input_prefix:
 		is_triple_shot_active = true
+		var effect_token := begin_timed_effect(OIL_EFFECT_LABEL, duration)
 		await get_tree().create_timer(duration).timeout
 		is_triple_shot_active = false
+		end_timed_effect(effect_token)
 
 func _on_flamethrower_received(duration: float, p_id: String):
 	if p_id == input_prefix:
 		var original_interval = shoot_interval
+		var effect_token := begin_timed_effect(OIL_CHAOS_LABEL, duration)
 
 		is_panicked_fire_active = true # Start shooting backwards
 		shoot_interval = 0.05
@@ -446,11 +457,24 @@ func _on_flamethrower_received(duration: float, p_id: String):
 		is_panicked_fire_active = false
 		shoot_interval = original_interval
 		modulate = Color(1, 1, 1)
+		end_timed_effect(effect_token)
 
 func set_active_effect(name: String, duration: float, icon: Texture2D = null) -> void:
 	active_effect_name = name
 	active_effect_time_left = duration
 	active_effect_icon = icon
+
+
+func begin_timed_effect(name: String, duration: float, icon: Texture2D = null) -> int:
+	active_effect_token += 1
+	var token := active_effect_token
+	set_active_effect(name, duration, icon)
+	return token
+
+
+func end_timed_effect(token: int) -> void:
+	if token == active_effect_token:
+		clear_active_effect()
 
 
 func clear_active_effect() -> void:
@@ -474,9 +498,9 @@ func _on_speed_boost_received(multiplier: float, duration: float, p_id: String):
 	if p_id == input_prefix:
 		speed_boost_token += 1
 		var token := speed_boost_token
+		var effect_token := begin_timed_effect(SHOE_EFFECT_LABEL, duration, SHOE_ICON)
 
 		speed = base_speed * multiplier
-		set_active_effect("Speed Boost", duration, SHOE_ICON)
 
 		await get_tree().create_timer(duration).timeout
 
@@ -484,12 +508,13 @@ func _on_speed_boost_received(multiplier: float, duration: float, p_id: String):
 			return
 
 		speed = base_speed
-		clear_active_effect()
+		end_timed_effect(effect_token)
 
 func _on_speed_backfire_received(multiplier: float, duration: float, p_id: String):
 	play_tv_static(0.25)
 	if p_id == input_prefix:
 		var original_speed = base_speed
+		var effect_token := begin_timed_effect(SHOE_CHAOS_LABEL, duration, SHOE_ICON)
 		is_ramming_active = true
 		speed = base_speed * multiplier
 
@@ -501,40 +526,45 @@ func _on_speed_backfire_received(multiplier: float, duration: float, p_id: Strin
 		is_ramming_active = false
 		speed = base_speed
 		modulate = Color(1, 1, 1, 1)
+		end_timed_effect(effect_token)
 
 func _on_shield_boost_received(duration: float, p_id: String):
 	print_debug("shield boost")
 	if p_id == input_prefix:
+		var effect_token := begin_timed_effect(SHIELD_EFFECT_LABEL, duration)
 		is_invincible = true
 		is_shield_active = true
 		shield_visual.show()
-		
+
 		await get_tree().create_timer(duration).timeout
-		
+
 		is_shield_active = false
 		is_invincible = false
 		shield_visual.hide()
+		end_timed_effect(effect_token)
 
 func _on_shield_backfire_received(duration: float, p_id: String):
 	play_tv_static(0.25)
 	print_debug("shield side effect boost")
 	if p_id == input_prefix:
+		var effect_token := begin_timed_effect(SHIELD_CHAOS_LABEL, duration)
 		is_prison_active = true
-		speed = 0 
+		speed = 0
 		prison_visual.show()
-		
+
 		# Optional: Add a screen shake or visual glitch for "Losing Control"
-		
+
 		await get_tree().create_timer(duration).timeout
-		
+
 		is_prison_active = false
 		speed = base_speed # Restore movement [cite: 17]
 		prison_visual.hide()
-		
+		end_timed_effect(effect_token)
+
 func spawn_afterimage():
 	var afterimg = afterimage_scene.instantiate()
 	get_parent().add_child(afterimg)
-	
+
 	afterimg.global_position = global_position
 	afterimg.show_afterimage(sprite)
 	afterimg.modulate = modulate
@@ -574,21 +604,21 @@ func play_sleep_sfx():
 	sfx.volume_db = 10.0
 	sfx.stream = picked_sfx.stream
 	sfx.global_position = global_position
-	
+
 	get_tree().current_scene.add_child(sfx)
 	sfx.play()
-	
+
 	sfx.finished.connect(sfx.queue_free)
-	
+
 func play_block_sfx():
 	var sfx = AudioStreamPlayer2D.new()
 	sfx.volume_db = -5.0
 	sfx.stream = blocked_sfx.stream
 	sfx.global_position = global_position
-	
+
 	get_tree().current_scene.add_child(sfx)
 	sfx.play()
-	
+
 	sfx.finished.connect(sfx.queue_free)
 
 func play_tv_static(duration: float = 0.2) -> void:

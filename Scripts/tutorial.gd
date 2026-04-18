@@ -3,15 +3,15 @@ extends Control
 const TUTORIAL_PAGES := [
 	{
 		"section_a_title": "Controls",
-		"section_a_body": "Player 1 Move: WASD\nPlayer 2 Move: Arrow Keys\nPick up / throw pillow: Space",
+		"section_a_body": "Player 1 Move - WASD\nPlayer 2 Move - Arrow Keys\nPick Up Items - Space",
 		"section_b_title": "Objective",
-		"section_b_body": "Survive enemy waves together.\nPass items, manage stamina, and protect sleeping teammates.\nDefeat the final boss."
+		"section_b_body": "Survive enemy waves together. Don't lose to the CHAOS.\nPass items, manage stamina, protect sleeping teammates.\nDefeat the final boss."
 	},
 	{
 		"section_a_title": "Effect",
-		"section_a_body": "Heart — Restores 1 heart point\nCoffee — Restores 50% stamina\nLighter — Instantly swaps the player and the ghost\nShoe — Temporarily grants a speed boost\nShield — Temporarily makes player immune to damage\nOil — Temporarily turns your shot into a triple-shot spread\nBomb — Causes a massive explosion radius",
-		"section_b_title": "Side Effect",
-		"section_b_body": "Heart — None\nCoffee — None\nLighter — None\nShoe — Did a hedgehog wear this?\nShield — Social Distancing\nOil — Minigun\nBomb — Why is it flying?"
+		"section_a_body": "Heart — Restores 1 heart point\nCoffee — Restores 50% stamina\nLighter — Swaps player and ghost\nShoe — Get a speed boost\nShield — Player immune to damage\nOil — Get a triple-shot gun\nBomb — Get a MASSIVE explosion",
+		"section_b_title": "Chaos Effect",
+		"section_b_body": "Heart — None\nCoffee — None\nLighter — None\nShoe — Did a hedgehog wear this?\nShield — Can't Touch Grass\nOil — Inverted Minigun brrr\nBomb — Why is it Flying?"
 	}
 ]
 

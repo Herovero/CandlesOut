@@ -4,6 +4,7 @@
 [ext_resource type="FontFile" uid="uid://nwcgismvm2jy" path="res://Assets/False Earthdream.ttf" id="2_font"]
 [ext_resource type="Texture2D" uid="uid://dl6caqu10wpsb" path="res://Assets/walk.png" id="3_walk"]
 [ext_resource type="Texture2D" uid="uid://dk7lah3oh5ikr" path="res://Assets/candle_sleep.png" id="4_sleep"]
+[ext_resource type="Texture2D" uid="uid://dnj0vitf5j7fb" path="res://Assets/Background.png" id="5_bg"]
 
 [sub_resource type="StyleBoxFlat" id="StyleBoxFlat_button_normal"]
 bg_color = Color(0.172549, 0.0901961, 0.243137, 1)
@@ -149,6 +150,16 @@ anchor_bottom = 1.0
 grow_horizontal = 2
 grow_vertical = 2
 script = ExtResource("1_script")
+
+[node name="Background" type="TextureRect" parent="."]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+texture = ExtResource("5_bg")
+stretch_mode = 6
 
 [node name="LeftCandle" type="AnimatedSprite2D" parent="." unique_id=1541350956]
 position = Vector2(260, 530)

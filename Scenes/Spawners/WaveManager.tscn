@@ -5,6 +5,7 @@
 [ext_resource type="AudioStream" uid="uid://ch0o747i8hffl" path="res://SFX/Ost/WaveMusic.ogg" id="3_851f6"]
 [ext_resource type="AudioStream" uid="uid://dlk4nsxhv8fur" path="res://SFX/WaveSound/Wave_enterSound.wav" id="4_8o5x6"]
 [ext_resource type="AudioStream" uid="uid://ddguvafhmvr4q" path="res://SFX/Ost/Boss_Music.ogg" id="4_av2pw"]
+[ext_resource type="AudioStream" uid="uid://b0j3hp5cva2f1" path="res://SFX/WaveSound/Wave2_sound.wav" id="6_b3jp5"]
 [ext_resource type="AudioStream" uid="uid://be23betopbcpf" path="res://SFX/WaveSound/Boss .wav" id="6_xyvwn"]
 
 [node name="WaveManager" type="Node2D" unique_id=657000445 node_paths=PackedStringArray("ost_manager")]
@@ -25,6 +26,7 @@ script = ExtResource("2_6v3by")
 stream = ExtResource("3_851f6")
 
 [node name="OST2" type="AudioStreamPlayer" parent="OstManager" unique_id=1111258901]
+stream = ExtResource("3_851f6")
 
 [node name="OST3" type="AudioStreamPlayer" parent="OstManager" unique_id=1614400420]
 stream = ExtResource("4_av2pw")
@@ -33,6 +35,7 @@ stream = ExtResource("4_av2pw")
 stream = ExtResource("4_8o5x6")
 
 [node name="Intro2" type="AudioStreamPlayer" parent="OstManager" unique_id=128407220]
+stream = ExtResource("6_b3jp5")
 
 [node name="Intro3" type="AudioStreamPlayer" parent="OstManager" unique_id=746634983]
 stream = ExtResource("6_xyvwn")
