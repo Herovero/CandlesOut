@@ -6,6 +6,12 @@ var throwing_ghost: CharacterBody2D = null
 
 @onready var heart_sfx: AudioStreamPlayer2D = get_node_or_null("HeartSFX")
 
+# Visual polish
+var float_time: float = 0.0
+@export var float_speed: float = 2.0
+@export var float_amplitude: float = 4.0
+@onready var item_sprite = $Sprite2D # Or whatever your visual node is named
+
 # Called when the node enters the scene tree for the first time.
 func _ready():
 	visible = false
@@ -17,7 +23,12 @@ func _ready():
 
 # Called every frame. 'delta' is the elapsed time since the previous frame.
 func _process(delta):
-	pass
+	item_sprite.modulate.a = randf_range(0.4, 0.6) # Constant subtle spiritual flicker
+	# Only bob if the item is not being held or thrown
+	if not is_thrown and get_parent().name != "PlayerGhost": 
+		float_time += delta
+		# Use a sine wave for smooth floating logic
+		item_sprite.position.y = sin(float_time * float_speed) * float_amplitude
 
 func show_item():
 	visible = true

@@ -59,10 +59,9 @@ func update_effect_ui() -> void:
 
 
 func _on_game_over(reason: String):
-	pass
-	"""## Pause the game
+	#pass
+	## Pause the game
 	gameover_label.show()
 	restart_button.show()
 	get_tree().paused = true
 	# Show your Game Over UI here
-	pass"""

@@ -16,6 +16,9 @@
 [ext_resource type="AudioStream" uid="uid://c5d83f6xvuxgt" path="res://SFX/ItemSound/Bomb.wav" id="14_gv38b"]
 [ext_resource type="AudioStream" uid="uid://2vyvg6lyfdha" path="res://SFX/ItemSound/BombFlying.wav" id="15_b4i02"]
 
+[sub_resource type="CanvasItemMaterial" id="CanvasItemMaterial_b4i02"]
+blend_mode = 1
+
 [sub_resource type="SpriteFrames" id="SpriteFrames_5b00u"]
 animations = [{
 "frames": [{
@@ -72,6 +75,7 @@ radius = 20.024984
 radius = 162.19742
 
 [node name="item_bomb" type="Area2D" unique_id=839316503 groups=["Items"]]
+material = SubResource("CanvasItemMaterial_b4i02")
 collision_layer = 3
 collision_mask = 3
 script = ExtResource("1_84vf5")
