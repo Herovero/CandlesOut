@@ -29,8 +29,8 @@ const SHOE_ICON = preload("res://Assets/Sprites/item_shoe.png")
 var current_stamina: float = 100.0
 @export var depletion_rate: float = 10.0
 @export var recharge_rate: float = 5.0
-#@export var depletion_rate: float = 10.0
-#@export var recharge_rate: float = 5.0
+@export var health_regen_rate: float = 0.25 # Amount of heart restored per second
+var regen_accumulator: float = 0.0
 
 var is_sleeping: bool = false
 var is_returning: bool = false
@@ -211,6 +211,12 @@ func handle_sleep(delta):
 	sprite.play("sleeping")
 	current_stamina += recharge_rate * delta
 	current_stamina = min(current_stamina, max_stamina)
+	
+	regen_accumulator += health_regen_rate * delta
+	if regen_accumulator >= 0.5: # Heal in half-heart increments 
+		# Sending negative damage to the SignalBus restores health 
+		SignalBus.emit_signal("take_damage", -0.5, input_prefix)
+		regen_accumulator = 0.0
 	
 	if current_stamina >= max_stamina and not is_returning:
 		if active_ghost:
