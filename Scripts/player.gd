@@ -28,6 +28,7 @@ var is_sleeping: bool = false
 var is_returning: bool = false
 var ghost_scene = preload("res://Scenes/player_ghost.tscn")
 var active_ghost: CharacterBody2D = null
+var is_transitioning_to_ghost: bool = false
 
 var knockback_velocity: Vector2 = Vector2.ZERO
 var shoot_cooldown: float = 0.0
@@ -147,6 +148,7 @@ func _on_restore_stamina(amount: float, target_id: String):
 	current_stamina += amount
 
 func enter_sleep():
+	is_transitioning_to_ghost = true
 	is_sleeping = true
 	velocity = Vector2.ZERO
 	modulate = Color(0.5, 0.5, 1.0) # Turn slightly blue/dark to show sleeping
@@ -156,7 +158,6 @@ func enter_sleep():
 	active_ghost.global_position = global_position # Start at player's body
 	
 	active_ghost.modulate.a = 0.0 # Start invisible
-	var start_pos = global_position
 	var end_pos = global_position + Vector2(0, -60) # Float up slightly
 	
 	get_parent().call_deferred("add_child", active_ghost)
@@ -167,7 +168,11 @@ func enter_sleep():
 	tween.tween_property(active_ghost, "modulate:a", 1.0, 0.5) # Fade in
 	tween.tween_property(active_ghost, "global_position", end_pos, 1.5)\
 		.set_trans(Tween.TRANS_CUBIC).set_ease(Tween.EASE_OUT)
-
+	
+	# Wait for the tween to finish before allowing a Game Over
+	await tween.finished
+	is_transitioning_to_ghost = false
+	
 	SignalBus.emit_signal("ghost_mode_started")
 
 func handle_sleep(delta):

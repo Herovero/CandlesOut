@@ -3,7 +3,7 @@
 [ext_resource type="PackedScene" uid="uid://c4sy607bwof83" path="res://Scenes/player.tscn" id="1_jjgbg"]
 [ext_resource type="Script" uid="uid://bmd6hkjls56de" path="res://Scripts/main.gd" id="1_ynf5e"]
 [ext_resource type="PackedScene" uid="uid://cqbq35ef7qsmd" path="res://Scenes/heart.tscn" id="2_8gbba"]
-[ext_resource type="PackedScene" uid="uid://cmxdhycob41w4" path="res://Scenes/item_oil.tscn" id="2_d1ilt"]
+[ext_resource type="PackedScene" uid="uid://nhbikyang5e7" path="res://Scenes/item_oil.tscn" id="2_d1ilt"]
 [ext_resource type="PackedScene" uid="uid://fvfcli6ddale" path="res://Scenes/item_bomb.tscn" id="2_fdnlq"]
 [ext_resource type="PackedScene" uid="uid://cdjgj0ntm6wbx" path="res://Scenes/item_lighter.tscn" id="2_hptm8"]
 [ext_resource type="PackedScene" uid="uid://yffq7cs5cqdf" path="res://Scenes/item_shoe.tscn" id="4_6iyac"]
@@ -275,7 +275,6 @@ offset_bottom = 105.0
 text = "Effect: None"
 
 [node name="gameover_label" type="Label" parent="HUDs" unique_id=1777338280]
-visible = false
 anchors_preset = 8
 anchor_left = 0.5
 anchor_top = 0.5
@@ -287,8 +286,13 @@ offset_right = 287.0
 offset_bottom = 12.5
 grow_horizontal = 2
 grow_vertical = 2
+theme_override_colors/font_color = Color(1, 0.16862746, 0.08235294, 1)
+theme_override_colors/font_outline_color = Color(0, 0, 0, 1)
+theme_override_fonts/font = ExtResource("8_wsu2k")
 theme_override_font_sizes/font_size = 100
 text = "GAME OVER"
+horizontal_alignment = 1
+vertical_alignment = 1
 
 [node name="wave_label" type="Label" parent="HUDs" unique_id=1837905852]
 visible = false

@@ -18,7 +18,6 @@ func _ready():
 	monitorable = false
 	monitoring = false
 	
-	SignalBus.connect("item_spawned", show_item)
 	SignalBus.connect("ghost_mode_ended", hide_item)
 
 # Called every frame. 'delta' is the elapsed time since the previous frame.
@@ -31,14 +30,28 @@ func _process(delta):
 		item_sprite.position.y = sin(float_time * float_speed) * float_amplitude
 
 func show_item():
+	modulate.a = 0.0
 	visible = true
+	
+	var tween = create_tween()
+	tween.tween_property(self, "modulate:a", 1.0, 0.5)\
+		.set_trans(Tween.TRANS_SINE)\
+		.set_ease(Tween.EASE_OUT)
+		
 	set_deferred("monitorable", true)
 	set_deferred("monitoring", true)
 
 func hide_item():
-	visible = false
 	set_deferred("monitorable", false)
 	set_deferred("monitoring", false)
+	
+	var tween = create_tween()
+	tween.tween_property(self, "modulate:a", 0.0, 0.4)\
+		.set_trans(Tween.TRANS_SINE)\
+		.set_ease(Tween.EASE_IN)
+	
+	# Hide the node only after the animation is finished
+	tween.tween_callback(func(): visible = false)
 
 func on_collected(target_ghost: CharacterBody2D):
 	# Now 'target_ghost' is declared and usable!
