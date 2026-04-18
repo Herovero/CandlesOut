@@ -6,6 +6,7 @@ extends Control
 @onready var title_music: AudioStreamPlayer = $TitleMusic
 
 func _ready() -> void:
+	get_tree().paused = false
 	play_button.pressed.connect(_on_play_pressed)
 	tutorial_button.pressed.connect(_on_tutorial_pressed)
 

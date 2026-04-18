@@ -2,8 +2,12 @@ extends Node2D
 
 @onready var gameover_label = $HUDs/gameover_label
 @onready var wave_label = $HUDs/wave_label
-@onready var restart_button = $HUDs/restart_button
 @onready var huds: CanvasLayer = $HUDs
+@onready var paused_label = $HUDs/PauseContainer/paused_label
+@onready var restart_button = $HUDs/PauseContainer/restart_button
+@onready var resume_button = $HUDs/PauseContainer/resume_button
+@onready var main_menu_button = $HUDs/PauseContainer/main_menu_button
+
 
 @onready var p1 = $Player1
 @onready var p2 = $Player2
@@ -32,11 +36,11 @@ var is_manual_paused: bool = false
 
 
 func _ready():
-	process_mode = Node.PROCESS_MODE_ALWAYS
+	process_mode = Node.PROCESS_MODE_INHERIT
 	Engine.time_scale = 1.0
 	get_tree().paused = false
 	gameover_label.hide()
-	restart_button.hide()
+	_hide_pause_menu()
 
 	p1_effect_icon.visible = false
 	p2_effect_icon.visible = false
@@ -53,13 +57,34 @@ func _ready():
 	SignalBus.connect("boss_phase_two_transition_started", _on_boss_phase_two_transition_started)
 	SignalBus.connect("boss_defeated", _on_boss_defeated)
 
+func _input(event):
+	# Check for Esc key press
+	if event.is_action_pressed("pause"):
+		if not get_tree().paused:
+			_show_pause_menu()
+		else:
+			_hide_pause_menu()
+
+func _hide_pause_menu():
+	paused_label.hide()
+	get_tree().paused = false
+	resume_button.hide()
+	restart_button.hide()
+	main_menu_button.hide()
+
+func _show_pause_menu():
+	paused_label.show()
+	get_tree().paused = true
+	resume_button.show()
+	restart_button.show()
+	main_menu_button.show()
 
 func _process(_delta):
 	check_total_sleep_condition()
 	update_effect_ui()
 
 
-func _input(event: InputEvent) -> void:
+"""func _input(event: InputEvent) -> void:
 	if not (event is InputEventKey):
 		return
 	if not event.is_action_pressed("ui_cancel") or event.is_echo():
@@ -67,7 +92,7 @@ func _input(event: InputEvent) -> void:
 	if phase_transition_running:
 		return
 
-	toggle_pause()
+	toggle_pause()"""
 
 
 func _setup_boss_ui() -> void:
@@ -319,12 +344,20 @@ func update_effect_ui() -> void:
 
 
 func _on_game_over(_reason: String):
+	# 1. Clean up any existing manual pause state so it doesn't interfere
 	is_manual_paused = false
-	Engine.time_scale = 1.0
-	if pause_overlay:
-		pause_overlay.visible = false
-	pass
-	#wave_label.hide()
-	#gameover_label.show()
-	#restart_button.show()
-	#get_tree().paused = true
+	_hide_pause_menu() 
+	
+	# 2. Display the Game Over UI
+	wave_label.hide()
+	gameover_label.text = "GAME OVER\n" + _reason
+	gameover_label.show()
+	
+	restart_button.show()
+	
+	# 3. Pause the game engine 
+	get_tree().paused = true
+
+
+func _on_resume_button_pressed():
+	_hide_pause_menu()
