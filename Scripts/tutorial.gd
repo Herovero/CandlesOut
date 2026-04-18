@@ -8,17 +8,17 @@ const TUTORIAL_PAGES := [
 		"section_b_body": "Survive enemy waves together.\nPass items, manage stamina, and protect sleeping teammates.\nDefeat the final boss."
 	},
 	{
-		"section_a_title": "Item Description",
-		"section_a_body": "1. Heart\nEffect: Restores 1 heart point\n\n2. Coffee\nEffect: Restores 50% stamina\n\n3. Lighter\nEffect: Instantly swaps the player and the ghost\n\n4. Shoe\nEffect: Temporarily grants a speed boost\nSide Effect: Did a hedgehog wear this?",
-		"section_b_title": "More Items",
-		"section_b_body": "5. Shield\nEffect: Temporarily makes player immune to damage\nSide Effect: Social Distancing\n\n6. Oil\nEffect: Temporarily turns your shot into a triple-shot spread\nSide Effect: Minigun\n\n7. Bomb\nEffect: Causes a massive explosion radius\nSide Effect: Why is it flying?"
+		"section_a_title": "Effect",
+		"section_a_body": "Heart — Restores 1 heart point\nCoffee — Restores 50% stamina\nLighter — Instantly swaps the player and the ghost\nShoe — Temporarily grants a speed boost\nShield — Temporarily makes player immune to damage\nOil — Temporarily turns your shot into a triple-shot spread\nBomb — Causes a massive explosion radius",
+		"section_b_title": "Side Effect",
+		"section_b_body": "Heart — None\nCoffee — None\nLighter — None\nShoe — Did a hedgehog wear this?\nShield — Social Distancing\nOil — Minigun\nBomb — Why is it flying?"
 	}
 ]
 
-@onready var controls_title: Label = $Center/TutorialCard/Margin/Content/ControlsTitle
-@onready var controls_body: Label = $Center/TutorialCard/Margin/Content/ControlsBody
-@onready var objective_title: Label = $Center/TutorialCard/Margin/Content/ObjectiveTitle
-@onready var objective_body: Label = $Center/TutorialCard/Margin/Content/ObjectiveBody
+@onready var controls_title: Label = $Center/TutorialCard/Margin/Content/LeftColumn/ControlsTitle
+@onready var controls_body: Label = $Center/TutorialCard/Margin/Content/LeftColumn/ControlsBody
+@onready var objective_title: Label = $Center/TutorialCard/Margin/Content/RightColumn/ObjectiveTitle
+@onready var objective_body: Label = $Center/TutorialCard/Margin/Content/RightColumn/ObjectiveBody
 @onready var page_label: Label = $Center/PageNav/PageLabel
 @onready var prev_button: Button = $Center/PageNav/PrevButton
 @onready var next_button: Button = $Center/PageNav/NextButton
@@ -75,6 +75,10 @@ func _update_page() -> void:
 	controls_body.text = page["section_a_body"]
 	objective_title.text = page["section_b_title"]
 	objective_body.text = page["section_b_body"]
+
+	controls_title.visible = controls_title.text.strip_edges() != ""
+	objective_title.visible = objective_title.text.strip_edges() != ""
+
 	page_label.text = "%d / %d" % [current_page + 1, TUTORIAL_PAGES.size()]
 
 

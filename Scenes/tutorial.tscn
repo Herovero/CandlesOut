@@ -98,12 +98,12 @@ theme_override_colors/font_color = Color(0.980392, 0.92549, 0.760784, 1)
 theme_override_colors/font_outline_color = Color(0.145098, 0.0901961, 0.223529, 0.8)
 theme_override_constants/outline_size = 3
 theme_override_fonts/font = ExtResource("2_font")
-theme_override_font_sizes/font_size = 68
+theme_override_font_sizes/font_size = 76
 text = "Tutorial"
 horizontal_alignment = 1
 
 [node name="TutorialCard" type="PanelContainer" parent="Center"]
-custom_minimum_size = Vector2(720, 350)
+custom_minimum_size = Vector2(720, 390)
 layout_mode = 2
 theme_override_styles/panel = SubResource("StyleBoxFlat_card")
 
@@ -114,36 +114,48 @@ theme_override_constants/margin_top = 24
 theme_override_constants/margin_right = 30
 theme_override_constants/margin_bottom = 24
 
-[node name="Content" type="VBoxContainer" parent="Center/TutorialCard/Margin"]
+[node name="Content" type="HBoxContainer" parent="Center/TutorialCard/Margin"]
 layout_mode = 2
-theme_override_constants/separation = 12
+theme_override_constants/separation = 28
 
-[node name="ControlsTitle" type="Label" parent="Center/TutorialCard/Margin/Content"]
+[node name="LeftColumn" type="VBoxContainer" parent="Center/TutorialCard/Margin/Content"]
+custom_minimum_size = Vector2(320, 0)
+layout_mode = 2
+theme_override_constants/separation = 10
+size_flags_horizontal = 3
+
+[node name="ControlsTitle" type="Label" parent="Center/TutorialCard/Margin/Content/LeftColumn"]
 layout_mode = 2
 theme_override_colors/font_color = Color(1, 0.933333, 0.776471, 1)
 theme_override_fonts/font = ExtResource("2_font")
-theme_override_font_sizes/font_size = 30
+theme_override_font_sizes/font_size = 34
 text = "Controls"
 
-[node name="ControlsBody" type="Label" parent="Center/TutorialCard/Margin/Content"]
+[node name="ControlsBody" type="Label" parent="Center/TutorialCard/Margin/Content/LeftColumn"]
 layout_mode = 2
 theme_override_colors/font_color = Color(0.905882, 0.862745, 0.768627, 0.96)
 theme_override_fonts/font = ExtResource("2_font")
-theme_override_font_sizes/font_size = 18
+theme_override_font_sizes/font_size = 20
 text = "Player 1 Move: WASD\nPlayer 2 Move: Arrow Keys\nPick up / throw pillow: Space"
 
-[node name="ObjectiveTitle" type="Label" parent="Center/TutorialCard/Margin/Content"]
+[node name="RightColumn" type="VBoxContainer" parent="Center/TutorialCard/Margin/Content"]
+custom_minimum_size = Vector2(320, 0)
+layout_mode = 2
+theme_override_constants/separation = 10
+size_flags_horizontal = 3
+
+[node name="ObjectiveTitle" type="Label" parent="Center/TutorialCard/Margin/Content/RightColumn"]
 layout_mode = 2
 theme_override_colors/font_color = Color(1, 0.933333, 0.776471, 1)
 theme_override_fonts/font = ExtResource("2_font")
-theme_override_font_sizes/font_size = 30
+theme_override_font_sizes/font_size = 34
 text = "Objective"
 
-[node name="ObjectiveBody" type="Label" parent="Center/TutorialCard/Margin/Content"]
+[node name="ObjectiveBody" type="Label" parent="Center/TutorialCard/Margin/Content/RightColumn"]
 layout_mode = 2
 theme_override_colors/font_color = Color(0.905882, 0.862745, 0.768627, 0.96)
 theme_override_fonts/font = ExtResource("2_font")
-theme_override_font_sizes/font_size = 18
+theme_override_font_sizes/font_size = 20
 text = "Survive enemy waves together.\nPass items, manage stamina, and protect sleeping teammates.\nDefeat the final boss."
 
 [node name="PageNav" type="HBoxContainer" parent="Center"]
@@ -152,41 +164,41 @@ theme_override_constants/separation = 14
 alignment = 1
 
 [node name="PrevButton" type="Button" parent="Center/PageNav"]
-custom_minimum_size = Vector2(70, 56)
+custom_minimum_size = Vector2(82, 64)
 layout_mode = 2
 theme_override_colors/font_color = Color(0.964706, 0.913726, 0.8, 1)
 theme_override_fonts/font = ExtResource("2_font")
-theme_override_font_sizes/font_size = 34
+theme_override_font_sizes/font_size = 40
 theme_override_styles/normal = SubResource("StyleBoxFlat_button_normal")
 theme_override_styles/hover = SubResource("StyleBoxFlat_button_hover")
 text = "<"
 
 [node name="PageLabel" type="Label" parent="Center/PageNav"]
-custom_minimum_size = Vector2(130, 40)
+custom_minimum_size = Vector2(150, 48)
 layout_mode = 2
 theme_override_colors/font_color = Color(0.894118, 0.854902, 0.756863, 1)
 theme_override_fonts/font = ExtResource("2_font")
-theme_override_font_sizes/font_size = 26
+theme_override_font_sizes/font_size = 32
 text = "1 / 2"
 horizontal_alignment = 1
 vertical_alignment = 1
 
 [node name="NextButton" type="Button" parent="Center/PageNav"]
-custom_minimum_size = Vector2(70, 56)
+custom_minimum_size = Vector2(82, 64)
 layout_mode = 2
 theme_override_colors/font_color = Color(0.964706, 0.913726, 0.8, 1)
 theme_override_fonts/font = ExtResource("2_font")
-theme_override_font_sizes/font_size = 34
+theme_override_font_sizes/font_size = 40
 theme_override_styles/normal = SubResource("StyleBoxFlat_button_normal")
 theme_override_styles/hover = SubResource("StyleBoxFlat_button_hover")
 text = ">"
 
 [node name="BackButton" type="Button" parent="Center"]
-custom_minimum_size = Vector2(260, 66)
+custom_minimum_size = Vector2(280, 74)
 layout_mode = 2
 theme_override_colors/font_color = Color(0.964706, 0.913726, 0.8, 1)
 theme_override_fonts/font = ExtResource("2_font")
-theme_override_font_sizes/font_size = 34
+theme_override_font_sizes/font_size = 38
 theme_override_styles/normal = SubResource("StyleBoxFlat_button_normal")
 theme_override_styles/hover = SubResource("StyleBoxFlat_button_hover")
 text = "BACK"
