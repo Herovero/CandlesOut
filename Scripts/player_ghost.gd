@@ -16,6 +16,8 @@ func _ready():
 	anim.play()
 
 func _physics_process(_delta: float) -> void:
+	if velocity.x != 0:
+		anim.flip_h = velocity.x > 0
 	if is_picking:
 		velocity = Vector2.ZERO
 		move_and_slide()

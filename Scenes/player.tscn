@@ -1,4 +1,4 @@
-[gd_scene format=4 uid="uid://c4sy607bwof83"]
+[gd_scene format=3 uid="uid://c4sy607bwof83"]
 
 [ext_resource type="Script" uid="uid://dwsroubvetdac" path="res://Scripts/player.gd" id="1_ndhuy"]
 [ext_resource type="AudioStream" uid="uid://xo6t8svnw0p" path="res://SFX/Player/Footstep.wav" id="3_6t5aa"]
@@ -12,7 +12,6 @@
 [ext_resource type="AudioStream" uid="uid://bgby2m44b4drh" path="res://SFX/Player/Sleep_2.wav" id="10_gymyn"]
 [ext_resource type="AudioStream" uid="uid://bdfei55y80m1o" path="res://SFX/Player/Blocked_bullet.wav" id="11_gymyn"]
 [ext_resource type="Material" uid="uid://d2fpvm2xbtuil" path="res://Assets/tv_static.tres" id="12_pu2lt"]
-[ext_resource type="Texture2D" uid="uid://biv8vykh0s88f" path="res://Assets/2D Pixel Dungeon Asset Pack/character and tileset/Dungeon_Tileset.png" id="13_ukyrk"]
 
 [sub_resource type="RectangleShape2D" id="RectangleShape2D_cvnsp"]
 size = Vector2(64, 64)
@@ -34,21 +33,6 @@ border_width_right = 2
 border_width_bottom = 2
 border_color = Color(0.152941, 0.458824, 0.309804, 1)
 anti_aliasing = false
-
-[sub_resource type="Gradient" id="Gradient_candle_glow"]
-offsets = PackedFloat32Array(0, 0.16, 0.42, 1)
-colors = PackedColorArray(1, 0.807843, 0.501961, 0.9, 1, 0.65098, 0.266667, 0.45, 0.960784, 0.34902, 0.12549, 0.16, 0, 0, 0, 0)
-
-[sub_resource type="GradientTexture2D" id="GradientTexture2D_candle_glow"]
-gradient = SubResource("Gradient_candle_glow")
-width = 48
-height = 48
-fill = 1
-fill_from = Vector2(0.5, 0.5)
-fill_to = Vector2(1, 0.5)
-
-[sub_resource type="CanvasItemMaterial" id="CanvasItemMaterial_candle_glow"]
-blend_mode = 1
 
 [sub_resource type="AtlasTexture" id="AtlasTexture_3smsa"]
 atlas = ExtResource("4_fkybt")
@@ -138,132 +122,22 @@ animations = [{
 "speed": 5.0
 }]
 
+[sub_resource type="CanvasItemMaterial" id="CanvasItemMaterial_candle_glow"]
+blend_mode = 1
+
+[sub_resource type="Gradient" id="Gradient_candle_glow"]
+offsets = PackedFloat32Array(0, 0.16, 0.42, 1)
+colors = PackedColorArray(1, 0.807843, 0.501961, 0.9, 1, 0.65098, 0.266667, 0.45, 0.960784, 0.34902, 0.12549, 0.16, 0, 0, 0, 0)
+
+[sub_resource type="GradientTexture2D" id="GradientTexture2D_candle_glow"]
+gradient = SubResource("Gradient_candle_glow")
+width = 48
+height = 48
+fill = 1
+fill_from = Vector2(0.5, 0.5)
+fill_to = Vector2(1, 0.5)
+
 [sub_resource type="SpriteFrames" id="SpriteFrames_fkybt"]
-
-[sub_resource type="TileSetAtlasSource" id="TileSetAtlasSource_7dp3o"]
-texture = ExtResource("13_ukyrk")
-0:0/0 = 0
-0:0/0/physics_layer_0/polygon_0/points = PackedVector2Array(-8, -8, 8, -8, 8, 8, -8, 8)
-1:0/0 = 0
-1:0/0/physics_layer_0/polygon_0/points = PackedVector2Array(-8, -8, 8, -8, 8, 8, -8, 8)
-2:0/0 = 0
-2:0/0/physics_layer_0/polygon_0/points = PackedVector2Array(-8, -8, 8, -8, 8, 8, -8, 8)
-3:0/0 = 0
-3:0/0/physics_layer_0/polygon_0/points = PackedVector2Array(-8, -8, 8, -8, 8, 8, -8, 8)
-4:0/0 = 0
-4:0/0/physics_layer_0/polygon_0/points = PackedVector2Array(-8, -8, 8, -8, 8, 8, -8, 8)
-5:0/0 = 0
-5:0/0/physics_layer_0/polygon_0/points = PackedVector2Array(-8, -8, 8, -8, 8, 8, -8, 8)
-6:0/0 = 0
-7:0/0 = 0
-8:0/0 = 0
-9:0/0 = 0
-0:1/0 = 0
-0:1/0/physics_layer_0/polygon_0/points = PackedVector2Array(-8, -8, 8, -8, 8, 8, -8, 8)
-1:1/0 = 0
-2:1/0 = 0
-3:1/0 = 0
-4:1/0 = 0
-5:1/0 = 0
-5:1/0/physics_layer_0/polygon_0/points = PackedVector2Array(-8, -8, 8, -8, 8, 8, -8, 8)
-6:1/0 = 0
-7:1/0 = 0
-8:1/0 = 0
-9:1/0 = 0
-0:2/0 = 0
-0:2/0/physics_layer_0/polygon_0/points = PackedVector2Array(-8, -8, 8, -8, 8, 8, -8, 8)
-1:2/0 = 0
-2:2/0 = 0
-3:2/0 = 0
-4:2/0 = 0
-5:2/0 = 0
-5:2/0/physics_layer_0/polygon_0/points = PackedVector2Array(-8, -8, 8, -8, 8, 8, -8, 8)
-6:2/0 = 0
-7:2/0 = 0
-8:2/0 = 0
-9:2/0 = 0
-0:3/0 = 0
-0:3/0/physics_layer_0/polygon_0/points = PackedVector2Array(-8, -8, 8, -8, 8, 8, -8, 8)
-1:3/0 = 0
-2:3/0 = 0
-3:3/0 = 0
-4:3/0 = 0
-5:3/0 = 0
-5:3/0/physics_layer_0/polygon_0/points = PackedVector2Array(-8, -8, 8, -8, 8, 8, -8, 8)
-6:3/0 = 0
-7:3/0 = 0
-8:3/0 = 0
-9:3/0 = 0
-0:4/0 = 0
-0:4/0/physics_layer_0/polygon_0/points = PackedVector2Array(-8, -8, 8, -8, 8, 8, -8, 8)
-1:4/0 = 0
-1:4/0/physics_layer_0/polygon_0/points = PackedVector2Array(-8, -8, 8, -8, 8, 8, -8, 8)
-2:4/0 = 0
-2:4/0/physics_layer_0/polygon_0/points = PackedVector2Array(-8, -8, 8, -8, 8, 8, -8, 8)
-3:4/0 = 0
-3:4/0/physics_layer_0/polygon_0/points = PackedVector2Array(-8, -8, 8, -8, 8, 8, -8, 8)
-4:4/0 = 0
-4:4/0/physics_layer_0/polygon_0/points = PackedVector2Array(-8, -8, 8, -8, 8, 8, -8, 8)
-5:4/0 = 0
-5:4/0/physics_layer_0/polygon_0/points = PackedVector2Array(-8, -8, 8, -8, 8, 8, -8, 8)
-6:4/0 = 0
-7:4/0 = 0
-8:4/0 = 0
-9:4/0 = 0
-0:5/0 = 0
-1:5/0 = 0
-2:5/0 = 0
-3:5/0 = 0
-4:5/0 = 0
-5:5/0 = 0
-6:5/0 = 0
-7:5/0 = 0
-8:5/0 = 0
-9:5/0 = 0
-0:6/0 = 0
-1:6/0 = 0
-2:6/0 = 0
-3:6/0 = 0
-4:6/0 = 0
-5:6/0 = 0
-6:6/0 = 0
-7:6/0 = 0
-8:6/0 = 0
-9:6/0 = 0
-0:7/0 = 0
-1:7/0 = 0
-2:7/0 = 0
-3:7/0 = 0
-4:7/0 = 0
-5:7/0 = 0
-6:7/0 = 0
-7:7/0 = 0
-8:7/0 = 0
-9:7/0 = 0
-0:8/0 = 0
-1:8/0 = 0
-2:8/0 = 0
-3:8/0 = 0
-4:8/0 = 0
-5:8/0 = 0
-6:8/0 = 0
-7:8/0 = 0
-8:8/0 = 0
-9:8/0 = 0
-0:9/0 = 0
-1:9/0 = 0
-2:9/0 = 0
-3:9/0 = 0
-4:9/0 = 0
-5:9/0 = 0
-6:9/0 = 0
-7:9/0 = 0
-8:9/0 = 0
-9:9/0 = 0
-
-[sub_resource type="TileSet" id="TileSet_h4iuc"]
-physics_layer_0/collision_layer = 1
-sources/0 = SubResource("TileSetAtlasSource_7dp3o")
 
 [node name="Player" type="CharacterBody2D" unique_id=687220319]
 script = ExtResource("1_ndhuy")
@@ -311,14 +185,14 @@ sprite_frames = SubResource("SpriteFrames_h4iuc")
 animation = &"sleeping"
 frame_progress = 0.66868645
 
-[node name="CandleLight" type="Sprite2D" parent="."]
-position = Vector2(0, -16)
-texture = SubResource("GradientTexture2D_candle_glow")
-material = SubResource("CanvasItemMaterial_candle_glow")
-texture_filter = 1
-scale = Vector2(1.38, 1.38)
+[node name="CandleLight" type="Sprite2D" parent="." unique_id=29720195]
 modulate = Color(1, 0.733333, 0.423529, 0.78)
 z_index = 1
+texture_filter = 1
+material = SubResource("CanvasItemMaterial_candle_glow")
+position = Vector2(0, -16)
+scale = Vector2(1.38, 1.38)
+texture = SubResource("GradientTexture2D_candle_glow")
 
 [node name="GhostTransitionAnimation" type="AnimatedSprite2D" parent="." unique_id=52766954]
 sprite_frames = SubResource("SpriteFrames_fkybt")
@@ -352,13 +226,6 @@ anchor_bottom = 1.0
 grow_horizontal = 2
 grow_vertical = 2
 color = Color(1, 1, 1, 0)
-
-[node name="TileMapLayer2" type="TileMapLayer" parent="CanvasLayer/TvStatic" unique_id=79115838]
-z_index = -1
-position = Vector2(-144, -23)
-scale = Vector2(3, 3)
-tile_map_data = PackedByteArray("AAD3//v/AAAEAAYAAAD9//r/AAAEAAcAAAAJAPr/AAAEAAcAAAANAPr/AAAFAAcAAAAEAPr/AAAJAAUAAAD3/wYAAAAEAAYAAAAOAPv/AAAFAAYAAAABAPr/AAAEAAYAAAABAAgAAAAEAAYAAAA=")
-tile_set = SubResource("TileSet_h4iuc")
 
 [connection signal="timeout" from="HitStunTimer" to="." method="_on_hit_stun_timer_timeout"]
 [connection signal="timeout" from="InvincibilityTimer" to="." method="_on_invincibility_timer_timeout"]
