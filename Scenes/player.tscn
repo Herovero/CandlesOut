@@ -15,6 +15,24 @@
 [sub_resource type="RectangleShape2D" id="RectangleShape2D_cvnsp"]
 size = Vector2(64, 64)
 
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_stamina_bg"]
+bg_color = Color(0.0666667, 0.054902, 0.0980392, 1)
+border_width_left = 3
+border_width_top = 3
+border_width_right = 3
+border_width_bottom = 3
+border_color = Color(0.439216, 0.372549, 0.564706, 1)
+anti_aliasing = false
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_stamina_fill"]
+bg_color = Color(0.392157, 0.913725, 0.584314, 1)
+border_width_left = 2
+border_width_top = 2
+border_width_right = 2
+border_width_bottom = 2
+border_color = Color(0.152941, 0.458824, 0.309804, 1)
+anti_aliasing = false
+
 [sub_resource type="AtlasTexture" id="AtlasTexture_3smsa"]
 atlas = ExtResource("4_fkybt")
 region = Rect2(0, 0, 20, 23)
@@ -105,32 +123,6 @@ animations = [{
 
 [sub_resource type="SpriteFrames" id="SpriteFrames_fkybt"]
 
-[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_stamina_bg"]
-bg_color = Color(0.0666667, 0.054902, 0.0980392, 1)
-border_width_left = 3
-border_width_top = 3
-border_width_right = 3
-border_width_bottom = 3
-border_color = Color(0.439216, 0.372549, 0.564706, 1)
-corner_radius_top_left = 0
-corner_radius_top_right = 0
-corner_radius_bottom_right = 0
-corner_radius_bottom_left = 0
-anti_aliasing = false
-
-[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_stamina_fill"]
-bg_color = Color(0.392157, 0.913725, 0.584314, 1)
-border_width_left = 2
-border_width_top = 2
-border_width_right = 2
-border_width_bottom = 2
-border_color = Color(0.152941, 0.458824, 0.309804, 1)
-corner_radius_top_left = 0
-corner_radius_top_right = 0
-corner_radius_bottom_right = 0
-corner_radius_bottom_left = 0
-anti_aliasing = false
-
 [node name="Player" type="CharacterBody2D" unique_id=687220319]
 script = ExtResource("1_ndhuy")
 
@@ -153,9 +145,9 @@ offset_right = 51.0
 offset_bottom = 7.0
 grow_horizontal = 2
 grow_vertical = 2
-show_percentage = false
 theme_override_styles/background = SubResource("StyleBoxFlat_stamina_bg")
 theme_override_styles/fill = SubResource("StyleBoxFlat_stamina_fill")
+show_percentage = false
 
 [node name="HitStunTimer" type="Timer" parent="." unique_id=628529596]
 one_shot = true

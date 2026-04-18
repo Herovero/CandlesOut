@@ -133,7 +133,7 @@ func on_enemy_died():
 
 func _on_start_timer_timeout() -> void:
 	ost_manager.play_wave_ost(1)
-	set_max_enemy(4)
+	set_max_enemy(3)
 	start_wave(1)
 	pass # Replace with function body.
 
@@ -156,12 +156,12 @@ func _on_wave_completed(wave_number: int):
 	match wave_number:
 		1:
 			await get_tree().create_timer(2.0).timeout
-			set_max_enemy(5)
+			set_max_enemy(4)
 			start_wave(2)
 			ost_manager.play_wave_ost(1)
 		2:
 			await get_tree().create_timer(2.0).timeout
-			set_max_enemy(6)
+			set_max_enemy(5)
 			start_wave(3)
 			ost_manager.play_wave_ost(2)
 			Global.item_spawner.set_bomb_phase(true)

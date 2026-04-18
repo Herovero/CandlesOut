@@ -1,7 +1,7 @@
 extends CharacterBody2D
 
 @export var input_prefix: String = "p1_"
-@export var speed: float = 300.0 # Maybe ghosts move faster?
+@export var speed: float = 400.0 # Maybe ghosts move faster?
 @export var throw_distance: float = 250.0
 
 @onready var interaction_area: Area2D = $InteractionArea

@@ -9,6 +9,7 @@ size = Vector2(208, 27)
 script = ExtResource("1_ohbek")
 
 [node name="Timer" type="Timer" parent="." unique_id=2096049769]
+wait_time = 2.0
 autostart = true
 
 [node name="Area2D" type="Area2D" parent="." unique_id=533718422]
