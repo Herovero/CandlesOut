@@ -182,7 +182,7 @@ func enter_sleep():
 	
 	var tween = create_tween().set_parallel(true)
 	tween.tween_property(active_ghost, "modulate:a", 1.0, 0.5) # Fade in
-	tween.tween_property(active_ghost, "global_position", end_pos, 1.5)\
+	tween.tween_property(active_ghost, "global_position", end_pos, 0.8)\
 		.set_trans(Tween.TRANS_CUBIC).set_ease(Tween.EASE_OUT)
 	
 	# Wait for the tween to finish before allowing a Game Over
@@ -220,9 +220,9 @@ func trigger_ghost_return():
 		
 		# 3. Setup the return tween (1.0s flight as per your current code)
 		var tween = create_tween().set_parallel(true)
-		tween.tween_property(active_ghost, "global_position", global_position, 1.0)\
+		tween.tween_property(active_ghost, "global_position", global_position, 0.8)\
 			.set_trans(Tween.TRANS_BACK).set_ease(Tween.EASE_IN)
-		tween.tween_property(active_ghost, "modulate:a", 0.0, 1.0)
+		tween.tween_property(active_ghost, "modulate:a", 0.0, 0.8)
 		
 		await tween.finished
 		
