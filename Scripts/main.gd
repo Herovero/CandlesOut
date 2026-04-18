@@ -18,6 +18,7 @@ extends Node2D
 
 const UI_FONT: FontFile = preload("res://Assets/False Earthdream.ttf")
 const PAUSE_BLUR_SHADER: Shader = preload("res://Assets/ui_pause_blur.gdshader")
+const PLAYER_WALK_TEXTURE: Texture2D = preload("res://Assets/walk.png")
 
 var boss_hp_container: VBoxContainer
 var boss_hp_label: Label
@@ -29,6 +30,11 @@ var phase_overlay_label: Label
 var pause_overlay: Control
 var pause_blur_rect: ColorRect
 var pause_icon_label: Label
+
+var victory_overlay: Control
+var victory_bg: ColorRect
+var victory_label: Label
+var victory_candle: AnimatedSprite2D
 
 var phase_transition_running: bool = false
 var pending_phase_two_refill: bool = false
@@ -50,6 +56,7 @@ func _ready():
 	_setup_boss_ui()
 	_setup_phase_overlay()
 	_setup_pause_overlay()
+	_setup_victory_overlay()
 
 	SignalBus.connect("game_over", _on_game_over)
 	SignalBus.connect("boss_hp_init", _on_boss_hp_init)
@@ -215,6 +222,72 @@ func _setup_pause_overlay() -> void:
 	huds.add_child(pause_overlay)
 
 
+func _setup_victory_overlay() -> void:
+	victory_overlay = Control.new()
+	victory_overlay.name = "VictoryOverlay"
+	victory_overlay.set_anchors_preset(Control.PRESET_FULL_RECT)
+	victory_overlay.offset_left = 0.0
+	victory_overlay.offset_top = 0.0
+	victory_overlay.offset_right = 0.0
+	victory_overlay.offset_bottom = 0.0
+	victory_overlay.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	victory_overlay.process_mode = Node.PROCESS_MODE_ALWAYS
+	victory_overlay.visible = false
+
+	victory_bg = ColorRect.new()
+	victory_bg.set_anchors_preset(Control.PRESET_FULL_RECT)
+	victory_bg.color = Color(0.02, 0.02, 0.03, 0.7)
+	victory_overlay.add_child(victory_bg)
+
+	victory_label = Label.new()
+	victory_label.set_anchors_preset(Control.PRESET_CENTER)
+	victory_label.offset_left = -760.0
+	victory_label.offset_top = -120.0
+	victory_label.offset_right = 760.0
+	victory_label.offset_bottom = 120.0
+	victory_label.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+	victory_label.vertical_alignment = VERTICAL_ALIGNMENT_CENTER
+	victory_label.text = "THANKS FOR PLAYING!"
+	victory_label.add_theme_font_override("font", UI_FONT)
+	victory_label.add_theme_font_size_override("font_size", 100)
+	victory_label.add_theme_color_override("font_color", Color(1.0, 0.95, 0.84, 1.0))
+	victory_label.add_theme_color_override("font_outline_color", Color(0, 0, 0, 1))
+	victory_label.add_theme_constant_override("outline_size", 12)
+	victory_overlay.add_child(victory_label)
+
+	victory_candle = AnimatedSprite2D.new()
+	victory_candle.sprite_frames = _create_walking_candle_frames()
+	victory_candle.animation = "walking"
+	victory_candle.scale = Vector2(8, 8)
+	victory_candle.process_mode = Node.PROCESS_MODE_ALWAYS
+	victory_overlay.add_child(victory_candle)
+	_position_victory_candle()
+
+	huds.add_child(victory_overlay)
+
+
+func _create_walking_candle_frames() -> SpriteFrames:
+	var frames := SpriteFrames.new()
+	frames.add_animation("walking")
+	frames.set_animation_loop("walking", true)
+	frames.set_animation_speed("walking", 5.0)
+
+	for i in 5:
+		var frame := AtlasTexture.new()
+		frame.atlas = PLAYER_WALK_TEXTURE
+		frame.region = Rect2(float(i) * 20.0, 0.0, 20.0, 23.0)
+		frames.add_frame("walking", frame)
+
+	return frames
+
+
+func _position_victory_candle() -> void:
+	if not is_instance_valid(victory_candle):
+		return
+	var size = get_viewport_rect().size
+	victory_candle.position = Vector2(size.x * 0.5 + 520.0, size.y * 0.5 + 8.0)
+
+
 func toggle_pause() -> void:
 	if phase_transition_running:
 		return
@@ -308,6 +381,14 @@ func _on_boss_phase_two_transition_started() -> void:
 
 func _on_boss_defeated() -> void:
 	boss_hp_container.visible = false
+	wave_label.hide()
+	is_manual_paused = false
+	_hide_pause_menu()
+	await get_tree().create_timer(2.0).timeout
+	victory_overlay.visible = true
+	_position_victory_candle()
+	victory_candle.play("walking")
+	get_tree().paused = true
 
 
 func check_total_sleep_condition():

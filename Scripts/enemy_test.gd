@@ -47,6 +47,7 @@ func _ready() -> void:
 	sprite.sprite_frames.set_animation_speed("idle", 10)
 	sprite.sprite_frames.set_animation_speed("move", 10)
 	sprite.sprite_frames.set_animation_speed("attack", 10)
+	sprite.sprite_frames.set_animation_speed("death", 20)
 	sprite.play("idle")
 
 
@@ -142,6 +143,7 @@ func take_damage(amount: float) -> void:
 	hp = clamp(hp - amount, 0.0, max_hp)
 	if hp <= 0.0:
 		is_dying = true
+		sprite.play("death")
 		print(self, " is dying")
 		death_sound.volume_db = -10.0
 		death_sound.play()

@@ -30,9 +30,16 @@ func _ready() -> void:
 	sprite.sprite_frames.set_animation_speed("idle", 9)
 	sprite.sprite_frames.set_animation_speed("run", 9)
 	sprite.sprite_frames.set_animation_speed("attack", 9)
+	sprite.sprite_frames.set_animation_speed("death", 16)
 	sprite.play("idle")
 
 func _physics_process(delta: float) -> void:
+	if is_dying:
+		velocity = Vector2.ZERO
+		knockback_velocity = Vector2.ZERO
+		move_and_slide()
+		return
+		
 	var target = find_closest_player()
 	var direction = Vector2.ZERO
 	var target_distance: float = INF
@@ -62,8 +69,10 @@ func _physics_process(delta: float) -> void:
 	velocity = move_velocity + knockback_velocity
 	if ( velocity.x != 0 || velocity.y != 0):
 		sprite.play("run")
-	if velocity.x != 0:
+	if (velocity.x != 0):
 		sprite.flip_h = velocity.x < 0
+	if is_dying:
+		sprite.flip_h = last_move_dir.x < 0
 	knockback_velocity *= 0.85
 
 	shoot_cooldown -= delta
@@ -77,7 +86,7 @@ func _physics_process(delta: float) -> void:
 
 
 func shoot_projectile(shoot_dir: Vector2) -> void:
-	sprite.play("attack")
+	# sprite.play("attack")
 	if projectile_scene == null:
 		return
 
@@ -112,4 +121,3 @@ func play_shoot_sound():
 	shoot_sound.play()
 	await shoot_sound.finished
 	Global.active_shoot_sound_count -= 1
-	
