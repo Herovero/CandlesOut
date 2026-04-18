@@ -19,12 +19,13 @@ const SHOE_ICON = preload("res://Assets/Sprites/item_shoe.png")
 
 @export var max_stamina: float = 100.0
 var current_stamina: float = 100.0
-@export var depletion_rate: float = 10.0
-@export var recharge_rate: float = 10.0
+@export var depletion_rate: float = 50.0
+@export var recharge_rate: float = 20.0
 #@export var depletion_rate: float = 10.0
 #@export var recharge_rate: float = 5.0
 
 var is_sleeping: bool = false
+var is_returning: bool = false
 var ghost_scene = preload("res://Scenes/player_ghost.tscn")
 var active_ghost: CharacterBody2D = null
 
@@ -171,11 +172,32 @@ func enter_sleep():
 
 func handle_sleep(delta):
 	current_stamina += recharge_rate * delta
-
 	current_stamina = min(current_stamina, max_stamina)
+	
+	if current_stamina >= max_stamina * 0.8 and not is_returning and active_ghost:
+		trigger_ghost_return()
 
 	if current_stamina >= max_stamina:
 		wake_up()
+
+func trigger_ghost_return():
+	is_returning = true
+	
+	if active_ghost:
+		# Disable ghost movement while it's returning
+		active_ghost.set_physics_process(false) 
+		
+		var tween = create_tween().set_parallel(true)
+		# Fly back to the sleeping player's position
+		tween.tween_property(active_ghost, "global_position", global_position, 1.0)\
+			.set_trans(Tween.TRANS_BACK).set_ease(Tween.EASE_IN)
+		# Fade out as it arrives
+		#tween.tween_property(active_ghost, "modulate:a", 0.0, 1.0)
+		
+		await tween.finished
+		
+	is_returning = false
+	wake_up() # Actually wake the player after the ghost "merges"
 
 func wake_up():
 	is_sleeping = false
