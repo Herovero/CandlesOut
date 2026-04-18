@@ -13,6 +13,7 @@ func _ready() -> void:
 	_bind_button_feedback(play_button)
 	_bind_button_feedback(tutorial_button)
 
+	_setup_volume_slider_visuals()
 	volume_slider.value_changed.connect(_on_volume_changed)
 
 	await get_tree().process_frame
@@ -58,6 +59,15 @@ func _bind_button_feedback(button: Button) -> void:
 	button.button_up.connect(func() -> void:
 		animate_button_scale(button, Vector2(1.04, 1.04), 0.08)
 	)
+
+
+func _setup_volume_slider_visuals() -> void:
+	var img := Image.create(2, 2, false, Image.FORMAT_RGBA8)
+	img.fill(Color(1, 1, 1, 0))
+	var transparent_icon := ImageTexture.create_from_image(img)
+	volume_slider.add_theme_icon_override("grabber", transparent_icon)
+	volume_slider.add_theme_icon_override("grabber_highlight", transparent_icon)
+	volume_slider.add_theme_icon_override("grabber_disabled", transparent_icon)
 
 
 func animate_button_scale(button: Button, target: Vector2, duration: float) -> void:
