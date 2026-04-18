@@ -38,6 +38,7 @@ animations = [{
 
 [node name="EnemyBoss" type="CharacterBody2D" unique_id=1538485009 groups=["Enemies"]]
 script = ExtResource("1_script")
+max_hp = 20.0
 
 [node name="CollisionShape2D" type="CollisionShape2D" parent="." unique_id=1304806297]
 visible = false

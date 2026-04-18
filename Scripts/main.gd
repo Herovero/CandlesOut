@@ -115,7 +115,7 @@ func _setup_boss_ui() -> void:
 	boss_hp_container.visible = false
 
 	boss_hp_label = Label.new()
-	boss_hp_label.text = "BOSS"
+	boss_hp_label.text = "Birthday Boy"
 	boss_hp_label.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 	boss_hp_label.modulate = Color(1.0, 0.93, 0.78, 1.0)
 	boss_hp_label.add_theme_font_override("font", UI_FONT)
