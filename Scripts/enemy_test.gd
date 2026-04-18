@@ -33,9 +33,11 @@ var attack_dir: Vector2 = Vector2.RIGHT
 @onready var death_sound = $EnemyDies
 var is_dying: bool = false
 @onready var footstep_enemy = $EnemyFootStep
+@onready var slash_sfx: AudioStreamPlayer2D = get_node_or_null("Slash")
 @export var footstep_interval: float = 0.5
 var footstep_timer: float = 0.0
 var attacking_animation: bool = false
+
 
 func _ready() -> void:
 	motion_mode = CharacterBody2D.MOTION_MODE_FLOATING
@@ -141,7 +143,7 @@ func take_damage(amount: float) -> void:
 	if hp <= 0.0:
 		is_dying = true
 		print(self, " is dying")
-		death_sound.volume_db = -10.0 
+		death_sound.volume_db = -10.0
 		death_sound.play()
 		await death_sound.finished
 		queue_free()
@@ -155,8 +157,24 @@ func start_attack() -> void:
 	attack_damage_applied = false
 	attack_elapsed = 0.0
 	attacking_animation = true
+
 	sprite.play("attack")
 	attack_timer.start()
+
+	if slash_sfx:
+		play_slash_sfx()
+
+	var dir = (body.global_position - global_position).normalized()
+	if body.has_method("receive_hit"):
+		body.receive_hit(damage_amount, dir * 240, true)
+		post_hit_pause_left = post_hit_pause_duration
+		return
+
+	if body.has_method("is_damage_blocked") and body.is_damage_blocked():
+		return
+
+	SignalBus.emit_signal("take_damage", damage_amount, body.input_prefix)
+	post_hit_pause_left = post_hit_pause_duration
 
 
 func perform_cone_attack() -> void:
@@ -191,7 +209,7 @@ func _on_hitbox_body_exited(_body):
 
 func _on_attack_timer_timeout() -> void:
 	return
-	
+
 func play_footstep():
 	if Global.active_footstep_count >= Global.MAX_ENEMY_FOOTSTEPS:
 		return
@@ -201,15 +219,15 @@ func play_footstep():
 	footstep_enemy.play()
 	await footstep_enemy.finished
 	Global.active_footstep_count -= 1
-	
+
 func handle_footsteps(delta, direction):
-	
+
 	if direction == Vector2.ZERO:
 		if attacking_animation == false:
 			sprite.play("idle")
 		footstep_timer = 0.0
 		return
-	
+
 	footstep_timer -= delta
 	if footstep_timer <= 0.0:
 		if attacking_animation == false:
@@ -220,3 +238,15 @@ func handle_footsteps(delta, direction):
 func _on_animation_finished():
 	if sprite.animation == "attack":
 		attacking_animation = false
+
+func play_slash_sfx():
+	await get_tree().create_timer(0.5).timeout
+	var sfx = AudioStreamPlayer2D.new()
+	slash_sfx.volume_db = -5.0
+	sfx.stream = slash_sfx.stream
+	sfx.global_position = global_position
+
+	get_tree().current_scene.add_child(sfx)
+	sfx.play()
+
+	sfx.finished.connect(sfx.queue_free)

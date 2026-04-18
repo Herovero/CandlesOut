@@ -6,28 +6,52 @@ var throwing_ghost: CharacterBody2D = null
 
 @onready var heart_sfx: AudioStreamPlayer2D = get_node_or_null("HeartSFX")
 
+# Visual polish
+var float_time: float = 0.0
+@export var float_speed: float = 2.0
+@export var float_amplitude: float = 4.0
+@onready var item_sprite = $Sprite2D # Or whatever your visual node is named
+
 # Called when the node enters the scene tree for the first time.
 func _ready():
 	visible = false
 	monitorable = false
 	monitoring = false
 	
-	SignalBus.connect("item_spawned", show_item)
 	SignalBus.connect("ghost_mode_ended", hide_item)
 
 # Called every frame. 'delta' is the elapsed time since the previous frame.
 func _process(delta):
-	pass
+	item_sprite.modulate.a = randf_range(0.4, 0.6) # Constant subtle spiritual flicker
+	# Only bob if the item is not being held or thrown
+	if not is_thrown and get_parent().name != "PlayerGhost": 
+		float_time += delta
+		# Use a sine wave for smooth floating logic
+		item_sprite.position.y = sin(float_time * float_speed) * float_amplitude
 
 func show_item():
+	modulate.a = 0.0
 	visible = true
+	
+	var tween = create_tween()
+	tween.tween_property(self, "modulate:a", 1.0, 0.5)\
+		.set_trans(Tween.TRANS_SINE)\
+		.set_ease(Tween.EASE_OUT)
+		
 	set_deferred("monitorable", true)
 	set_deferred("monitoring", true)
 
 func hide_item():
-	visible = false
 	set_deferred("monitorable", false)
 	set_deferred("monitoring", false)
+	
+	var tween = create_tween()
+	tween.tween_property(self, "modulate:a", 0.0, 0.4)\
+		.set_trans(Tween.TRANS_SINE)\
+		.set_ease(Tween.EASE_IN)
+	
+	# Hide the node only after the animation is finished
+	tween.tween_callback(func(): visible = false)
 
 func on_collected(target_ghost: CharacterBody2D):
 	# Now 'target_ghost' is declared and usable!
@@ -77,8 +101,10 @@ func on_dropped():
 func _finish_drop(ghost):
 	monitoring = true
 	monitorable = true
-	if is_instance_valid(ghost):
-		ghost.is_picking = false
+	
+	if is_instance_valid(ghost) and ghost is CharacterBody2D:
+		if "is_picking" in ghost:
+			ghost.is_picking = false
 		
 func _attach_to_ghost(ghost: CharacterBody2D, offset: Vector2):
 	if is_instance_valid(ghost):
@@ -123,8 +149,10 @@ func _finish_throw(ghost):
 	# Re-enable detection so it can be picked up again at its new location
 	monitoring = true
 	monitorable = true
-	if is_instance_valid(ghost):
-		ghost.is_picking = false
+	
+	if is_instance_valid(ghost) and ghost is CharacterBody2D:
+		if "is_picking" in ghost:
+			ghost.is_picking = false
 
 func _on_body_entered(body):
 	# Only trigger if the item is currently flying

@@ -4,6 +4,8 @@ extends Node2D
 @onready var spawn_timer = $Timer  # add a Timer node as child of WaveManager
 signal wave_completed(wave_number : int)
 
+@onready var wave_notice_label = $"../HUDs/wave_label"
+
 const WAVE_DATA = {
 	1: [
 		{"scene": preload("res://Scenes/enemy_test.tscn"), "count": 10},
@@ -51,6 +53,29 @@ func start_wave(wave_number: int):
 
 	# optional: shuffle so enemy types are mixed
 	spawn_queue.shuffle()
+	
+	if wave_notice_label:
+		wave_notice_label.text = "WAVE " + str(wave_number)
+		wave_notice_label.modulate.a = 0 # Start fully transparent
+		wave_notice_label.show()
+		
+		# Create a tween for the sequence
+		var tween = create_tween()
+		
+		# 1. Fade In (0.5 seconds)
+		tween.tween_property(wave_notice_label, "modulate:a", 1.0, 0.5)
+		
+		# 2. Stay visible
+		tween.tween_interval(2.0)
+		
+		# 3. Fade Out (0.5 seconds)
+		tween.tween_property(wave_notice_label, "modulate:a", 0.0, 0.5)
+		
+		# 4. Final Cleanup
+		tween.tween_callback(wave_notice_label.hide)
+		
+		# Wait for the whole sequence to finish before spawning
+		await tween.finished
 
 	print("Wave %d started! Total enemies: %d" % [current_wave, spawn_queue.size()])
 	try_spawn()
@@ -106,12 +131,32 @@ func _on_start_timer_timeout() -> void:
 
 func _on_wave_completed(wave_number: int):
 	print("Wave signal emmitted")
+	
+	if ost_manager:
+		ost_manager.stop_all()
+	
+	# Guard against null tree during scene transitions/restarts 
+	if not is_inside_tree():
+		return
+	
+	await get_tree().create_timer(2.0).timeout
+	
+	# Re-check after the await, as the scene might have changed during the 2s wait
+	if not is_inside_tree():
+		return
+	
 	match wave_number:
 		1:
+			await get_tree().create_timer(2.0).timeout
 			start_wave(2)
+			ost_manager.play_wave_ost(1)
 		2:
+			await get_tree().create_timer(2.0).timeout
 			start_wave(3)
+			ost_manager.play_wave_ost(3)
 		3:
+			await get_tree().create_timer(2.0).timeout
 			start_wave(4)
+			ost_manager.play_wave_ost(3)
 		4:
 			print("Boss defeated! All waves complete.")

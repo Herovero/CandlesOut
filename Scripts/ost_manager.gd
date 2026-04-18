@@ -2,7 +2,7 @@ extends Node
 
 
 @onready var tracks = [ $OST1, $OST2, $OST3 ]
-
+@onready var intros = [ $Intro1, $Intro2, $Intro3 ]
 @export var fade_speed: float = 1.0 # how fast tracks crossfade 
 var current_track: AudioStreamPlayer = null
 
@@ -18,6 +18,8 @@ func play_wave_ost(wave_number: int):
 	
 	if current_track:
 		fade_out(current_track)
+	
+	await _play_intro(wave_number)  # wait for intro to finish before wave ost
 	
 	current_track = next_track
 	current_track.play()
@@ -39,3 +41,20 @@ func fade_in(track: AudioStreamPlayer):
 func set_volume(value: float):
 	for track in tracks:
 		track.volume_db = value
+		
+func _play_intro(wave_number: int):
+	var index = wave_number - 1 
+	if index < 0 or index >= intros.size():
+		return
+	var intro = intros[index]
+	intro.volume_db = -40.0
+	intro.play()
+	var tween = create_tween()
+	tween.tween_property(intro, "volume_db", 0.0, fade_speed)
+	await intro.finished
+	intro.stop()
+
+func stop_all():
+	for track in tracks:
+		track.stop()
+	current_track = null

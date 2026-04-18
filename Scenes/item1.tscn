@@ -4,6 +4,9 @@
 [ext_resource type="Texture2D" uid="uid://slrcerdwiuo" path="res://Assets/UIs/heart_full.png" id="2_1o0s7"]
 [ext_resource type="AudioStream" uid="uid://boyho6ynvl272" path="res://SFX/ItemSound/Heart.wav" id="3_1weea"]
 
+[sub_resource type="CanvasItemMaterial" id="CanvasItemMaterial_1weea"]
+blend_mode = 1
+
 [sub_resource type="CircleShape2D" id="CircleShape2D_1weea"]
 radius = 20.024984
 
@@ -13,7 +16,8 @@ collision_mask = 3
 script = ExtResource("1_pkys8")
 
 [node name="Sprite2D" type="Sprite2D" parent="." unique_id=171564091]
-scale = Vector2(0.2, 0.2)
+material = SubResource("CanvasItemMaterial_1weea")
+scale = Vector2(3, 3)
 texture = ExtResource("2_1o0s7")
 
 [node name="CollisionShape2D" type="CollisionShape2D" parent="." unique_id=40545649]

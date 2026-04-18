@@ -5,6 +5,7 @@ var speed: float = 200.0
 var base_speed: float = 200.0 # Store reference
 
 @export var projectile_scene: PackedScene = preload("res://Scenes/projectile.tscn")
+@export var afterimage_scene: PackedScene = preload("res://Scenes/afterimage.tscn")
 @export var shoot_interval: float = 0.5
 @export var projectile_speed: float = 200.0
 @export var projectile_damage: float = 1.0
@@ -14,19 +15,22 @@ var base_speed: float = 200.0 # Store reference
 @export var hit_stun_duration: float = 0.32
 @export var invincibility_duration: float = 0.32
 @export var flash_interval: float = 0.06
+@export var spawn_interval: float = 0.05
 
 const SHOE_ICON = preload("res://Assets/Sprites/item_shoe.png")
 
 @export var max_stamina: float = 100.0
 var current_stamina: float = 100.0
-@export var depletion_rate: float = 10.0
-@export var recharge_rate: float = 10.0
+@export var depletion_rate: float = 50.0
+@export var recharge_rate: float = 5.0
 #@export var depletion_rate: float = 10.0
 #@export var recharge_rate: float = 5.0
 
 var is_sleeping: bool = false
+var is_returning: bool = false
 var ghost_scene = preload("res://Scenes/player_ghost.tscn")
 var active_ghost: CharacterBody2D = null
+var is_transitioning_to_ghost: bool = false
 
 var knockback_velocity: Vector2 = Vector2.ZERO
 var shoot_cooldown: float = 0.0
@@ -102,6 +106,9 @@ func _physics_process(delta: float) -> void:
 	knockback_velocity *= 0.91
 	if knockback_velocity.length() < 15.0:
 		knockback_velocity = Vector2.ZERO
+		
+	if speed != base_speed:
+		spawn_afterimage()
 
 	shoot_cooldown -= delta
 	if not is_hit_stunned and direction != Vector2.ZERO:
@@ -146,6 +153,7 @@ func _on_restore_stamina(amount: float, target_id: String):
 	current_stamina += amount
 
 func enter_sleep():
+	is_transitioning_to_ghost = true
 	is_sleeping = true
 	velocity = Vector2.ZERO
 	modulate = Color(0.5, 0.5, 1.0) # Turn slightly blue/dark to show sleeping
@@ -153,23 +161,69 @@ func enter_sleep():
 	active_ghost = ghost_scene.instantiate()
 	active_ghost.input_prefix = input_prefix # Give the ghost your controls
 	active_ghost.global_position = global_position # Start at player's body
+	
+	active_ghost.modulate.a = 0.0 # Start invisible
+	var end_pos = global_position + Vector2(0, -60) # Float up slightly
+	
 	get_parent().call_deferred("add_child", active_ghost)
-
+	
+	await get_tree().process_frame
+	
+	var tween = create_tween().set_parallel(true)
+	tween.tween_property(active_ghost, "modulate:a", 1.0, 0.5) # Fade in
+	tween.tween_property(active_ghost, "global_position", end_pos, 1.5)\
+		.set_trans(Tween.TRANS_CUBIC).set_ease(Tween.EASE_OUT)
+	
+	# Wait for the tween to finish before allowing a Game Over
+	await tween.finished
+	is_transitioning_to_ghost = false
+	
 	SignalBus.emit_signal("ghost_mode_started")
 
 func handle_sleep(delta):
 	current_stamina += recharge_rate * delta
-
 	current_stamina = min(current_stamina, max_stamina)
+	
+	if current_stamina >= max_stamina and not is_returning:
+		if active_ghost:
+			trigger_ghost_return()
+		else:
+			wake_up() # Fallback if ghost was already destroyed
 
-	if current_stamina >= max_stamina:
-		wake_up()
+func trigger_ghost_return():
+	is_returning = true
+	
+	if is_instance_valid(active_ghost):
+		# Check if the ghost is holding an item
+		if active_ghost.held_item != null:
+			# Force the ghost to drop the item properly
+			active_ghost.drop_item()
+			
+			# Give it a tiny moment to finish the drop tween before flying back
+			await get_tree().create_timer(0.5).timeout
+		
+		# 2. Disable ghost input/movement for the return journey
+		active_ghost.set_physics_process(false)
+		active_ghost.set_process_input(false)
+		
+		# 3. Setup the return tween (1.0s flight as per your current code)
+		var tween = create_tween().set_parallel(true)
+		tween.tween_property(active_ghost, "global_position", global_position, 1.0)\
+			.set_trans(Tween.TRANS_BACK).set_ease(Tween.EASE_IN)
+		tween.tween_property(active_ghost, "modulate:a", 0.0, 1.0)
+		
+		await tween.finished
+		
+		# 4. Cleanup
+		active_ghost.queue_free()
+		active_ghost = null
+	
+	is_returning = false
+	wake_up()
 
 func wake_up():
 	is_sleeping = false
 	modulate = Color(1, 1, 1)
-	if active_ghost:
-		active_ghost.queue_free() # Remove the ghost when waking up
 
 	SignalBus.emit_signal("ghost_mode_ended")
 
@@ -351,6 +405,13 @@ func _on_speed_backfire_received(multiplier: float, duration: float, p_id: Strin
 		is_ramming_active = false
 		speed = base_speed
 		modulate = Color(1, 1, 1, 1)
+
+func spawn_afterimage():
+	var afterimg = afterimage_scene.instantiate()
+	get_parent().add_child(afterimg)
+	
+	afterimg.global_position = global_position
+	afterimg.show_afterimage(sprite)
 
 func _on_flash_timer_timeout() -> void:
 	flash_tint_on = not flash_tint_on

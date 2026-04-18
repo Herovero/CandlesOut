@@ -1,9 +1,10 @@
 [gd_scene format=3 uid="uid://dbovespj7y5o8"]
 
 [ext_resource type="Script" uid="uid://c2t7es6cljgi0" path="res://Scripts/enemy_test.gd" id="1_67vpr"]
-[ext_resource type="SpriteFrames" path="res://addons/duelyst_animated_sprites/assets/spritesheets/units/f4_crawler.tres" id="2_oyc1c"]
+[ext_resource type="SpriteFrames" uid="uid://bjx62bkfcak5o" path="res://addons/duelyst_animated_sprites/assets/spritesheets/units/f4_crawler.tres" id="2_oyc1c"]
 [ext_resource type="AudioStream" uid="uid://cxcdt0cwv4g4v" path="res://SFX/Enemy/EneFootstep.wav" id="3_kxk0d"]
 [ext_resource type="AudioStream" uid="uid://do4d7expdd4hw" path="res://SFX/Enemy/EneDead.wav" id="4_oyc1c"]
+[ext_resource type="AudioStream" uid="uid://c8b8eloxcr2ob" path="res://SFX/Enemy/enemySlash.wav" id="5_c3qj7"]
 
 [sub_resource type="RectangleShape2D" id="RectangleShape2D_67vpr"]
 size = Vector2(64, 64)
@@ -36,6 +37,9 @@ stream = ExtResource("3_kxk0d")
 
 [node name="EnemyDies" type="AudioStreamPlayer2D" parent="." unique_id=257612411]
 stream = ExtResource("4_oyc1c")
+
+[node name="Slash" type="AudioStreamPlayer2D" parent="." unique_id=25549398]
+stream = ExtResource("5_c3qj7")
 
 [connection signal="animation_finished" from="AnimatedSprite2D" to="." method="_on_animation_finished"]
 [connection signal="body_entered" from="Hitbox" to="." method="_on_hitbox_body_entered"]
