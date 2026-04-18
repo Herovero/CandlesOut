@@ -62,7 +62,7 @@ func _ready() -> void:
 	base_sprite_modulate = sprite.modulate
 	enter_idle()
 	sprite.sprite_frames.set_animation_speed("idle", 10)
-	sprite.play()
+	sprite.play("idle")
 
 	if not SignalBus.is_connected("boss_activate_phase_two", activate_phase_two):
 		SignalBus.connect("boss_activate_phase_two", activate_phase_two)
@@ -172,7 +172,7 @@ func enter_idle() -> void:
 	state_time_left = idle_duration
 	is_charging = false
 	velocity = Vector2.ZERO
-
+	sprite.play("idle")
 
 func fire_radial_burst() -> void:
 	if projectile_scene == null:
