@@ -9,6 +9,10 @@ var items = [
 	preload("res://Scenes/item_oil.tscn")
 ]
 
+var normal_weights = [10, 10, 10, 10, 10, 10]
+var bomb_weights =   [5,  40, 5,  5,  5,  5]  # bomb is index 1, much higher chance
+var current_weights: Array
+
 var can_spawn : bool = false
 @onready var spawn_area = $Area2D/CollisionShape2D
 @export var min_x: float = 0
@@ -43,15 +47,19 @@ func spawn_one() -> void:
 	if not can_spawn:
 		return
 	if items_alive >= MAX_ITEMS:
-		print("max item reached")
+		print_debug("max item reached")
 		return
 	
-	var random_item = items[randi() % items.size()]
+	var random_item = get_weighted_random_item()  # replace old randi() line
 	var item_instance = random_item.instantiate()
-	print("spawning item")
+	print_debug("spawning item")
 	item_instance.global_position = get_random_spawn_position()
 	get_tree().current_scene.add_child(item_instance)
-	SignalBus.emit_signal("item_spawned")
+	
+	# Call show_item directly on the new instance instead of using SignalBus 
+	if item_instance.has_method("show_item"):
+		item_instance.show_item()
+	
 	item_instance.add_to_group("items")
 	items_alive += 1
 	item_instance.tree_exited.connect(_on_item_removed)
@@ -61,22 +69,43 @@ func _on_item_removed() -> void:
 	
 # Called when the node enters the scene tree for the first time.
 func _ready() -> void:
+	current_weights = normal_weights.duplicate()
+	Global.item_spawner = self
 	SignalBus.connect("ghost_mode_started",  func(): set_spawn_state(true))
 	SignalBus.connect("ghost_mode_ended",  func(): set_spawn_state(false))
 	SignalBus.connect("ghost_mode_ended", func(): destroy_all_items())
 	pass # Replace with function body.
 
+func set_bomb_phase(enabled: bool) -> void:
+	current_weights = bomb_weights.duplicate() if enabled else normal_weights.duplicate()
+
+
 func destroy_all_items() -> void:
 	# get all children of current scene and remove items
 	print("destroy all items")
 	for item in get_tree().get_nodes_in_group("items"):
-		item.queue_free()
+		if item.has_method("hide_item"):
+			item.hide_item() # This triggers your new fade-out tween!
+		else:
+			item.queue_free()
 	items_alive = 0
 
 # Called every frame. 'delta' is the elapsed time since the previous frame.
 func _process(delta: float) -> void:
 	pass
-
+	
+func get_weighted_random_item():
+	var total_weight = 0
+	for w in current_weights:
+		total_weight += w
+	
+	var roll = randi() % total_weight
+	var cumulative = 0
+	for i in items.size():
+		cumulative += current_weights[i]
+		if roll < cumulative:
+			return items[i]
+	return items[0]
 
 func _on_timer_timeout() -> void:
 	spawn_one()
