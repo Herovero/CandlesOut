@@ -6,8 +6,8 @@ var items = [
 	#preload("res://Scenes/item_coffee.tscn"),
 	#preload("res://Scenes/item_shoe.tscn"),
 	#preload("res://Scenes/item_lighter.tscn"),
-	#preload("res://Scenes/item_oil.tscn"),
-	preload("res://Scenes/item_shield.tscn")
+	preload("res://Scenes/item_oil.tscn"),
+	#preload("res://Scenes/item_shield.tscn")
 ]
 
 var can_spawn : bool = false

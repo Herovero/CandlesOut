@@ -21,7 +21,7 @@ const SHOE_ICON = preload("res://Assets/Sprites/item_shoe.png")
 
 @export var max_stamina: float = 100.0
 var current_stamina: float = 100.0
-@export var depletion_rate: float = 50.0
+@export var depletion_rate: float = 20.0
 @export var recharge_rate: float = 5.0
 #@export var depletion_rate: float = 10.0
 #@export var recharge_rate: float = 5.0
@@ -334,7 +334,7 @@ func shoot_projectile(target: Node2D = null) -> void:
 
 	# Decide how many shots to fire
 	var shot_angles = [0.0]
-	if is_flamethrower_active or is_panicked_fire_active:
+	if is_flamethrower_active or is_panicked_fire_active or is_triple_shot_active:
 		shot_angles = [-0.52, 0.0, 0.52] # -30, 0, +30 degrees
 
 	for angle in shot_angles:
