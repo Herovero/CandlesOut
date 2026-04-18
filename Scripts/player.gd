@@ -20,7 +20,7 @@ const SHOE_ICON = preload("res://Assets/Sprites/item_shoe.png")
 @export var max_stamina: float = 100.0
 var current_stamina: float = 100.0
 @export var depletion_rate: float = 50.0
-@export var recharge_rate: float = 20.0
+@export var recharge_rate: float = 5.0
 #@export var depletion_rate: float = 10.0
 #@export var recharge_rate: float = 5.0
 
@@ -28,6 +28,7 @@ var is_sleeping: bool = false
 var is_returning: bool = false
 var ghost_scene = preload("res://Scenes/player_ghost.tscn")
 var active_ghost: CharacterBody2D = null
+var is_transitioning_to_ghost: bool = false
 
 var knockback_velocity: Vector2 = Vector2.ZERO
 var shoot_cooldown: float = 0.0
@@ -147,6 +148,7 @@ func _on_restore_stamina(amount: float, target_id: String):
 	current_stamina += amount
 
 func enter_sleep():
+	is_transitioning_to_ghost = true
 	is_sleeping = true
 	velocity = Vector2.ZERO
 	modulate = Color(0.5, 0.5, 1.0) # Turn slightly blue/dark to show sleeping
@@ -156,7 +158,6 @@ func enter_sleep():
 	active_ghost.global_position = global_position # Start at player's body
 	
 	active_ghost.modulate.a = 0.0 # Start invisible
-	var start_pos = global_position
 	var end_pos = global_position + Vector2(0, -60) # Float up slightly
 	
 	get_parent().call_deferred("add_child", active_ghost)
@@ -167,7 +168,11 @@ func enter_sleep():
 	tween.tween_property(active_ghost, "modulate:a", 1.0, 0.5) # Fade in
 	tween.tween_property(active_ghost, "global_position", end_pos, 1.5)\
 		.set_trans(Tween.TRANS_CUBIC).set_ease(Tween.EASE_OUT)
-
+	
+	# Wait for the tween to finish before allowing a Game Over
+	await tween.finished
+	is_transitioning_to_ghost = false
+	
 	SignalBus.emit_signal("ghost_mode_started")
 
 func handle_sleep(delta):
@@ -183,20 +188,28 @@ func handle_sleep(delta):
 func trigger_ghost_return():
 	is_returning = true
 	
-	if active_ghost:
-		# Disable ghost movement while it's returning
+	if is_instance_valid(active_ghost):
+		# Check if the ghost is holding an item
+		if active_ghost.held_item != null:
+			# Force the ghost to drop the item properly
+			active_ghost.drop_item()
+			
+			# Give it a tiny moment to finish the drop tween before flying back
+			await get_tree().create_timer(0.5).timeout
+		
+		# 2. Disable ghost input/movement for the return journey
 		active_ghost.set_physics_process(false)
 		active_ghost.set_process_input(false)
 		
+		# 3. Setup the return tween (1.0s flight as per your current code)
 		var tween = create_tween().set_parallel(true)
-		# Fly back to the sleeping player's position
 		tween.tween_property(active_ghost, "global_position", global_position, 1.0)\
 			.set_trans(Tween.TRANS_BACK).set_ease(Tween.EASE_IN)
-		# Fade out as it arrives
-		#tween.tween_property(active_ghost, "modulate:a", 0.0, 1.0)
+		tween.tween_property(active_ghost, "modulate:a", 0.0, 1.0)
 		
 		await tween.finished
 		
+		# 4. Cleanup
 		active_ghost.queue_free()
 		active_ghost = null
 	

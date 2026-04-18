@@ -43,15 +43,19 @@ func spawn_one() -> void:
 	if not can_spawn:
 		return
 	if items_alive >= MAX_ITEMS:
-		print("max item reached")
+		print_debug("max item reached")
 		return
 	
 	var random_item = items[randi() % items.size()]
 	var item_instance = random_item.instantiate()
-	print("spawning item")
+	print_debug("spawning item")
 	item_instance.global_position = get_random_spawn_position()
 	get_tree().current_scene.add_child(item_instance)
-	SignalBus.emit_signal("item_spawned")
+	
+	# Call show_item directly on the new instance instead of using SignalBus 
+	if item_instance.has_method("show_item"):
+		item_instance.show_item()
+	
 	item_instance.add_to_group("items")
 	items_alive += 1
 	item_instance.tree_exited.connect(_on_item_removed)
@@ -70,7 +74,10 @@ func destroy_all_items() -> void:
 	# get all children of current scene and remove items
 	print("destroy all items")
 	for item in get_tree().get_nodes_in_group("items"):
-		item.queue_free()
+		if item.has_method("hide_item"):
+			item.hide_item() # This triggers your new fade-out tween!
+		else:
+			item.queue_free()
 	items_alive = 0
 
 # Called every frame. 'delta' is the elapsed time since the previous frame.
