@@ -8,7 +8,7 @@ extends "res://Scripts/item.gd"
 @onready var explosion_sfx: AudioStreamPlayer2D = $ExplosionSFX
 @onready var fly_sfx: AudioStreamPlayer2D = $FlySFX
 
-@export var bomb_throw_distance: float = 450.0
+@export var bomb_throw_distance: float = 350.0
 var is_stalking: bool = false
 var was_stalking := false
 @export var max_stalk_time: float = 5.0
