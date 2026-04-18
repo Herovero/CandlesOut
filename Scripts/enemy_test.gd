@@ -7,16 +7,24 @@ const SEPARATION_FORCE: float = 200.0
 @export var damage_amount: float = 1.0
 @export var max_hp: float = 3
 @export var melee_attack_buffer: float = 1.2
+@export var attack_trigger_range: float = 78.0
+@export var attack_hit_delay: float = 0.14
+@export var attack_cone_range: float = 92.0
+@export var attack_cone_angle_deg: float = 85.0
 @export var post_hit_pause_duration: float = 0.25
 @export var hurt_tint_color: Color = Color(1.0, 0.35, 0.35, 1.0)
 @export var hurt_tint_duration: float = 0.12
 
-var hp: float = 5.0
+var hp: float = 3.0
 var knockback_velocity: Vector2 = Vector2.ZERO
-var current_melee_target: Node2D = null
 var post_hit_pause_left: float = 0.0
 var hurt_tint_token: int = 0
 var base_sprite_modulate: Color = Color(1, 1, 1, 1)
+
+var attack_in_progress: bool = false
+var attack_damage_applied: bool = false
+var attack_elapsed: float = 0.0
+var attack_dir: Vector2 = Vector2.RIGHT
 
 @onready var attack_timer: Timer = $AttackTimer
 @onready var hitbox: Area2D = $Hitbox
@@ -40,32 +48,47 @@ func _ready() -> void:
 	sprite.sprite_frames.set_animation_speed("move", 10)
 	sprite.sprite_frames.set_animation_speed("attack", 10)
 	sprite.play("idle")
-	
-	sprite.animation_finished.connect(_on_animation_finished)
 
 
 func _physics_process(delta: float) -> void:
 	if is_dying:
 		return
-		
+
 	var target = find_closest_player()
 	var direction = Vector2.ZERO
+	var target_dist := INF
+	var to_target := Vector2.ZERO
+
+	if target:
+		to_target = global_position.direction_to(target.global_position)
+		target_dist = global_position.distance_to(target.global_position)
+		if to_target != Vector2.ZERO:
+			attack_dir = to_target
 
 	post_hit_pause_left = max(post_hit_pause_left - delta, 0.0)
-	if target and post_hit_pause_left <= 0.0:
-		direction = global_position.direction_to(target.global_position)
+
+	if attack_in_progress:
+		attack_elapsed += delta
+		if not attack_damage_applied and attack_elapsed >= attack_hit_delay:
+			attack_damage_applied = true
+			perform_cone_attack()
+			post_hit_pause_left = post_hit_pause_duration
+			attack_in_progress = false
+	elif target and attack_timer.is_stopped() and post_hit_pause_left <= 0.0 and target_dist <= attack_trigger_range:
+		start_attack()
+	elif target and post_hit_pause_left <= 0.0:
+		direction = to_target
 
 	var separation = compute_separation()
-
 	var move_velocity = (direction * SPEED) + separation
 	velocity = move_velocity + knockback_velocity
 	if velocity.x != 0:
 		sprite.flip_h = velocity.x < 0
-		
+
 	knockback_velocity *= 0.85
 
 	move_and_slide()
-	handle_footsteps(delta,direction)
+	handle_footsteps(delta, direction)
 
 
 func find_closest_player() -> CharacterBody2D:
@@ -120,7 +143,7 @@ func take_damage(amount: float) -> void:
 	if hp <= 0.0:
 		is_dying = true
 		print(self, " is dying")
-		death_sound.volume_db = -10.0 
+		death_sound.volume_db = -10.0
 		death_sound.play()
 		await death_sound.finished
 		queue_free()
@@ -129,54 +152,52 @@ func take_damage(amount: float) -> void:
 	play_hurt_tint()
 
 
-func deal_melee_hit(body) -> void:
+func start_attack() -> void:
+	attack_in_progress = true
+	attack_damage_applied = false
+	attack_elapsed = 0.0
 	attacking_animation = true
-	
+
 	sprite.play("attack")
-	
+	attack_timer.start()
+
 	if slash_sfx:
 		play_slash_sfx()
-	
-	var dir = (body.global_position - global_position).normalized()
-	if body.has_method("receive_hit"):
-		body.receive_hit(damage_amount, dir * 240, true)
-		post_hit_pause_left = post_hit_pause_duration
-		return
-
-	if body.has_method("is_damage_blocked") and body.is_damage_blocked():
-		return
-
-	SignalBus.emit_signal("take_damage", damage_amount, body.input_prefix)
-	post_hit_pause_left = post_hit_pause_duration
 
 
-func _on_hitbox_body_entered(body):
-	if not body.is_in_group("Players") or not (body is Node2D):
-		return
+func perform_cone_attack() -> void:
+	var players = get_tree().get_nodes_in_group("Players")
+	var min_dot = cos(deg_to_rad(attack_cone_angle_deg * 0.5))
 
-	current_melee_target = body as Node2D
+	for p in players:
+		if not (p is Node2D):
+			continue
 
-	if attack_timer.is_stopped():
-		deal_melee_hit(body)
-		attack_timer.start()
+		var to_player = (p as Node2D).global_position - global_position
+		if to_player.length() == 0.0 or to_player.length() > attack_cone_range:
+			continue
 
-func _on_hitbox_body_exited(body):
-	if body == current_melee_target:
-		current_melee_target = null
+		var dir_to_player = to_player.normalized()
+		if attack_dir.dot(dir_to_player) < min_dot:
+			continue
+
+		if p.has_method("receive_hit"):
+			p.receive_hit(damage_amount, dir_to_player * 240, true)
+		elif not (p.has_method("is_damage_blocked") and p.is_damage_blocked()):
+			SignalBus.emit_signal("take_damage", damage_amount, p.input_prefix)
+
+
+func _on_hitbox_body_entered(_body):
+	return
+
+
+func _on_hitbox_body_exited(_body):
+	return
 
 
 func _on_attack_timer_timeout() -> void:
-	if current_melee_target == null or not is_instance_valid(current_melee_target):
-		current_melee_target = null
-		return
+	return
 
-	if not hitbox.overlaps_body(current_melee_target):
-		current_melee_target = null
-		return
-
-	deal_melee_hit(current_melee_target)
-	attack_timer.start()
-	
 func play_footstep():
 	if Global.active_footstep_count >= Global.MAX_ENEMY_FOOTSTEPS:
 		return
@@ -186,15 +207,15 @@ func play_footstep():
 	footstep_enemy.play()
 	await footstep_enemy.finished
 	Global.active_footstep_count -= 1
-	
+
 func handle_footsteps(delta, direction):
-	
+
 	if direction == Vector2.ZERO:
 		if attacking_animation == false:
 			sprite.play("idle")
 		footstep_timer = 0.0
 		return
-	
+
 	footstep_timer -= delta
 	if footstep_timer <= 0.0:
 		if attacking_animation == false:
@@ -205,15 +226,15 @@ func handle_footsteps(delta, direction):
 func _on_animation_finished():
 	if sprite.animation == "attack":
 		attacking_animation = false
-		
+
 func play_slash_sfx():
 	await get_tree().create_timer(0.5).timeout
 	var sfx = AudioStreamPlayer2D.new()
-	slash_sfx.volume_db = -5.0 
+	slash_sfx.volume_db = -5.0
 	sfx.stream = slash_sfx.stream
 	sfx.global_position = global_position
-	
+
 	get_tree().current_scene.add_child(sfx)
 	sfx.play()
-	
+
 	sfx.finished.connect(sfx.queue_free)

@@ -23,6 +23,10 @@ func _ready() -> void:
 	super()
 	max_hp = ranged_max_hp
 	hp = max_hp
+
+	# Ranged enemy should not deal melee collision damage.
+	hitbox.monitoring = false
+	hitbox.monitorable = false
 	sprite.sprite_frames.set_animation_speed("idle", 9)
 	sprite.sprite_frames.set_animation_speed("run", 9)
 	sprite.sprite_frames.set_animation_speed("attack", 9)

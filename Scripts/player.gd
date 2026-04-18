@@ -5,6 +5,7 @@ var speed: float = 200.0
 var base_speed: float = 200.0 # Store reference
 
 @export var projectile_scene: PackedScene = preload("res://Scenes/projectile.tscn")
+@export var afterimage_scene: PackedScene = preload("res://Scenes/afterimage.tscn")
 @export var shoot_interval: float = 0.5
 @export var projectile_speed: float = 200.0
 @export var projectile_damage: float = 1.0
@@ -14,12 +15,13 @@ var base_speed: float = 200.0 # Store reference
 @export var hit_stun_duration: float = 0.32
 @export var invincibility_duration: float = 0.32
 @export var flash_interval: float = 0.06
+@export var spawn_interval: float = 0.05
 
 const SHOE_ICON = preload("res://Assets/Sprites/item_shoe.png")
 
 @export var max_stamina: float = 100.0
 var current_stamina: float = 100.0
-@export var depletion_rate: float = 50.0
+@export var depletion_rate: float = 10.0
 @export var recharge_rate: float = 5.0
 #@export var depletion_rate: float = 10.0
 #@export var recharge_rate: float = 5.0
@@ -110,6 +112,9 @@ func _physics_process(delta: float) -> void:
 	knockback_velocity *= 0.91
 	if knockback_velocity.length() < 15.0:
 		knockback_velocity = Vector2.ZERO
+		
+	if speed != base_speed:
+		spawn_afterimage()
 
 	shoot_cooldown -= delta
 	if not is_hit_stunned and direction != Vector2.ZERO:
@@ -442,6 +447,14 @@ func _on_shield_backfire_received(duration: float, p_id: String):
 		is_prison_active = false
 		speed = base_speed # Restore movement [cite: 17]
 		prison_visual.hide()
+		
+func spawn_afterimage():
+	var afterimg = afterimage_scene.instantiate()
+	get_parent().add_child(afterimg)
+	
+	afterimg.global_position = global_position
+	afterimg.show_afterimage(sprite)
+	afterimg.modulate = modulate
 
 func _on_flash_timer_timeout() -> void:
 	flash_tint_on = not flash_tint_on

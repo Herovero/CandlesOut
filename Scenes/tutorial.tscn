@@ -1,0 +1,157 @@
+[gd_scene format=3]
+
+[ext_resource type="Script" path="res://Scripts/tutorial.gd" id="1_script"]
+[ext_resource type="FontFile" path="res://Assets/False Earthdream.ttf" id="2_font"]
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_card"]
+bg_color = Color(0.137255, 0.0823529, 0.211765, 0.92)
+border_width_left = 2
+border_width_top = 2
+border_width_right = 2
+border_width_bottom = 2
+border_color = Color(0.905882, 0.760784, 0.435294, 0.85)
+corner_radius_top_left = 18
+corner_radius_top_right = 18
+corner_radius_bottom_right = 18
+corner_radius_bottom_left = 18
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_button_normal"]
+bg_color = Color(0.172549, 0.0901961, 0.243137, 1)
+border_width_left = 2
+border_width_top = 2
+border_width_right = 2
+border_width_bottom = 2
+border_color = Color(0.905882, 0.760784, 0.435294, 1)
+corner_radius_top_left = 14
+corner_radius_top_right = 14
+corner_radius_bottom_right = 14
+corner_radius_bottom_left = 14
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_button_hover"]
+bg_color = Color(0.235294, 0.117647, 0.345098, 1)
+border_width_left = 2
+border_width_top = 2
+border_width_right = 2
+border_width_bottom = 2
+border_color = Color(1, 0.839216, 0.482353, 1)
+corner_radius_top_left = 14
+corner_radius_top_right = 14
+corner_radius_bottom_right = 14
+corner_radius_bottom_left = 14
+
+[node name="Tutorial" type="Control"]
+layout_mode = 3
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+script = ExtResource("1_script")
+
+[node name="Background" type="ColorRect" parent="."]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+color = Color(0.0588235, 0.0431373, 0.0941176, 1)
+
+[node name="TopGlow" type="ColorRect" parent="."]
+layout_mode = 1
+anchors_preset = 10
+anchor_right = 1.0
+offset_bottom = 210.0
+grow_horizontal = 2
+color = Color(0.533333, 0.309804, 0.760784, 0.12)
+
+[node name="BottomAccent" type="ColorRect" parent="."]
+layout_mode = 1
+anchors_preset = 12
+anchor_top = 1.0
+anchor_right = 1.0
+anchor_bottom = 1.0
+offset_top = -160.0
+grow_horizontal = 2
+grow_vertical = 0
+color = Color(0.996078, 0.760784, 0.439216, 0.06)
+
+[node name="Center" type="VBoxContainer" parent="."]
+layout_mode = 1
+anchors_preset = 8
+anchor_left = 0.5
+anchor_top = 0.5
+anchor_right = 0.5
+anchor_bottom = 0.5
+offset_left = -380.0
+offset_top = -260.0
+offset_right = 380.0
+offset_bottom = 260.0
+grow_horizontal = 2
+grow_vertical = 2
+theme_override_constants/separation = 20
+alignment = 1
+
+[node name="Title" type="Label" parent="Center"]
+layout_mode = 2
+theme_override_colors/font_color = Color(0.980392, 0.92549, 0.760784, 1)
+theme_override_colors/font_outline_color = Color(0.145098, 0.0901961, 0.223529, 0.8)
+theme_override_constants/outline_size = 3
+theme_override_fonts/font = ExtResource("2_font")
+theme_override_font_sizes/font_size = 68
+text = "Tutorial"
+horizontal_alignment = 1
+
+[node name="TutorialCard" type="PanelContainer" parent="Center"]
+custom_minimum_size = Vector2(720, 310)
+layout_mode = 2
+theme_override_styles/panel = SubResource("StyleBoxFlat_card")
+
+[node name="Margin" type="MarginContainer" parent="Center/TutorialCard"]
+layout_mode = 2
+theme_override_constants/margin_left = 30
+theme_override_constants/margin_top = 24
+theme_override_constants/margin_right = 30
+theme_override_constants/margin_bottom = 24
+
+[node name="Content" type="VBoxContainer" parent="Center/TutorialCard/Margin"]
+layout_mode = 2
+theme_override_constants/separation = 12
+
+[node name="ControlsTitle" type="Label" parent="Center/TutorialCard/Margin/Content"]
+layout_mode = 2
+theme_override_colors/font_color = Color(1, 0.933333, 0.776471, 1)
+theme_override_fonts/font = ExtResource("2_font")
+theme_override_font_sizes/font_size = 30
+text = "Controls"
+
+[node name="ControlsBody" type="Label" parent="Center/TutorialCard/Margin/Content"]
+layout_mode = 2
+theme_override_colors/font_color = Color(0.905882, 0.862745, 0.768627, 0.96)
+theme_override_fonts/font = ExtResource("2_font")
+theme_override_font_sizes/font_size = 22
+text = "Player 1 Move: WASD\nPlayer 2 Move: Arrow Keys\nPick up / throw pillow: Space"
+
+[node name="ObjectiveTitle" type="Label" parent="Center/TutorialCard/Margin/Content"]
+layout_mode = 2
+theme_override_colors/font_color = Color(1, 0.933333, 0.776471, 1)
+theme_override_fonts/font = ExtResource("2_font")
+theme_override_font_sizes/font_size = 30
+text = "Objective"
+
+[node name="ObjectiveBody" type="Label" parent="Center/TutorialCard/Margin/Content"]
+layout_mode = 2
+theme_override_colors/font_color = Color(0.905882, 0.862745, 0.768627, 0.96)
+theme_override_fonts/font = ExtResource("2_font")
+theme_override_font_sizes/font_size = 22
+text = "Survive enemy waves together.\nPass items, manage stamina, and protect sleeping teammates.\nDefeat the final boss."
+
+[node name="BackButton" type="Button" parent="Center"]
+custom_minimum_size = Vector2(260, 66)
+layout_mode = 2
+theme_override_colors/font_color = Color(0.964706, 0.913726, 0.8, 1)
+theme_override_fonts/font = ExtResource("2_font")
+theme_override_font_sizes/font_size = 34
+theme_override_styles/normal = SubResource("StyleBoxFlat_button_normal")
+theme_override_styles/hover = SubResource("StyleBoxFlat_button_hover")
+text = "BACK"
