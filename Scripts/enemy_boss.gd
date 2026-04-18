@@ -55,14 +55,17 @@ var base_sprite_modulate: Color = Color(1, 1, 1, 1)
 
 @onready var hitbox: Area2D = $Hitbox
 @onready var sprite: AnimatedSprite2D = $AnimatedSprite2D
+@onready var cone_sprite: AnimatedSprite2D = $AnimatedSprite2D2
 
 func _ready() -> void:
 	sprite.animation_finished.connect(_on_animation_finished)
+	cone_sprite.animation_finished.connect(_on_cone_animation_finished)
 	motion_mode = CharacterBody2D.MOTION_MODE_FLOATING
 	hp = max_hp
 	base_sprite_modulate = sprite.modulate
 	enter_idle()
 	sprite.sprite_frames.set_animation_speed("idle", 10)
+	cone_sprite.sprite_frames.set_animation_speed("default", 3)
 	sprite.play("idle")
 
 	if not SignalBus.is_connected("boss_activate_phase_two", activate_phase_two):
@@ -72,6 +75,10 @@ func _ready() -> void:
 	SignalBus.emit_signal("boss_hp_changed", hp, get_current_phase_max_hp(), is_phase_two)
 
 func _physics_process(delta: float) -> void:
+	cone_sprite.flip_h = velocity.x < 0
+	if velocity.x != 0:
+		sprite.flip_h = velocity.x < 0
+
 	if is_phase_transitioning:
 		velocity = Vector2.ZERO
 		return
@@ -214,6 +221,8 @@ func spawn_projectile(dir: Vector2, dmg: float) -> void:
 
 
 func do_cone_attack() -> void:
+	cone_sprite.visible = true
+	cone_sprite.play()
 	var players = get_tree().get_nodes_in_group("Players")
 	var min_dot = cos(deg_to_rad(cone_angle_deg * 0.5))
 
@@ -320,3 +329,8 @@ func _on_animation_finished() -> void:
 		BossState.ATTACK_CHARGE:
 			if not is_charging:
 				enter_idle()
+
+
+func _on_cone_animation_finished() -> void:
+	cone_sprite.visible = false
+	cone_sprite.frame = 0

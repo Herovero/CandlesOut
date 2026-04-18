@@ -11,6 +11,7 @@
 [ext_resource type="AudioStream" uid="uid://d2l8cmgm4bmaw" path="res://SFX/Player/Sleep_1.wav" id="9_tx1dd"]
 [ext_resource type="AudioStream" uid="uid://bgby2m44b4drh" path="res://SFX/Player/Sleep_2.wav" id="10_gymyn"]
 [ext_resource type="AudioStream" uid="uid://bdfei55y80m1o" path="res://SFX/Player/Blocked_bullet.wav" id="11_gymyn"]
+[ext_resource type="Material" uid="uid://d2fpvm2xbtuil" path="res://Assets/tv_static.tres" id="12_pu2lt"]
 
 [sub_resource type="RectangleShape2D" id="RectangleShape2D_cvnsp"]
 size = Vector2(64, 64)
@@ -32,21 +33,6 @@ border_width_right = 2
 border_width_bottom = 2
 border_color = Color(0.152941, 0.458824, 0.309804, 1)
 anti_aliasing = false
-
-[sub_resource type="Gradient" id="Gradient_candle_glow"]
-offsets = PackedFloat32Array(0, 0.16, 0.42, 1)
-colors = PackedColorArray(1, 0.807843, 0.501961, 0.9, 1, 0.65098, 0.266667, 0.45, 0.960784, 0.34902, 0.12549, 0.16, 0, 0, 0, 0)
-
-[sub_resource type="GradientTexture2D" id="GradientTexture2D_candle_glow"]
-gradient = SubResource("Gradient_candle_glow")
-width = 48
-height = 48
-fill = 1
-fill_from = Vector2(0.5, 0.5)
-fill_to = Vector2(1, 0.5)
-
-[sub_resource type="CanvasItemMaterial" id="CanvasItemMaterial_candle_glow"]
-blend_mode = 1
 
 [sub_resource type="AtlasTexture" id="AtlasTexture_3smsa"]
 atlas = ExtResource("4_fkybt")
@@ -136,6 +122,21 @@ animations = [{
 "speed": 5.0
 }]
 
+[sub_resource type="CanvasItemMaterial" id="CanvasItemMaterial_candle_glow"]
+blend_mode = 1
+
+[sub_resource type="Gradient" id="Gradient_candle_glow"]
+offsets = PackedFloat32Array(0, 0.16, 0.42, 1)
+colors = PackedColorArray(1, 0.807843, 0.501961, 0.9, 1, 0.65098, 0.266667, 0.45, 0.960784, 0.34902, 0.12549, 0.16, 0, 0, 0, 0)
+
+[sub_resource type="GradientTexture2D" id="GradientTexture2D_candle_glow"]
+gradient = SubResource("Gradient_candle_glow")
+width = 48
+height = 48
+fill = 1
+fill_from = Vector2(0.5, 0.5)
+fill_to = Vector2(1, 0.5)
+
 [sub_resource type="SpriteFrames" id="SpriteFrames_fkybt"]
 
 [node name="Player" type="CharacterBody2D" unique_id=687220319]
@@ -184,14 +185,14 @@ sprite_frames = SubResource("SpriteFrames_h4iuc")
 animation = &"sleeping"
 frame_progress = 0.66868645
 
-[node name="CandleLight" type="Sprite2D" parent="."]
-position = Vector2(0, -16)
-texture = SubResource("GradientTexture2D_candle_glow")
-material = SubResource("CanvasItemMaterial_candle_glow")
-texture_filter = 1
-scale = Vector2(1.38, 1.38)
+[node name="CandleLight" type="Sprite2D" parent="." unique_id=29720195]
 modulate = Color(1, 0.733333, 0.423529, 0.78)
 z_index = 1
+texture_filter = 1
+material = SubResource("CanvasItemMaterial_candle_glow")
+position = Vector2(0, -16)
+scale = Vector2(1.38, 1.38)
+texture = SubResource("GradientTexture2D_candle_glow")
 
 [node name="GhostTransitionAnimation" type="AnimatedSprite2D" parent="." unique_id=52766954]
 sprite_frames = SubResource("SpriteFrames_fkybt")
@@ -214,6 +215,17 @@ stream = ExtResource("10_gymyn")
 
 [node name="Blocked" type="AudioStreamPlayer2D" parent="." unique_id=3827780]
 stream = ExtResource("11_gymyn")
+
+[node name="CanvasLayer" type="CanvasLayer" parent="." unique_id=2065762588]
+
+[node name="TvStatic" type="ColorRect" parent="CanvasLayer" unique_id=945425539]
+material = ExtResource("12_pu2lt")
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+color = Color(1, 1, 1, 0)
 
 [connection signal="timeout" from="HitStunTimer" to="." method="_on_hit_stun_timer_timeout"]
 [connection signal="timeout" from="InvincibilityTimer" to="." method="_on_invincibility_timer_timeout"]

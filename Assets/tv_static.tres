@@ -1,0 +1,9 @@
+[gd_resource type="ShaderMaterial" format=3 uid="uid://d2fpvm2xbtuil"]
+
+[ext_resource type="Shader" uid="uid://b8kvjvvbi04k3" path="res://Assets/tv_static.gdshader" id="1_m1y24"]
+
+[resource]
+shader = ExtResource("1_m1y24")
+shader_parameter/intensity = 1.0
+shader_parameter/time_scale = 20.0
+shader_parameter/color_shift = 1.5
