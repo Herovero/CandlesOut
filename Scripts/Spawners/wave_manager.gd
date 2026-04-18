@@ -145,6 +145,7 @@ func _on_wave_completed(wave_number: int):
 			await get_tree().create_timer(2.0).timeout
 			start_wave(3)
 			ost_manager.play_wave_ost(3)
+			Global.item_spawner.set_bomb_phase(true)
 		3:
 			await get_tree().create_timer(2.0).timeout
 			start_wave(4)
