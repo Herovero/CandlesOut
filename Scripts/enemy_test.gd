@@ -25,9 +25,11 @@ var base_sprite_modulate: Color = Color(1, 1, 1, 1)
 @onready var death_sound = $EnemyDies
 var is_dying: bool = false
 @onready var footstep_enemy = $EnemyFootStep
+@onready var slash_sfx: AudioStreamPlayer2D = get_node_or_null("Slash")
 @export var footstep_interval: float = 0.5
 var footstep_timer: float = 0.0
 var attacking_animation: bool = false
+
 
 func _ready() -> void:
 	motion_mode = CharacterBody2D.MOTION_MODE_FLOATING
@@ -129,7 +131,11 @@ func take_damage(amount: float) -> void:
 
 func deal_melee_hit(body) -> void:
 	attacking_animation = true
+	
 	sprite.play("attack")
+	
+	if slash_sfx:
+		play_slash_sfx()
 	
 	var dir = (body.global_position - global_position).normalized()
 	if body.has_method("receive_hit"):
@@ -199,3 +205,15 @@ func handle_footsteps(delta, direction):
 func _on_animation_finished():
 	if sprite.animation == "attack":
 		attacking_animation = false
+		
+func play_slash_sfx():
+	await get_tree().create_timer(0.5).timeout
+	var sfx = AudioStreamPlayer2D.new()
+	slash_sfx.volume_db = -5.0 
+	sfx.stream = slash_sfx.stream
+	sfx.global_position = global_position
+	
+	get_tree().current_scene.add_child(sfx)
+	sfx.play()
+	
+	sfx.finished.connect(sfx.queue_free)

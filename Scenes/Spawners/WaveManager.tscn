@@ -2,7 +2,7 @@
 
 [ext_resource type="Script" uid="uid://sq7a06lesyka" path="res://Scripts/Spawners/wave_manager.gd" id="1_4ji1e"]
 [ext_resource type="Script" uid="uid://do5vq5635mvb7" path="res://Scripts/ost_manager.gd" id="2_6v3by"]
-[ext_resource type="AudioStream" uid="uid://fa35qe6vqden" path="res://SFX/Ost/Wave_Intro_New.ogg" id="3_851f6"]
+[ext_resource type="AudioStream" uid="uid://ch0o747i8hffl" path="res://SFX/Ost/WaveMusic.ogg" id="3_851f6"]
 
 [node name="WaveManager" type="Node2D" unique_id=657000445 node_paths=PackedStringArray("ost_manager")]
 script = ExtResource("1_4ji1e")

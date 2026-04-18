@@ -2,8 +2,8 @@
 
 [ext_resource type="Script" uid="uid://dwsroubvetdac" path="res://Scripts/player.gd" id="1_ndhuy"]
 [ext_resource type="AudioStream" uid="uid://xo6t8svnw0p" path="res://SFX/Player/Footstep.wav" id="3_6t5aa"]
+[ext_resource type="AudioStream" uid="uid://bvuai66f8gs8i" path="res://SFX/Player/Fireball.wav" id="3_fkybt"]
 [ext_resource type="Texture2D" uid="uid://cfbf3whkdulbr" path="res://Assets/idle.png" id="4_fkybt"]
-[ext_resource type="AudioStream" uid="uid://t0iap5rt6kl4" path="res://SFX/Player/Shoot.wav" id="4_vgqql"]
 [ext_resource type="Texture2D" uid="uid://dl6caqu10wpsb" path="res://Assets/walk.png" id="5_x3wgy"]
 
 [sub_resource type="RectangleShape2D" id="RectangleShape2D_cvnsp"]
@@ -112,7 +112,7 @@ one_shot = true
 stream = ExtResource("3_6t5aa")
 
 [node name="ShootPlayer" type="AudioStreamPlayer2D" parent="." unique_id=244165008]
-stream = ExtResource("4_vgqql")
+stream = ExtResource("3_fkybt")
 
 [node name="AnimatedSprite2D" type="AnimatedSprite2D" parent="." unique_id=1109616564]
 scale = Vector2(3, 3)
