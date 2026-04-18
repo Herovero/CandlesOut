@@ -15,7 +15,7 @@ const SEPARATION_FORCE: float = 200.0
 @export var hurt_tint_color: Color = Color(1.0, 0.35, 0.35, 1.0)
 @export var hurt_tint_duration: float = 0.12
 
-var hp: float = 5.0
+var hp: float = 3.0
 var knockback_velocity: Vector2 = Vector2.ZERO
 var post_hit_pause_left: float = 0.0
 var hurt_tint_token: int = 0
@@ -163,18 +163,6 @@ func start_attack() -> void:
 
 	if slash_sfx:
 		play_slash_sfx()
-
-	var dir = (body.global_position - global_position).normalized()
-	if body.has_method("receive_hit"):
-		body.receive_hit(damage_amount, dir * 240, true)
-		post_hit_pause_left = post_hit_pause_duration
-		return
-
-	if body.has_method("is_damage_blocked") and body.is_damage_blocked():
-		return
-
-	SignalBus.emit_signal("take_damage", damage_amount, body.input_prefix)
-	post_hit_pause_left = post_hit_pause_duration
 
 
 func perform_cone_attack() -> void:
