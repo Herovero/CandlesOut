@@ -137,7 +137,6 @@ theme_override_styles/normal = SubResource("StyleBoxFlat_button_normal")
 theme_override_styles/hover = SubResource("StyleBoxFlat_button_hover")
 text = "TUTORIAL"
 
-[node name="SoundRow" type="HBoxContainer" parent="Center"]
 [node name="SoundRow" type="HBoxContainer" parent="Center" unique_id=1096554387]
 layout_mode = 2
 theme_override_constants/separation = 14
