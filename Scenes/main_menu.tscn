@@ -158,9 +158,8 @@ animation = &"walking"
 autoplay = "walking"
 
 [node name="RightCandle" type="AnimatedSprite2D" parent="." unique_id=1201597406]
-position = Vector2(1020, 530)
+position = Vector2(990, 530)
 scale = Vector2(8, 8)
-flip_h = true
 sprite_frames = SubResource("SpriteFrames_menu_sleep")
 animation = &"sleeping"
 autoplay = "sleeping"
