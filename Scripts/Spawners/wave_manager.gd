@@ -151,10 +151,23 @@ func on_enemy_died():
 
 
 func _on_start_timer_timeout() -> void:
-	ost_manager.play_wave_ost(1)
-	set_max_enemy(3)
-	start_wave(1)
-	pass # Replace with function body.
+	if Global.skip_to_boss:
+		# Reset the flag so it doesn't stay true next time
+		Global.skip_to_boss = false
+		
+		# Boss logic setup [cite: 65]
+		ost_manager.play_wave_ost(3) # Play the 3rd OST (Boss track) [cite: 66]
+		set_max_enemy(5) # Set appropriate enemy count for boss [cite: 65]
+		start_wave(4) # Start the defined Boss Wave [cite: 60, 62]
+		
+		# Ensure items are in the correct phase [cite: 65]
+		if Global.item_spawner:
+			Global.item_spawner.set_bomb_phase(true)
+	else:
+		# Standard start 
+		ost_manager.play_wave_ost(1)
+		set_max_enemy(3)
+		start_wave(1)
 
 func _on_wave_completed(wave_number: int):
 	print("Wave signal emmitted")

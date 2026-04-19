@@ -125,6 +125,7 @@ func _ready():
 
 
 func _physics_process(delta: float) -> void:
+	
 	update_ui()
 	update_effect_state(delta)
 	
@@ -198,6 +199,11 @@ func _physics_process(delta: float) -> void:
 				knockback_velocity = -velocity.normalized() * 150.0
 
 	handle_footsteps(delta, direction)
+	
+	var screen_size = get_viewport_rect().size
+	var margin = 32.0 # Keep the player slightly away from the absolute edge
+	global_position.x = clamp(global_position.x, margin, screen_size.x - margin)
+	global_position.y = clamp(global_position.y, margin, screen_size.y - margin)
 
 
 func consume_stamina(delta):

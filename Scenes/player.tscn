@@ -273,8 +273,8 @@ script = ExtResource("1_ndhuy")
 shape = SubResource("RectangleShape2D_cvnsp")
 
 [node name="Stats" type="Node2D" parent="." unique_id=1450506992]
-z_as_relative = false
 z_index = 20
+z_as_relative = false
 position = Vector2(0, -70)
 
 [node name="StaminaBar" type="ProgressBar" parent="Stats" unique_id=61292380]
