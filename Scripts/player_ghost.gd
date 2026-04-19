@@ -57,6 +57,10 @@ func attempt_pickup():
 				is_picking = true
 				held_item = area # Store the item reference
 				area.on_collected(self)
+				
+				# FAILSAFE: If the item doesn't unlock the ghost within 0.5s, 
+				# unlock it manually to prevent the movement bug.
+				get_tree().create_timer(0.5).connect("timeout", func(): is_picking = false)
 				break
 
 func drop_item():
