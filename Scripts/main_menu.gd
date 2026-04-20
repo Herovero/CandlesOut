@@ -2,6 +2,7 @@ extends Control
 
 @onready var play_button: Button = $Center/PlayButton
 @onready var tutorial_button: Button = $Center/TutorialButton
+@onready var boss_button: Button = $Center/BossButton
 @onready var volume_slider: HSlider = $Center/SoundRow/VolumeSlider
 @onready var title_music: AudioStreamPlayer = $TitleMusic
 
@@ -27,6 +28,8 @@ func _ready() -> void:
 	volume_slider.value = clamp(current_linear, 0.0, 1.0)
 	title_music.volume_db = -10.0 
 	title_music.play()
+	
+	_bind_button_feedback(boss_button)
 
 
 func _on_play_pressed() -> void:
@@ -73,3 +76,9 @@ func _setup_volume_slider_visuals() -> void:
 func animate_button_scale(button: Button, target: Vector2, duration: float) -> void:
 	var tween = create_tween()
 	tween.tween_property(button, "scale", target, duration).set_trans(Tween.TRANS_QUAD).set_ease(Tween.EASE_OUT)
+
+func _on_boss_button_pressed():
+	title_music.stop() 
+	# Use Global to tell the game we want to skip 
+	Global.skip_to_boss = true 
+	get_tree().change_scene_to_file("res://Scenes/main.tscn")

@@ -125,6 +125,7 @@ func _ready():
 
 
 func _physics_process(delta: float) -> void:
+	
 	update_ui()
 	update_effect_state(delta)
 	

@@ -22,7 +22,7 @@ func _on_body_entered(body):
 		
 		# Item is consumed
 		play_coffee_sfx()
-		queue_free()
+		call_deferred("queue_free")
 		
 func play_coffee_sfx():
 	var sfx = AudioStreamPlayer2D.new()

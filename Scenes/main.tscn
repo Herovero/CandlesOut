@@ -7,9 +7,9 @@
 [ext_resource type="Texture2D" uid="uid://biv8vykh0s88f" path="res://Assets/2D Pixel Dungeon Asset Pack/character and tileset/Dungeon_Tileset.png" id="5_kry3j"]
 [ext_resource type="PackedScene" uid="uid://duwadq4gka1wx" path="res://Scenes/Spawners/item_spawner.tscn" id="6_6bp64"]
 [ext_resource type="PackedScene" uid="uid://cqts1yegiva4h" path="res://Scenes/Spawners/WaveManager.tscn" id="6_21xkr"]
-[ext_resource type="Script" path="res://Scripts/restart_button1.gd" id="7_fdnlq"]
+[ext_resource type="Script" uid="uid://dfqibvf74fdsq" path="res://Scripts/restart_button1.gd" id="7_fdnlq"]
 [ext_resource type="Shader" path="res://Assets/vig.gdshader" id="8_344ge"]
-[ext_resource type="Script" path="res://Scripts/main_menu_button.gd" id="8_fdnlq"]
+[ext_resource type="Script" uid="uid://chmejb7w7i52" path="res://Scripts/main_menu_button.gd" id="8_fdnlq"]
 [ext_resource type="FontFile" uid="uid://nwcgismvm2jy" path="res://Assets/False Earthdream.ttf" id="8_wsu2k"]
 [ext_resource type="Texture2D" uid="uid://bdwplb78u4y5s" path="res://Assets/2D Pixel Dungeon Asset Pack/items and trap_animation/torch/side_torch_1.png" id="12_fevyy"]
 [ext_resource type="Texture2D" uid="uid://tlhl3wl4xe84" path="res://Assets/2D Pixel Dungeon Asset Pack/items and trap_animation/torch/side_torch_2.png" id="13_hibaj"]
@@ -234,6 +234,9 @@ animations = [{
 "name": &"front",
 "speed": 5.0
 }]
+
+[sub_resource type="RectangleShape2D" id="RectangleShape2D_fevyy"]
+size = Vector2(228, 18)
 
 [node name="main" type="Node2D" unique_id=1941177541]
 script = ExtResource("1_ynf5e")
@@ -544,6 +547,44 @@ position = Vector2(-144, -23)
 scale = Vector2(4, 4)
 tile_map_data = PackedByteArray("AAD6//3/AAAHAAcAAAAIAAMAAAAHAAcAAAD9/wMAAAAHAAcAAAAHAP7/AAAIAAYAAAAHAAIAAAAIAAYAAAD7/wQAAAAIAAYAAAAAAP7/AAAIAAYAAAD+/wAAAAAIAAYAAAD9//3/AAAJAAUAAAAHAAQAAAAJAAUAAAD5/wEAAAAJAAUAAAAFAAQAAAAJAAQAAAAFAP3/AAAJAAQAAAA=")
 tile_set = SubResource("TileSet_6bp64")
+
+[node name="StaticBody2D" type="StaticBody2D" parent="." unique_id=96163877]
+position = Vector2(16, -272)
+collision_layer = 4
+collision_mask = 4
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="StaticBody2D" unique_id=365344491]
+position = Vector2(9, -46)
+shape = SubResource("RectangleShape2D_fevyy")
+
+[node name="StaticBody2D2" type="StaticBody2D" parent="." unique_id=1301061327]
+position = Vector2(-665, -10)
+rotation = 1.5707964
+collision_layer = 4
+collision_mask = 4
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="StaticBody2D2" unique_id=1424624290]
+position = Vector2(9, -46)
+shape = SubResource("RectangleShape2D_fevyy")
+
+[node name="StaticBody2D3" type="StaticBody2D" parent="." unique_id=2005866822]
+position = Vector2(16, -272)
+collision_layer = 4
+collision_mask = 4
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="StaticBody2D3" unique_id=1243072085]
+position = Vector2(9, 610)
+shape = SubResource("RectangleShape2D_fevyy")
+
+[node name="StaticBody2D4" type="StaticBody2D" parent="." unique_id=1572282424]
+position = Vector2(16, -272)
+collision_layer = 4
+collision_mask = 4
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="StaticBody2D4" unique_id=632725151]
+position = Vector2(585, 274)
+rotation = -1.5707964
+shape = SubResource("RectangleShape2D_fevyy")
 
 [connection signal="pressed" from="HUDs/PauseContainer/resume_button" to="." method="_on_resume_button_pressed"]
 [connection signal="pressed" from="HUDs/PauseContainer/restart_button" to="HUDs/PauseContainer/restart_button" method="_on_pressed"]

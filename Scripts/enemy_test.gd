@@ -47,7 +47,7 @@ func _ready() -> void:
 	sprite.sprite_frames.set_animation_speed("idle", 10)
 	sprite.sprite_frames.set_animation_speed("move", 10)
 	sprite.sprite_frames.set_animation_speed("attack", 10)
-	sprite.sprite_frames.set_animation_speed("death", 20)
+	sprite.sprite_frames.set_animation_speed("death", 17)
 	sprite.play("idle")
 
 
