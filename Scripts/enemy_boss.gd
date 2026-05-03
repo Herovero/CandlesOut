@@ -1,6 +1,4 @@
-extends CharacterBody2D
-
-const SPEED: float = 50.0
+extends "res://Scripts/enemy_base.gd"
 
 enum BossState {
 	IDLE,
@@ -10,42 +8,37 @@ enum BossState {
 	ATTACK_AOE
 }
 
-@export var max_hp: float = 10.0
-@export var hurt_tint_color: Color = Color(1.0, 0.35, 0.35, 1.0)
-@export var hurt_tint_duration: float = 0.12
-
-@export var idle_duration: float = 1.0
-@export var idle_move_speed: float = 35.0
+var idle_duration: float = 1.0
+var idle_move_speed: float = 35.0
 
 @export var projectile_scene: PackedScene = preload("res://Scenes/projectile.tscn")
-@export var projectile_speed: float = 180.0
-@export var radial_projectile_count: int = 10
-@export var radial_damage: float = 1.0
-@export var radial_windup: float = 0.5
-@export var radial_recover: float = 0.5
+var projectile_speed: float = 180.0
+var radial_projectile_count: int = 10
+var radial_damage: float = 1.0
+var radial_windup: float = 0.5
+var radial_recover: float = 0.5
 
-@export var charge_damage: float = 1.0
-@export var charge_speed: float = 360.0
-@export var charge_windup: float = 0.45
-@export var charge_duration: float = 0.5
-@export var charge_knockback: float = 280.0
-@export var contact_damage: float = 1.0
-@export var phase_two_threshold: float = 3.0
-@export var phase_two_bomb_damage: float = 1.0
+var charge_damage: float = 1.0
+var charge_speed: float = 360.0
+var charge_windup: float = 0.45
+var charge_duration: float = 0.5
+var charge_knockback: float = 280.0
+var contact_damage: float = 1.0
+var phase_two_threshold: float = 3.0
+var phase_two_bomb_damage: float = 1.0
 
-@export var cone_damage: float = 2.0
-@export var cone_range: float = 180.0
-@export var cone_angle_deg: float = 70.0
-@export var cone_windup: float = 0.35
-@export var cone_recover: float = 0.45
+var cone_damage: float = 2.0
+var cone_range: float = 180.0
+var cone_angle_deg: float = 70.0
+var cone_windup: float = 0.35
+var cone_recover: float = 0.45
 
-@export var aoe_radius: float = 120.0
-@export var aoe_windup: float = 0.4
-@export var aoe_recover: float = 0.45
-@export var aoe_tint_color: Color = Color(1.0, 0.1, 0.1, 0.28)
-@export var aoe_tint_duration: float = 0.2
+var aoe_radius: float = 120.0
+var aoe_windup: float = 0.4
+var aoe_recover: float = 0.45
+var aoe_tint_color: Color = Color(1.0, 0.1, 0.1, 0.28)
+var aoe_tint_duration: float = 0.2
 
-var hp: float = 100.0
 var is_phase_two: bool = false
 var is_phase_transitioning: bool = false
 var state: BossState = BossState.IDLE
@@ -60,28 +53,55 @@ var charge_cone_fired: bool = false
 var aoe_fired: bool = false
 var aoe_tint_visible: bool = false
 var aoe_tint_token: int = 0
-var hurt_tint_token: int = 0
-var base_sprite_modulate: Color = Color(1, 1, 1, 1)
 var is_playing_sfx: bool = false
 
 
 
-@onready var hitbox: Area2D = $Hitbox
-@onready var sprite: AnimatedSprite2D = $AnimatedSprite2D
 @onready var cone_sprite: AnimatedSprite2D = $AnimatedSprite2D2
 @onready var aoe_sprite: Sprite2D = $aoe
 @onready var boss_radial: AudioStreamPlayer2D = $Boss_Radial
 @onready var boss_slash: AudioStreamPlayer2D = $Boss_Slash
 @onready var boss_charge: AudioStreamPlayer2D = $Boss_Charge
 
+
+func get_enemy_id() -> String:
+	return "boss"
+
+
+func apply_stats(stats: Dictionary) -> void:
+	idle_duration = float(stats.get("idle_duration", idle_duration))
+	idle_move_speed = float(stats.get("idle_move_speed", idle_move_speed))
+	projectile_speed = float(stats.get("projectile_speed", projectile_speed))
+	radial_projectile_count = int(stats.get("radial_projectile_count", radial_projectile_count))
+	radial_damage = float(stats.get("radial_damage", radial_damage))
+	radial_windup = float(stats.get("radial_windup", radial_windup))
+	radial_recover = float(stats.get("radial_recover", radial_recover))
+	charge_damage = float(stats.get("charge_damage", charge_damage))
+	charge_speed = float(stats.get("charge_speed", charge_speed))
+	charge_windup = float(stats.get("charge_windup", charge_windup))
+	charge_duration = float(stats.get("charge_duration", charge_duration))
+	charge_knockback = float(stats.get("charge_knockback", charge_knockback))
+	contact_damage = float(stats.get("contact_damage", contact_damage))
+	phase_two_threshold = float(stats.get("phase_two_threshold", phase_two_threshold))
+	phase_two_bomb_damage = float(stats.get("phase_two_bomb_damage", phase_two_bomb_damage))
+	cone_damage = float(stats.get("cone_damage", cone_damage))
+	cone_range = float(stats.get("cone_range", cone_range))
+	cone_angle_deg = float(stats.get("cone_angle_deg", cone_angle_deg))
+	cone_windup = float(stats.get("cone_windup", cone_windup))
+	cone_recover = float(stats.get("cone_recover", cone_recover))
+	aoe_radius = float(stats.get("aoe_radius", aoe_radius))
+	aoe_windup = float(stats.get("aoe_windup", aoe_windup))
+	aoe_recover = float(stats.get("aoe_recover", aoe_recover))
+	aoe_tint_color = stats.get("aoe_tint_color", aoe_tint_color)
+	aoe_tint_duration = float(stats.get("aoe_tint_duration", aoe_tint_duration))
+
+
 func _ready() -> void:
+	super()
 	sprite.animation_finished.connect(_on_animation_finished)
 	cone_sprite.animation_finished.connect(_on_cone_animation_finished)
 	update_aoe_sprite_scale()
 	aoe_sprite.visible = false
-	motion_mode = CharacterBody2D.MOTION_MODE_FLOATING
-	hp = max_hp
-	base_sprite_modulate = sprite.modulate
 	enter_idle()
 	sprite.sprite_frames.set_animation_speed("idle", 10)
 	cone_sprite.sprite_frames.set_animation_speed("default", 3)

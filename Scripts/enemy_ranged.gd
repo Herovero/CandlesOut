@@ -1,15 +1,15 @@
-extends "res://Scripts/enemy_test.gd"
+extends "res://Scripts/enemy_base.gd"
 
-@export var ranged_max_hp: float = 3
 @export var projectile_scene: PackedScene = preload("res://Scenes/projectile.tscn")
-@export var shoot_interval: float = 2.0
-@export var projectile_speed: float = 180.0
-@export var projectile_damage: float = 0.5
-@export var muzzle_offset: float = 24.0
-@export var preferred_distance: float = 220.0
-@export var distance_tolerance: float = 32.0
-@export var shoot_range: float = 450.0
-@export var orbit_duration: float = 0.6
+var shoot_interval: float = 2.0
+var projectile_speed: float = 180.0
+var projectile_damage: float = 0.5
+var muzzle_offset: float = 24.0
+var preferred_distance: float = 220.0
+var distance_tolerance: float = 32.0
+var shoot_range: float = 450.0
+var orbit_duration: float = 0.6
+var footstep_interval: float = 0.5
 
 var shoot_cooldown: float = 1.0
 var orbit_time_left: float = 0.0
@@ -19,10 +19,24 @@ var last_move_dir: Vector2 = Vector2.RIGHT
 @onready var shoot_sound = $ShootEnemy
 
 
+func get_enemy_id() -> String:
+	return "ranged"
+
+
+func apply_stats(stats: Dictionary) -> void:
+	shoot_interval = float(stats.get("shoot_interval", shoot_interval))
+	projectile_speed = float(stats.get("projectile_speed", projectile_speed))
+	projectile_damage = float(stats.get("projectile_damage", projectile_damage))
+	muzzle_offset = float(stats.get("muzzle_offset", muzzle_offset))
+	preferred_distance = float(stats.get("preferred_distance", preferred_distance))
+	distance_tolerance = float(stats.get("distance_tolerance", distance_tolerance))
+	shoot_range = float(stats.get("shoot_range", shoot_range))
+	orbit_duration = float(stats.get("orbit_duration", orbit_duration))
+	footstep_interval = float(stats.get("footstep_interval", footstep_interval))
+
+
 func _ready() -> void:
 	super()
-	max_hp = ranged_max_hp
-	hp = max_hp
 
 	# Ranged enemy should not deal melee collision damage.
 	hitbox.monitoring = false
@@ -65,7 +79,7 @@ func _physics_process(delta: float) -> void:
 		last_move_dir = aim_dir
 
 	var separation = compute_separation()
-	var move_velocity = (direction * SPEED) + separation
+	var move_velocity = (direction * speed) + separation
 	velocity = move_velocity + knockback_velocity
 	if ( velocity.x != 0 || velocity.y != 0):
 		sprite.play("run")

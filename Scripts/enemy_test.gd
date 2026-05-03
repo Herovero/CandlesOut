@@ -1,25 +1,14 @@
-extends CharacterBody2D
+extends "res://Scripts/enemy_base.gd"
 
-const SPEED: float = 90.0
-const SEPARATION_RADIUS: float = 40.0
-const SEPARATION_FORCE: float = 200.0
+var damage_amount: float = 1.0
+var melee_attack_buffer: float = 1.2
+var attack_trigger_range: float = 78.0
+var attack_hit_delay: float = 0.14
+var attack_cone_range: float = 92.0
+var attack_cone_angle_deg: float = 85.0
+var post_hit_pause_duration: float = 1.0
 
-@export var damage_amount: float = 1.0
-@export var max_hp: float = 3
-@export var melee_attack_buffer: float = 1.2
-@export var attack_trigger_range: float = 78.0
-@export var attack_hit_delay: float = 0.14
-@export var attack_cone_range: float = 92.0
-@export var attack_cone_angle_deg: float = 85.0
-@export var post_hit_pause_duration: float = 1
-@export var hurt_tint_color: Color = Color(1.0, 0.35, 0.35, 1.0)
-@export var hurt_tint_duration: float = 0.12
-
-var hp: float = 3.0
-var knockback_velocity: Vector2 = Vector2.ZERO
 var post_hit_pause_left: float = 0.0
-var hurt_tint_token: int = 0
-var base_sprite_modulate: Color = Color(1, 1, 1, 1)
 
 var attack_in_progress: bool = false
 var attack_damage_applied: bool = false
@@ -27,23 +16,30 @@ var attack_elapsed: float = 0.0
 var attack_dir: Vector2 = Vector2.RIGHT
 
 @onready var attack_timer: Timer = $AttackTimer
-@onready var hitbox: Area2D = $Hitbox
-@onready var sprite: AnimatedSprite2D = $AnimatedSprite2D
-
-@onready var death_sound = $EnemyDies
-var is_dying: bool = false
-@onready var footstep_enemy = $EnemyFootStep
 @onready var slash_sfx: AudioStreamPlayer2D = get_node_or_null("Slash")
-@export var footstep_interval: float = 0.5
+var footstep_interval: float = 0.5
 var footstep_timer: float = 0.0
 var attacking_animation: bool = false
 
 
+func get_enemy_id() -> String:
+	return "melee"
+
+
+func apply_stats(stats: Dictionary) -> void:
+	damage_amount = float(stats.get("damage_amount", damage_amount))
+	melee_attack_buffer = float(stats.get("melee_attack_buffer", melee_attack_buffer))
+	attack_trigger_range = float(stats.get("attack_trigger_range", attack_trigger_range))
+	attack_hit_delay = float(stats.get("attack_hit_delay", attack_hit_delay))
+	attack_cone_range = float(stats.get("attack_cone_range", attack_cone_range))
+	attack_cone_angle_deg = float(stats.get("attack_cone_angle_deg", attack_cone_angle_deg))
+	post_hit_pause_duration = float(stats.get("post_hit_pause_duration", post_hit_pause_duration))
+	footstep_interval = float(stats.get("footstep_interval", footstep_interval))
+
+
 func _ready() -> void:
-	motion_mode = CharacterBody2D.MOTION_MODE_FLOATING
-	hp = max_hp
+	super()
 	attack_timer.wait_time = melee_attack_buffer
-	base_sprite_modulate = sprite.modulate
 	sprite.sprite_frames.set_animation_speed("idle", 10)
 	sprite.sprite_frames.set_animation_speed("move", 10)
 	sprite.sprite_frames.set_animation_speed("attack", 10)
@@ -81,7 +77,7 @@ func _physics_process(delta: float) -> void:
 		direction = to_target
 
 	var separation = compute_separation()
-	var move_velocity = (direction * SPEED) + separation
+	var move_velocity = (direction * speed) + separation
 	velocity = move_velocity + knockback_velocity
 	if velocity.x != 0:
 		sprite.flip_h = velocity.x < 0
@@ -117,14 +113,14 @@ func compute_separation() -> Vector2:
 
 		var dist = global_position.distance_to(e.global_position)
 
-		if dist < SEPARATION_RADIUS and dist > 0:
+		if dist < separation_radius and dist > 0:
 			var away = (global_position - e.global_position).normalized()
-			push += away * (SEPARATION_RADIUS - dist)
+			push += away * (separation_radius - dist)
 			count += 1
 
 	if count > 0:
 		push = push / count
-		push = push.normalized() * SEPARATION_FORCE
+		push = push.normalized() * separation_force
 
 	return push
 
