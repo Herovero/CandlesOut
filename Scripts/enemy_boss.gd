@@ -98,8 +98,6 @@ func apply_stats(stats: Dictionary) -> void:
 
 func _ready() -> void:
 	super()
-	sprite.animation_finished.connect(_on_animation_finished)
-	cone_sprite.animation_finished.connect(_on_cone_animation_finished)
 	update_aoe_sprite_scale()
 	aoe_sprite.visible = false
 	enter_idle()
