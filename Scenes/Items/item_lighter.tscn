@@ -1,0 +1,26 @@
+[gd_scene format=3 uid="uid://cdjgj0ntm6wbx"]
+
+[ext_resource type="Script" uid="uid://ctmfcae3orebm" path="res://Scripts/Item/lighter.gd" id="1_vfb2n"]
+[ext_resource type="Texture2D" uid="uid://bbrq2egro364" path="res://Assets/Sprites/item_lighter.png" id="2_4hyn5"]
+[ext_resource type="AudioStream" uid="uid://d37od8xtehnda" path="res://SFX/ItemSound/Lighter.wav" id="3_4hyn5"]
+
+[sub_resource type="CircleShape2D" id="CircleShape2D_1weea"]
+radius = 20.024984
+
+[node name="item_lighter" type="Area2D" unique_id=839316503 groups=["Items"]]
+collision_layer = 3
+collision_mask = 3
+script = ExtResource("1_vfb2n")
+
+[node name="Sprite2D" type="Sprite2D" parent="." unique_id=1942250597]
+position = Vector2(2.0000002, 1.0000001)
+scale = Vector2(1.7, 1.7)
+texture = ExtResource("2_4hyn5")
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="." unique_id=40545649]
+shape = SubResource("CircleShape2D_1weea")
+
+[node name="LighterSFX" type="AudioStreamPlayer2D" parent="." unique_id=74290357]
+stream = ExtResource("3_4hyn5")
+
+[connection signal="body_entered" from="." to="." method="_on_body_entered"]

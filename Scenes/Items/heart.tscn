@@ -1,0 +1,38 @@
+[gd_scene format=3 uid="uid://cqbq35ef7qsmd"]
+
+[ext_resource type="Script" uid="uid://dpp0622emkluy" path="res://Scripts/Item/heart.gd" id="1_v4aiu"]
+[ext_resource type="Texture2D" uid="uid://slrcerdwiuo" path="res://Assets/UIs/heart_full.png" id="2_jgxw8"]
+
+[node name="Hearts" type="HBoxContainer" unique_id=706036972]
+theme_override_constants/separation = 4
+script = ExtResource("1_v4aiu")
+
+[node name="heart1" type="TextureRect" parent="." unique_id=1972595632]
+custom_minimum_size = Vector2(32, 32)
+layout_mode = 2
+texture = ExtResource("2_jgxw8")
+stretch_mode = 5
+
+[node name="heart2" type="TextureRect" parent="." unique_id=1849379708]
+custom_minimum_size = Vector2(32, 32)
+layout_mode = 2
+texture = ExtResource("2_jgxw8")
+stretch_mode = 5
+
+[node name="heart3" type="TextureRect" parent="." unique_id=1832247272]
+custom_minimum_size = Vector2(32, 32)
+layout_mode = 2
+texture = ExtResource("2_jgxw8")
+stretch_mode = 5
+
+[node name="heart4" type="TextureRect" parent="." unique_id=1569858281]
+custom_minimum_size = Vector2(32, 32)
+layout_mode = 2
+texture = ExtResource("2_jgxw8")
+stretch_mode = 5
+
+[node name="heart5" type="TextureRect" parent="." unique_id=13492197]
+custom_minimum_size = Vector2(32, 32)
+layout_mode = 2
+texture = ExtResource("2_jgxw8")
+stretch_mode = 5

@@ -1,7 +1,7 @@
 extends Node2D
 
 
-@onready var enemy = preload("res://Scenes/enemy_test.tscn")
+@onready var enemy = preload("res://Scenes/Enemy/enemy_test.tscn")
 @onready var spawn_area = $Area2D/CollisionShape2D
 @export var min_x: float = 0
 @export var min_y: float = 0

@@ -1,13 +1,13 @@
 extends Node2D
 
 var items = [
-	preload("res://Scenes/item1.tscn"),
-	preload("res://Scenes/item_bomb.tscn"),
-	preload("res://Scenes/item_coffee.tscn"),
-	preload("res://Scenes/item_shoe.tscn"),
-	preload("res://Scenes/item_lighter.tscn"),
-	preload("res://Scenes/item_oil.tscn"),
-	preload("res://Scenes/item_shield.tscn")
+	preload("res://Scenes/Items/item1.tscn"),
+	preload("res://Scenes/Items/item_bomb.tscn"),
+	preload("res://Scenes/Items/item_coffee.tscn"),
+	preload("res://Scenes/Items/item_shoe.tscn"),
+	preload("res://Scenes/Items/item_lighter.tscn"),
+	preload("res://Scenes/Items/item_oil.tscn"),
+	preload("res://Scenes/Items/item_shield.tscn")
 ]
 
 var normal_weights = [15, 10, 15, 10, 5, 10, 10]

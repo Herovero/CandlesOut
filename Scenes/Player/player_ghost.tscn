@@ -1,0 +1,108 @@
+[gd_scene format=3 uid="uid://co8ys1q0spb7f"]
+
+[ext_resource type="Script" uid="uid://bt0tvdxl0akvq" path="res://Scripts/Player/player_ghost.gd" id="1_humek"]
+[ext_resource type="Texture2D" uid="uid://cs13sb6udhs4d" path="res://Assets/wisp.png" id="2_humek"]
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_5c57a"]
+atlas = ExtResource("2_humek")
+region = Rect2(0, 0, 18, 20)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_gl5sa"]
+atlas = ExtResource("2_humek")
+region = Rect2(18, 0, 18, 20)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_nu2h4"]
+atlas = ExtResource("2_humek")
+region = Rect2(36, 0, 18, 20)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_xrm1m"]
+atlas = ExtResource("2_humek")
+region = Rect2(54, 0, 18, 20)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_t3klv"]
+atlas = ExtResource("2_humek")
+region = Rect2(72, 0, 18, 20)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_4g61u"]
+atlas = ExtResource("2_humek")
+region = Rect2(90, 0, 18, 20)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_kpi10"]
+atlas = ExtResource("2_humek")
+region = Rect2(108, 0, 18, 20)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_h3tte"]
+atlas = ExtResource("2_humek")
+region = Rect2(126, 0, 18, 20)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_mh8nu"]
+atlas = ExtResource("2_humek")
+region = Rect2(144, 0, 18, 20)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_ex4kd"]
+atlas = ExtResource("2_humek")
+region = Rect2(162, 0, 18, 20)
+
+[sub_resource type="SpriteFrames" id="SpriteFrames_84l48"]
+animations = [{
+"frames": [{
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_5c57a")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_gl5sa")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_nu2h4")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_xrm1m")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_t3klv")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_4g61u")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_kpi10")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_h3tte")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_mh8nu")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_ex4kd")
+}],
+"loop": true,
+"name": &"default",
+"speed": 10.0
+}]
+
+[sub_resource type="RectangleShape2D" id="RectangleShape2D_gl5sa"]
+size = Vector2(64, 64)
+
+[sub_resource type="RectangleShape2D" id="RectangleShape2D_humek"]
+size = Vector2(64, 64)
+
+[node name="CharacterBody2D" type="CharacterBody2D" unique_id=929815185 groups=["Ghost"]]
+collision_layer = 4
+collision_mask = 6
+script = ExtResource("1_humek")
+
+[node name="AnimatedSprite2D" type="AnimatedSprite2D" parent="." unique_id=156144050]
+scale = Vector2(3, 3)
+sprite_frames = SubResource("SpriteFrames_84l48")
+frame_progress = 0.43160588
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="." unique_id=1899094678]
+shape = SubResource("RectangleShape2D_gl5sa")
+
+[node name="InteractionArea" type="Area2D" parent="." unique_id=660207684]
+collision_layer = 2
+collision_mask = 2
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="InteractionArea" unique_id=132704989]
+shape = SubResource("RectangleShape2D_humek")

@@ -1,10 +1,10 @@
 [gd_scene format=4 uid="uid://cc6i0e1kvelc8"]
 
 [ext_resource type="Script" uid="uid://bmd6hkjls56de" path="res://Scripts/main.gd" id="1_aqrgr"]
-[ext_resource type="PackedScene" uid="uid://yffq7cs5cqdf" path="res://Scenes/item_shoe.tscn" id="2_t1i21"]
-[ext_resource type="PackedScene" uid="uid://5oxjm6ug5ncp" path="res://Scenes/item_coffee.tscn" id="3_q15t2"]
-[ext_resource type="PackedScene" uid="uid://c4sy607bwof83" path="res://Scenes/player.tscn" id="4_7icnw"]
-[ext_resource type="PackedScene" uid="uid://cqbq35ef7qsmd" path="res://Scenes/heart.tscn" id="5_8oggy"]
+[ext_resource type="PackedScene" uid="uid://yffq7cs5cqdf" path="res://Scenes/Items/item_shoe.tscn" id="2_t1i21"]
+[ext_resource type="PackedScene" uid="uid://5oxjm6ug5ncp" path="res://Scenes/Items/item_coffee.tscn" id="3_q15t2"]
+[ext_resource type="PackedScene" uid="uid://c4sy607bwof83" path="res://Scenes/Player/player.tscn" id="4_7icnw"]
+[ext_resource type="PackedScene" uid="uid://cqbq35ef7qsmd" path="res://Scenes/Items/heart.tscn" id="5_8oggy"]
 [ext_resource type="Texture2D" uid="uid://banibmuufdg3x" path="res://Assets/UIs/button UI.png" id="6_kvgin"]
 [ext_resource type="Script" uid="uid://0a15j6p2c2ts" path="res://Scripts/restart_button.gd" id="7_y5mkc"]
 [ext_resource type="Texture2D" uid="uid://biv8vykh0s88f" path="res://Assets/2D Pixel Dungeon Asset Pack/character and tileset/Dungeon_Tileset.png" id="8_kdssi"]
@@ -192,9 +192,6 @@ offset_right = 2.0
 offset_bottom = 13.5
 show_percentage = true
 metadata/_edit_use_anchors_ = true
-
-[node name="GhostTransitionAnimation" parent="Player2" index="9" unique_id=52766954]
-visible = false
 
 [node name="Camera2D" type="Camera2D" parent="." unique_id=1658536604]
 zoom = Vector2(0.75, 0.75)

@@ -1,5 +1,6 @@
 extends Node2D
 
+# HUD Elements
 @onready var gameover_label = $HUDs/gameover_label
 @onready var wave_label = $HUDs/wave_label
 @onready var huds: CanvasLayer = $HUDs
@@ -8,7 +9,7 @@ extends Node2D
 @onready var resume_button = $HUDs/PauseContainer/resume_button
 @onready var main_menu_button = $HUDs/PauseContainer/main_menu_button
 
-
+# Player Elemetns
 @onready var p1 = $Player1
 @onready var p2 = $Player2
 @onready var p1_effect_label = $HUDs/Player1/EffectLabel
@@ -16,10 +17,12 @@ extends Node2D
 @onready var p2_effect_label = $HUDs/Player2/EffectLabel
 @onready var p2_effect_icon = $HUDs/Player2/EffectIcon
 
+# ???
 const UI_FONT: FontFile = preload("res://Assets/False Earthdream.ttf")
 const PAUSE_BLUR_SHADER: Shader = preload("res://Assets/ui_pause_blur.gdshader")
 const PLAYER_WALK_TEXTURE: Texture2D = preload("res://Assets/walk.png")
 
+# Boss related elements
 var boss_hp_container: VBoxContainer
 var boss_hp_label: Label
 var boss_hp_bar: ProgressBar
@@ -27,15 +30,19 @@ var phase_overlay: Control
 var phase_overlay_bg: ColorRect
 var phase_overlay_label: Label
 
+# Pause Elements
 var pause_overlay: Control
 var pause_blur_rect: ColorRect
 var pause_icon_label: Label
 
+
+#Victory Elemetnts
 var victory_overlay: Control
 var victory_bg: ColorRect
 var victory_label: Label
 var victory_candle: AnimatedSprite2D
 
+# Boss Phase
 var phase_transition_running: bool = false
 var pending_phase_two_refill: bool = false
 var is_manual_paused: bool = false

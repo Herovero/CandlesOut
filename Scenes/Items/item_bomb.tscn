@@ -1,0 +1,128 @@
+[gd_scene format=3 uid="uid://fvfcli6ddale"]
+
+[ext_resource type="Script" uid="uid://qaqrcuiubex6" path="res://Scripts/Item/bomb.gd" id="1_84vf5"]
+[ext_resource type="Texture2D" uid="uid://csd1bk12cfhin" path="res://Assets/Sprites/angel wings/angel_wings1.png" id="2_gv38b"]
+[ext_resource type="Texture2D" uid="uid://jlnyjr8040vx" path="res://Assets/explosion pack 1/Explosions pack/explosion-1-g/Sprites/frame1.png" id="3_5b00u"]
+[ext_resource type="Texture2D" uid="uid://dwjr5allyskx6" path="res://Assets/Sprites/angel wings/angel_wings2.png" id="3_b4i02"]
+[ext_resource type="Texture2D" uid="uid://ck65vg7svaaex" path="res://Assets/Sprites/angel wings/angel_wings3.png" id="4_kgc4i"]
+[ext_resource type="Texture2D" uid="uid://c0jb7mvcxp5i1" path="res://Assets/explosion pack 1/Explosions pack/explosion-1-g/Sprites/frame2.png" id="4_t8hh5"]
+[ext_resource type="Texture2D" uid="uid://bjcvtmkyosho1" path="res://Assets/explosion pack 1/Explosions pack/explosion-1-g/Sprites/frame3.png" id="5_aqbkn"]
+[ext_resource type="Texture2D" uid="uid://kg83rkqx7hkt" path="res://Assets/Sprites/angel wings/angel_wings4.png" id="5_bul4x"]
+[ext_resource type="Texture2D" uid="uid://cufpnftmhble7" path="res://Assets/explosion pack 1/Explosions pack/explosion-1-g/Sprites/frame4.png" id="6_ugtvp"]
+[ext_resource type="Texture2D" uid="uid://s1khnkfal0ph" path="res://Assets/Sprites/item_bomb(1).png" id="7_5y74k"]
+[ext_resource type="Texture2D" uid="uid://ck34pnwuibdjv" path="res://Assets/explosion pack 1/Explosions pack/explosion-1-g/Sprites/frame5.png" id="7_rfdoe"]
+[ext_resource type="Texture2D" uid="uid://dpyunhjmi8pc0" path="res://Assets/explosion pack 1/Explosions pack/explosion-1-g/Sprites/frame6.png" id="8_gv38b"]
+[ext_resource type="Texture2D" uid="uid://b0qsbw6wygg0r" path="res://Assets/explosion pack 1/Explosions pack/explosion-1-g/Sprites/frame7.png" id="9_b4i02"]
+[ext_resource type="AudioStream" uid="uid://c5d83f6xvuxgt" path="res://SFX/ItemSound/Bomb.wav" id="14_gv38b"]
+[ext_resource type="AudioStream" uid="uid://2vyvg6lyfdha" path="res://SFX/ItemSound/BombFlying.wav" id="15_b4i02"]
+
+[sub_resource type="CanvasItemMaterial" id="CanvasItemMaterial_b4i02"]
+blend_mode = 1
+
+[sub_resource type="SpriteFrames" id="SpriteFrames_5b00u"]
+animations = [{
+"frames": [{
+"duration": 1.0,
+"texture": ExtResource("2_gv38b")
+}, {
+"duration": 1.0,
+"texture": ExtResource("3_b4i02")
+}, {
+"duration": 1.0,
+"texture": ExtResource("4_kgc4i")
+}, {
+"duration": 1.0,
+"texture": ExtResource("5_bul4x")
+}],
+"loop": true,
+"name": &"default",
+"speed": 7.0
+}]
+
+[sub_resource type="SpriteFrames" id="SpriteFrames_kgc4i"]
+animations = [{
+"frames": [{
+"duration": 1.0,
+"texture": ExtResource("3_5b00u")
+}, {
+"duration": 1.0,
+"texture": ExtResource("4_t8hh5")
+}, {
+"duration": 1.0,
+"texture": ExtResource("5_aqbkn")
+}, {
+"duration": 1.0,
+"texture": ExtResource("6_ugtvp")
+}, {
+"duration": 1.0,
+"texture": ExtResource("7_rfdoe")
+}, {
+"duration": 1.0,
+"texture": ExtResource("8_gv38b")
+}, {
+"duration": 1.0,
+"texture": ExtResource("9_b4i02")
+}],
+"loop": false,
+"name": &"explode",
+"speed": 10.0
+}]
+
+[sub_resource type="CircleShape2D" id="CircleShape2D_1weea"]
+radius = 20.024984
+
+[sub_resource type="CircleShape2D" id="CircleShape2D_84vf5"]
+radius = 162.19742
+
+[node name="item_bomb" type="Area2D" unique_id=839316503 groups=["Items"]]
+material = SubResource("CanvasItemMaterial_b4i02")
+collision_layer = 3
+collision_mask = 3
+script = ExtResource("1_84vf5")
+
+[node name="LeftWing" type="AnimatedSprite2D" parent="." unique_id=1374021363]
+visible = false
+position = Vector2(-36, 0)
+scale = Vector2(0.2, 0.2)
+sprite_frames = SubResource("SpriteFrames_5b00u")
+frame = 3
+frame_progress = 0.09262803
+
+[node name="RightWing" type="AnimatedSprite2D" parent="." unique_id=1825353331]
+visible = false
+position = Vector2(36, 0)
+scale = Vector2(0.2, 0.2)
+sprite_frames = SubResource("SpriteFrames_5b00u")
+frame = 3
+frame_progress = 0.09262803
+flip_h = true
+
+[node name="Sprite2D" type="Sprite2D" parent="." unique_id=288658865]
+position = Vector2(2.0000002, 0)
+scale = Vector2(2.1, 2.1)
+texture = ExtResource("7_5y74k")
+
+[node name="ExplosionVFX" type="AnimatedSprite2D" parent="." unique_id=1588758555]
+visible = false
+scale = Vector2(10, 10)
+sprite_frames = SubResource("SpriteFrames_kgc4i")
+animation = &"explode"
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="." unique_id=40545649]
+visible = false
+shape = SubResource("CircleShape2D_1weea")
+
+[node name="ExplosionArea" type="Area2D" parent="." unique_id=2139255617]
+visible = false
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="ExplosionArea" unique_id=1631850397]
+position = Vector2(1, 0)
+shape = SubResource("CircleShape2D_84vf5")
+
+[node name="ExplosionSFX" type="AudioStreamPlayer2D" parent="." unique_id=609944901]
+stream = ExtResource("14_gv38b")
+
+[node name="FlySFX" type="AudioStreamPlayer2D" parent="." unique_id=1674956394]
+stream = ExtResource("15_b4i02")
+
+[connection signal="body_entered" from="." to="." method="_on_body_entered"]

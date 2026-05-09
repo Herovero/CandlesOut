@@ -1,8 +1,8 @@
 [gd_scene format=4 uid="uid://b4jda3svu4fmh"]
 
-[ext_resource type="PackedScene" uid="uid://c4sy607bwof83" path="res://Scenes/player.tscn" id="1_jjgbg"]
+[ext_resource type="PackedScene" uid="uid://c4sy607bwof83" path="res://Scenes/Player/player.tscn" id="1_jjgbg"]
 [ext_resource type="Script" uid="uid://bmd6hkjls56de" path="res://Scripts/main.gd" id="1_ynf5e"]
-[ext_resource type="PackedScene" uid="uid://cqbq35ef7qsmd" path="res://Scenes/heart.tscn" id="2_8gbba"]
+[ext_resource type="PackedScene" uid="uid://cqbq35ef7qsmd" path="res://Scenes/Items/heart.tscn" id="2_8gbba"]
 [ext_resource type="PackedScene" uid="uid://ct8trhua4tgaq" path="res://Scenes/Spawners/Spawner.tscn" id="5_21xkr"]
 [ext_resource type="Texture2D" uid="uid://biv8vykh0s88f" path="res://Assets/2D Pixel Dungeon Asset Pack/character and tileset/Dungeon_Tileset.png" id="5_kry3j"]
 [ext_resource type="PackedScene" uid="uid://duwadq4gka1wx" path="res://Scenes/Spawners/item_spawner.tscn" id="6_6bp64"]
@@ -480,67 +480,6 @@ grow_horizontal = 2
 grow_vertical = 2
 color = Color(1, 1, 1, 0)
 
-[node name="AnimatedSprite2D" type="AnimatedSprite2D" parent="." unique_id=1377888699]
-position = Vector2(-549, 193.00002)
-scale = Vector2(3, 3)
-sprite_frames = SubResource("SpriteFrames_1w6v2")
-autoplay = "default"
-speed_scale = 2.0
-
-[node name="AnimatedSprite2D" type="AnimatedSprite2D" parent="AnimatedSprite2D" unique_id=1418518945]
-position = Vector2(366, 0.66666126)
-sprite_frames = SubResource("SpriteFrames_1w6v2")
-autoplay = "default"
-speed_scale = 2.0
-flip_h = true
-
-[node name="AnimatedSprite2D3" type="AnimatedSprite2D" parent="." unique_id=1147649102]
-position = Vector2(-168, -287)
-scale = Vector2(3, 3)
-sprite_frames = SubResource("SpriteFrames_1w6v2")
-animation = &"front"
-autoplay = "front"
-speed_scale = 2.0
-
-[node name="AnimatedSprite2D2" type="AnimatedSprite2D" parent="." unique_id=1645234091]
-position = Vector2(-549, -195)
-scale = Vector2(3, 3)
-sprite_frames = SubResource("SpriteFrames_1w6v2")
-autoplay = "default"
-speed_scale = 2.0
-
-[node name="AnimatedSprite2D4" type="AnimatedSprite2D" parent="." unique_id=325771104]
-position = Vector2(216.00002, -287)
-scale = Vector2(3, 3)
-sprite_frames = SubResource("SpriteFrames_1w6v2")
-animation = &"front"
-autoplay = "front"
-speed_scale = 2.0
-
-[node name="AnimatedSprite2D5" type="AnimatedSprite2D" parent="." unique_id=1353647845]
-position = Vector2(-408, -287)
-scale = Vector2(3, 3)
-sprite_frames = SubResource("SpriteFrames_1w6v2")
-animation = &"front"
-autoplay = "front"
-speed_scale = 2.0
-
-[node name="AnimatedSprite2D6" type="AnimatedSprite2D" parent="." unique_id=1361860015]
-position = Vector2(408, -287)
-scale = Vector2(3, 3)
-sprite_frames = SubResource("SpriteFrames_1w6v2")
-animation = &"front"
-autoplay = "front"
-speed_scale = 2.0
-
-[node name="AnimatedSprite2D7" type="AnimatedSprite2D" parent="." unique_id=188676675]
-position = Vector2(549, -191)
-scale = Vector2(3, 3)
-sprite_frames = SubResource("SpriteFrames_1w6v2")
-autoplay = "default"
-speed_scale = 2.0
-flip_h = true
-
 [node name="TileMapLayer3" type="TileMapLayer" parent="." unique_id=1359292144]
 z_index = -1
 position = Vector2(-144, -23)
@@ -548,40 +487,105 @@ scale = Vector2(4, 4)
 tile_map_data = PackedByteArray("AAD6//3/AAAHAAcAAAAIAAMAAAAHAAcAAAD9/wMAAAAHAAcAAAAHAP7/AAAIAAYAAAAHAAIAAAAIAAYAAAD7/wQAAAAIAAYAAAAAAP7/AAAIAAYAAAD+/wAAAAAIAAYAAAD9//3/AAAJAAUAAAAHAAQAAAAJAAUAAAD5/wEAAAAJAAUAAAAFAAQAAAAJAAQAAAAFAP3/AAAJAAQAAAA=")
 tile_set = SubResource("TileSet_6bp64")
 
-[node name="StaticBody2D" type="StaticBody2D" parent="." unique_id=96163877]
+[node name="Decorations" type="Node" parent="." unique_id=607672452]
+
+[node name="AnimatedSprite2D" type="AnimatedSprite2D" parent="Decorations" unique_id=1377888699]
+position = Vector2(-549, 193.00002)
+scale = Vector2(3, 3)
+sprite_frames = SubResource("SpriteFrames_1w6v2")
+autoplay = "default"
+speed_scale = 2.0
+
+[node name="AnimatedSprite2D" type="AnimatedSprite2D" parent="Decorations/AnimatedSprite2D" unique_id=1418518945]
+position = Vector2(366, 0.66666126)
+sprite_frames = SubResource("SpriteFrames_1w6v2")
+autoplay = "default"
+speed_scale = 2.0
+flip_h = true
+
+[node name="AnimatedSprite2D3" type="AnimatedSprite2D" parent="Decorations" unique_id=1147649102]
+position = Vector2(-168, -287)
+scale = Vector2(3, 3)
+sprite_frames = SubResource("SpriteFrames_1w6v2")
+animation = &"front"
+autoplay = "front"
+speed_scale = 2.0
+
+[node name="AnimatedSprite2D2" type="AnimatedSprite2D" parent="Decorations" unique_id=1645234091]
+position = Vector2(-549, -195)
+scale = Vector2(3, 3)
+sprite_frames = SubResource("SpriteFrames_1w6v2")
+autoplay = "default"
+speed_scale = 2.0
+
+[node name="AnimatedSprite2D4" type="AnimatedSprite2D" parent="Decorations" unique_id=325771104]
+position = Vector2(216.00002, -287)
+scale = Vector2(3, 3)
+sprite_frames = SubResource("SpriteFrames_1w6v2")
+animation = &"front"
+autoplay = "front"
+speed_scale = 2.0
+
+[node name="AnimatedSprite2D5" type="AnimatedSprite2D" parent="Decorations" unique_id=1353647845]
+position = Vector2(-408, -287)
+scale = Vector2(3, 3)
+sprite_frames = SubResource("SpriteFrames_1w6v2")
+animation = &"front"
+autoplay = "front"
+speed_scale = 2.0
+
+[node name="AnimatedSprite2D6" type="AnimatedSprite2D" parent="Decorations" unique_id=1361860015]
+position = Vector2(408, -287)
+scale = Vector2(3, 3)
+sprite_frames = SubResource("SpriteFrames_1w6v2")
+animation = &"front"
+autoplay = "front"
+speed_scale = 2.0
+
+[node name="AnimatedSprite2D7" type="AnimatedSprite2D" parent="Decorations" unique_id=188676675]
+position = Vector2(549, -191)
+scale = Vector2(3, 3)
+sprite_frames = SubResource("SpriteFrames_1w6v2")
+autoplay = "default"
+speed_scale = 2.0
+flip_h = true
+
+[node name="Borders" type="Node" parent="." unique_id=394966260]
+
+[node name="StaticBody2D" type="StaticBody2D" parent="Borders" unique_id=96163877]
 position = Vector2(16, -272)
 collision_layer = 4
 collision_mask = 4
 
-[node name="CollisionShape2D" type="CollisionShape2D" parent="StaticBody2D" unique_id=365344491]
+[node name="CollisionShape2D" type="CollisionShape2D" parent="Borders/StaticBody2D" unique_id=365344491]
 position = Vector2(9, -46)
 shape = SubResource("RectangleShape2D_fevyy")
 
-[node name="StaticBody2D2" type="StaticBody2D" parent="." unique_id=1301061327]
+[node name="StaticBody2D2" type="StaticBody2D" parent="Borders" unique_id=1301061327]
 position = Vector2(-665, -10)
 rotation = 1.5707964
 collision_layer = 4
 collision_mask = 4
 
-[node name="CollisionShape2D" type="CollisionShape2D" parent="StaticBody2D2" unique_id=1424624290]
+[node name="CollisionShape2D" type="CollisionShape2D" parent="Borders/StaticBody2D2" unique_id=1424624290]
 position = Vector2(9, -46)
 shape = SubResource("RectangleShape2D_fevyy")
 
-[node name="StaticBody2D3" type="StaticBody2D" parent="." unique_id=2005866822]
+[node name="StaticBody2D3" type="StaticBody2D" parent="Borders" unique_id=2005866822]
 position = Vector2(16, -272)
 collision_layer = 4
 collision_mask = 4
 
-[node name="CollisionShape2D" type="CollisionShape2D" parent="StaticBody2D3" unique_id=1243072085]
+[node name="CollisionShape2D" type="CollisionShape2D" parent="Borders/StaticBody2D3" unique_id=1243072085]
 position = Vector2(9, 610)
 shape = SubResource("RectangleShape2D_fevyy")
 
-[node name="StaticBody2D4" type="StaticBody2D" parent="." unique_id=1572282424]
+[node name="StaticBody2D4" type="StaticBody2D" parent="Borders" unique_id=1572282424]
 position = Vector2(16, -272)
 collision_layer = 4
 collision_mask = 4
 
-[node name="CollisionShape2D" type="CollisionShape2D" parent="StaticBody2D4" unique_id=632725151]
+[node name="CollisionShape2D" type="CollisionShape2D" parent="Borders/StaticBody2D4" unique_id=632725151]
 position = Vector2(585, 274)
 rotation = -1.5707964
 shape = SubResource("RectangleShape2D_fevyy")
