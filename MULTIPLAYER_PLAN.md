@@ -18,11 +18,11 @@ The first version should intentionally support only:
 - Native Windows and Linux desktop builds, including cross-platform LAN Sessions
 - IPv4 LAN addresses only
 - Local Co-op with both players on one machine
-- Online Co-op with one host and one joining player on the same LAN
-- Joining by entering the host's LAN IP address
-- Both players connecting before the match starts
-- Host-controlled pause, restart, waves, and scene changes
-- Ending the match if either peer disconnects
+- Online Co-op with one Host and one Joining Peer on the same LAN
+- Joining by entering the Host's LAN IP address
+- Both Online Co-op participants connecting before the Match starts
+- Host-controlled pause, restart, waves, and scene changes in Online Co-op
+- Ending an Online Co-op Match if either peer disconnects
 
 The following are out of scope:
 
@@ -38,7 +38,7 @@ The following are out of scope:
 
 ## Authority Model
 
-Use a **host-authoritative simulation**. The joining player sends input intentions to the host, and the host decides the resulting game state.
+Use a **host-authoritative simulation**. The Joining Peer sends input intentions to the Host, and the Host decides the resulting game state.
 
 | State | Authority |
 |---|---|
@@ -46,7 +46,7 @@ Use a **host-authoritative simulation**. The joining player sends input intentio
 | Health and damage | Host |
 | Enemy AI and health | Host |
 | Projectiles and collisions | Host |
-| Ghost creation and movement | Host |
+| Ghost activation and movement | Host |
 | Item spawning and outcomes | Host |
 | Waves and boss phases | Host |
 | Music, particles, UI, and sound | Local presentation of replicated state |
@@ -168,18 +168,20 @@ func apply_command(command: PlayerCommand, delta: float) -> void
 
 Local Co-op, Host input, and Joining Peer input must all converge on the same `apply_command` simulation path. Input adapters may differ, but there must not be separate local and network implementations of movement, sprinting, sleeping, or interaction rules.
 
-The joining player sends movement intentions to the host:
+The Joining Peer sends movement intentions to the Host with the current Match generation:
 
 ```gdscript
-submit_input.rpc_id(1, direction, sprinting)
+submit_input.rpc_id(1, NetworkSession.match_generation, direction, sprinting)
 ```
 
-The host validates the sender and stores the latest input:
+The Host rejects stale generations, validates the sender, and stores the latest input:
 
 ```gdscript
 @rpc("any_peer", "call_remote", "unreliable_ordered", 1)
-func submit_input(direction: Vector2, sprinting: bool) -> void:
+func submit_input(generation: int, direction: Vector2, sprinting: bool) -> void:
     if not multiplayer.is_server():
+        return
+    if generation != NetworkSession.match_generation:
         return
 
     var sender := multiplayer.get_remote_sender_id()
@@ -192,16 +194,15 @@ func submit_input(direction: Vector2, sprinting: bool) -> void:
 
 Use unreliable ordered messages for continuous movement because newer input supersedes older input. The Joining Peer sends input continuously at an initial rate of 30 Hz, even when unchanged. If the Host receives no input update for 500 ms, it substitutes neutral movement and disables sprint until fresh input arrives. Losing window focus should immediately send neutral input when possible.
 
-Use reliable messages for discrete actions:
+Use validated reliable client requests for discrete player actions:
 
 - Pick up item
 - Drop item
 - Throw item
-- Pause
-- Restart
-- Return to menu
 
-Initially, accept the input delay caused by waiting for the host. Add client prediction and reconciliation later if remote movement—especially ghost movement—feels sluggish.
+Pause, Restart, Rematch, and Return to Main Menu are Host-owned lifecycle transitions, not Joining Peer gameplay requests. Joining Peer Disconnect closes its local peer and is observed through the connection lifecycle.
+
+Initially, accept the input delay caused by waiting for the Host. Client prediction and reconciliation are not part of this plan; if LAN playtesting proves them necessary, define them as a separate follow-up project.
 
 ## 4. Synchronize Player State
 
@@ -214,7 +215,7 @@ Synchronize authoritative properties including:
 - Stamina
 - Sleeping and returning states
 - Invincibility and status effects
-- Active ghost state
+- Ghost activation and return state
 - Animation-relevant state
 
 Run authoritative physics at 60 Hz, initially synchronize moving transforms at 20 Hz, and interpolate remote positions to avoid visible snapping. Keep input and synchronization rates as named developer constants rather than player-facing settings, and adjust them only after profiling.
@@ -258,7 +259,7 @@ Use `MultiplayerSpawner` for dynamically created objects:
 
 - Enemies
 - Projectiles
-- Items and bombs
+- Items, including bombs
 
 Place replicated objects under a stable world node such as:
 
@@ -417,7 +418,7 @@ Do not accept nodes, resources, or arbitrary object state from a client.
 10. Replicate item spawning, pickup, drop, throw, and effects.
 11. Replicate boss phases, victory, and game over.
 12. Synchronize pause, restart, menu transitions, and full cleanup.
-13. Add interpolation and then client prediction if testing shows it is needed.
+13. Tune interpolation and replication rates from profiling.
 
 ## Milestones
 
