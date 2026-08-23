@@ -166,6 +166,8 @@ func sample_local_input() -> PlayerCommand
 func apply_command(command: PlayerCommand, delta: float) -> void
 ```
 
+Local Co-op, Host input, and Joining Peer input must all converge on the same `apply_command` simulation path. Input adapters may differ, but there must not be separate local and network implementations of movement, sprinting, sleeping, or interaction rules.
+
 The joining player sends movement intentions to the host:
 
 ```gdscript
@@ -239,7 +241,7 @@ Do not allow clients to run independent enemy AI, damage checks, spawning, or wa
 
 Split authoritative simulation from visual presentation rather than disabling entire scripts on clients. Clients still need to render animations, particles, sounds, and interpolated movement.
 
-All random decisions must occur on the host, including:
+All random decisions must occur on the Host, including:
 
 - Wave queue shuffling
 - Weighted item selection
@@ -247,6 +249,8 @@ All random decisions must occur on the host, including:
 - Bomb behavior
 - Boss attack selection
 - Random spawn positions
+
+The Host also owns every gameplay clock: cooldowns, effect durations, stamina, wave delays, boss transitions, and projectile lifetimes. Clients may animate synchronized remaining time, but a client-side timer or `await` must never expire or advance authoritative gameplay state. Global Host pause freezes these authoritative clocks.
 
 ## 6. Replicate Dynamic Objects
 
@@ -263,6 +267,8 @@ Main/ReplicatedEntities
 ```
 
 The Host creates and removes these objects. Their scenes can contain `MultiplayerSynchronizer` nodes for position and gameplay state. Commit to Godot's `MultiplayerSpawner` and `MultiplayerSynchronizer` for the first version rather than building a custom snapshot or entity-replication protocol.
+
+Set an entity's identifying and initial authoritative state before exposing it through `MultiplayerSpawner`, using custom spawn data where necessary. A client must never temporarily simulate a projectile, enemy, item, or bomb with default ownership, direction, phase, or damage values.
 
 Synchronizing every projectile is acceptable for the first version because the game has relatively few entities. Optimize only after profiling.
 
@@ -361,6 +367,23 @@ Return to Main Menu closes the Session. If either peer disconnects during a Matc
 
 Keep the networking autoload in `PROCESS_MODE_ALWAYS` so it can process connection events and RPCs while the scene tree is paused.
 
+## 11. Make Lifecycle and Reset Explicit
+
+Model Session lifecycle explicitly instead of inferring it from the current scene:
+
+```gdscript
+enum SessionState { IDLE, HOSTING, CONNECTING, LOBBY, LOADING, IN_MATCH, CLOSING }
+enum MatchPhase { LOADING, PLAYING, PAUSED, GAME_OVER, VICTORY }
+```
+
+`NetworkSession` owns transport, peer assignment, protocol validation, Session state, and scene-readiness coordination. The authoritative Match controller owns Match phase, waves, game-over, victory, and global pause. Transitions must be validated and idempotent so duplicate Start, Restart, disconnect, or scene-ready messages cannot execute twice.
+
+The Host increments a monotonic `match_generation` before every initial Match, Restart, or Rematch. Include it in every Match-scoped command, request, readiness message, and presentation event. Both sides reject messages for any other generation so delayed input or reliable RPCs from a previous scene cannot affect the new Match.
+
+Session and Lobby RPC endpoints live on the stable `NetworkSession` autoload. Match-scoped RPC endpoints are used only after the two-peer loading barrier confirms that identical gameplay scene paths exist on both peers.
+
+Before each Match generation, clear all Match-scoped state, including cached input, readiness flags, spawned-entity accounting, wave queues, Timed Item Effects, ghost/item ownership, timers, tweens, and debug skip flags. On leaving or losing a Session, also close the multiplayer peer, clear peer-to-slot assignments and `Global` scene references, restore `get_tree().paused = false` and `Engine.time_scale = 1.0`, and return `NetworkSession` to `IDLE`. Repeated Host, Join, Restart, Rematch, and Local Co-op cycles must not accumulate signal connections or retain stale nodes and references.
+
 ## Security and Validation
 
 The first version assumes a cooperative LAN environment. The Host accepts the first protocol-compatible Joining Peer; Session passwords, participant authentication, and transport encryption are deferred. This does not weaken gameplay validation.
@@ -383,17 +406,18 @@ Do not accept nodes, resources, or arbitrary object state from a client.
 ## Implementation Order
 
 1. Move health and player identity out of HUD/input-prefix code.
-2. Separate local-dual and online input collection from player simulation while preserving Local Co-op.
-3. Add the fixed-port ENet Host LAN Game / Join LAN Game Lobby, including protocol-version validation.
-4. Add the two-peer scene-loading readiness barrier and assign each peer to one existing player.
-5. Synchronize player movement and state.
-6. Make enemy AI, waves, damage, and random decisions host-only.
-7. Replicate enemies and one basic projectile.
-8. Activate and synchronize the two persistent ghosts and sleeping state.
-9. Replicate item spawning, pickup, drop, throw, and effects.
-10. Replicate boss phases, victory, and game over.
-11. Synchronize pause, restart, and menu transitions.
-12. Add interpolation and then client prediction if testing shows it is needed.
+2. Separate local-dual and online input collection from simulation while making every mode use the same command-application path.
+3. Add the explicit Session state machine, Match phase model, generation IDs, and reset contract.
+4. Add the fixed-port ENet Host LAN Game / Join LAN Game Lobby, including protocol-version validation.
+5. Add the two-peer scene-loading readiness barrier and assign each peer to one existing player.
+6. Synchronize player movement and state.
+7. Make enemy AI, gameplay clocks, waves, damage, and random decisions Host-only.
+8. Replicate enemies and one basic projectile with complete initial spawn state.
+9. Activate and synchronize the two persistent ghosts and sleeping state.
+10. Replicate item spawning, pickup, drop, throw, and effects.
+11. Replicate boss phases, victory, and game over.
+12. Synchronize pause, restart, menu transitions, and full cleanup.
+13. Add interpolation and then client prediction if testing shows it is needed.
 
 ## Milestones
 
@@ -404,6 +428,7 @@ Do not accept nodes, resources, or arbitrary object state from a client.
 - Joining Peer manually connects over `127.0.0.1` or the Host's displayed LAN IP address using the fixed port.
 - Incompatible protocol versions are rejected before entering the Lobby.
 - Both peers enter the Lobby, load the same gameplay scene, report readiness, and start only after the loading barrier completes.
+- Session state transitions and Match generations agree on both peers.
 - Connection failures and disconnects are handled.
 
 ### Milestone 2: Player Movement
@@ -437,6 +462,7 @@ Do not accept nodes, resources, or arbitrary object state from a client.
 - Restart and Rematch retain the existing Session.
 - Return to Main Menu closes the Session.
 - Any disconnect ends the Match and returns both sides to the main menu with a reason.
+- Every Match and Session exit clears authoritative state, peer mappings, replicated entities, timers, global references, pause state, and signal connections.
 - Local Co-op remains playable through the full game without creating a Session.
 
 ## Verification
@@ -459,5 +485,9 @@ Test in increasing order of complexity:
 14. Simultaneous pickup requests for the same item.
 15. Both players sleeping at nearly the same time.
 16. Boss phase transition and victory under latency, including the debug-build-only Host shortcut.
+17. Delayed or duplicate input, readiness, Start, Restart, and presentation RPCs from the wrong Match generation.
+18. Repeated Host → Match → Main Menu → Host and Join → Match → Rematch cycles without stale state, duplicate signals, or retained nodes.
+19. Local Co-op, Host input, and Joining Peer input producing the same simulation outcomes from equivalent commands.
+20. Authoritative timers and cooldowns agreeing through latency, global pause, scene reload, and Match cleanup.
 
 The first development target should remain small: **host and client enter one room, each controls one player, and both see the same movement**. Add enemies, projectiles, ghosts, items, and waves only after that foundation is stable.
