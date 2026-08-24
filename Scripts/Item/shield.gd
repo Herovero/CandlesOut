@@ -1,7 +1,6 @@
 extends "res://Scripts/Item/item.gd"
 
 @export var duration: float = 10.0
-@onready var shield_sfx: AudioStreamPlayer2D = $ShieldSFX
 
 func _ready():
 	super()
@@ -24,15 +23,5 @@ func _on_body_entered(body):
 			# Blessing: Immunity
 			SignalBus.emit_signal.call_deferred("apply_shield_boost", duration, target_slot)
 		
-		if shield_sfx:
-			play_sfx(shield_sfx)
+		NetworkSession.broadcast_sfx(GameplayAudio.Cue.ITEM_SHIELD, global_position)
 		queue_free()
-
-func play_sfx(template):
-	var sfx = AudioStreamPlayer2D.new()
-	sfx.stream = template.stream
-	sfx.volume_db = 4.0
-	sfx.global_position = global_position
-	get_tree().current_scene.add_child(sfx)
-	sfx.play()
-	sfx.finished.connect(sfx.queue_free)

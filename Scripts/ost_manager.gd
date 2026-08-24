@@ -5,6 +5,19 @@ extends Node
 @onready var intros = [ $Intro1, $Intro2, $Intro3 ]
 @export var fade_speed: float = 1.0 # how fast tracks crossfade 
 var current_track: AudioStreamPlayer = null
+var transition_token: int = 0
+
+
+func _ready() -> void:
+	Global.ost_manager = self
+	GameplayAudio.register_ost_manager(self)
+
+
+func _exit_tree() -> void:
+	GameplayAudio.unregister_ost_manager(self)
+	if Global.ost_manager == self:
+		Global.ost_manager = null
+
 
 func play_wave_ost(wave_number: int):
 	var index = wave_number - 1
@@ -16,10 +29,14 @@ func play_wave_ost(wave_number: int):
 	if current_track == next_track:
 		return
 	
+	transition_token += 1
+	var token := transition_token
 	if current_track:
 		fade_out(current_track)
 	
 	await _play_intro(wave_number)  # wait for intro to finish before wave ost
+	if token != transition_token:
+		return
 	
 	current_track = next_track
 	current_track.play()
@@ -55,6 +72,9 @@ func _play_intro(wave_number: int):
 	intro.stop()
 
 func stop_all():
+	transition_token += 1
+	for intro in intros:
+		intro.stop()
 	for track in tracks:
 		track.stop()
 	current_track = null

@@ -92,6 +92,12 @@ var remote_direction: Vector2 = Vector2.ZERO
 var remote_sprinting: bool = false
 var last_remote_input_msec: int = 0
 var input_send_accumulator: float = 0.0
+var network_generation: int = 0
+var network_position: Vector2 = Vector2.ZERO
+var network_velocity: Vector2 = Vector2.ZERO
+var _presented_sleeping: bool = false
+var _presented_prison: bool = false
+var _presented_hit_stun: bool = false
 
 @onready var candle_light: Sprite2D = $Asset/CandleLight
 
@@ -133,8 +139,14 @@ func _ready():
 	if candle_light:
 		candle_light.modulate.a = glow_base_energy
 
-	NetworkSession.configure_synchronizer(self, [
-		&"position", &"velocity", &"health", &"current_stamina", &"is_sleeping",
+	network_generation = NetworkSession.match_generation
+	network_position = position
+	network_velocity = velocity
+	_presented_sleeping = is_sleeping
+	_presented_prison = is_prison_active
+	_presented_hit_stun = is_hit_stunned
+	NetworkSession.configure_moving_synchronizer(self, [
+		&"health", &"current_stamina", &"is_sleeping",
 		&"is_returning", &"is_invincible", &"is_hit_stunned", &"active_effect_name",
 		&"active_effect_time_left", &"last_move_dir", &"is_triple_shot_active",
 		&"is_panicked_fire_active", &"is_ramming_active", &"is_shield_active", &"is_prison_active",
@@ -147,7 +159,14 @@ func _physics_process(delta: float) -> void:
 
 	if NetworkSession.is_online() and not NetworkSession.has_simulation_authority():
 		_process_joining_peer_input(delta)
-		_update_remote_presentation()
+		var force_snap := is_sleeping != _presented_sleeping \
+			or is_prison_active != _presented_prison \
+			or is_hit_stunned != _presented_hit_stun
+		NetworkSession.interpolate_movement(self, delta, force_snap)
+		_update_remote_presentation(delta)
+		_presented_sleeping = is_sleeping
+		_presented_prison = is_prison_active
+		_presented_hit_stun = is_hit_stunned
 		return
 
 	update_effect_state(delta)
@@ -165,6 +184,7 @@ func _physics_process(delta: float) -> void:
 
 	if is_sleeping:
 		handle_sleep(delta)
+		NetworkSession.publish_movement(self, velocity)
 		return
 
 	var direction := Vector2.ZERO
@@ -190,6 +210,7 @@ func _physics_process(delta: float) -> void:
 			consume_stamina(delta)
 			if current_stamina <= 0:
 				enter_sleep()
+				NetworkSession.publish_movement(self, velocity)
 				return
 		sprite.play("walking")
 
@@ -217,6 +238,7 @@ func _physics_process(delta: float) -> void:
 				knockback_velocity = -velocity.normalized() * 150.0
 
 	audio.handle_footsteps(delta, direction)
+	NetworkSession.publish_movement(self, velocity)
 
 
 func sample_local_input(use_online_actions: bool = false) -> Dictionary:
@@ -310,7 +332,7 @@ func _on_local_focus_changed(has_focus: bool) -> void:
 	submit_input.rpc_id(NetworkSession.HOST_PEER_ID, NetworkSession.match_generation, Vector2.ZERO, false)
 
 
-func _update_remote_presentation() -> void:
+func _update_remote_presentation(delta: float) -> void:
 	shield_visual.visible = is_shield_active
 	prison_visual.visible = is_prison_active
 	active_effect_icon = SHOE_ICON if active_effect_name in [SHOE_EFFECT_LABEL, SHOE_CHAOS_LABEL] else null
@@ -322,10 +344,13 @@ func _update_remote_presentation() -> void:
 		modulate = Color.WHITE
 	if is_sleeping:
 		sprite.play("sleeping")
-	elif velocity.length_squared() > 1.0:
+	elif network_velocity.length_squared() > 1.0:
+		last_move_dir = network_velocity.normalized()
 		sprite.play("walking")
 	else:
 		sprite.play("idle")
+	audio.handle_footsteps(delta, network_velocity)
+	update_candle_glow(delta)
 
 
 func consume_stamina(delta):

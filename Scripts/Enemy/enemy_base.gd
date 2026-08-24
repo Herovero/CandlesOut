@@ -15,6 +15,10 @@ var hurt_tint_duration: float = 0.12
 var hurt_tint_token: int = 0
 var base_sprite_modulate: Color = Color(1, 1, 1, 1)
 var is_dying: bool = false
+var network_generation: int = 0
+var network_position: Vector2 = Vector2.ZERO
+var network_velocity: Vector2 = Vector2.ZERO
+var remote_footstep_timer: float = 0.0
 
 @onready var hitbox: Area2D = get_node_or_null("Hitbox")
 @onready var sprite: AnimatedSprite2D = get_node_or_null("AnimatedSprite2D")
@@ -30,10 +34,39 @@ func _ready() -> void:
 	hp = max_hp
 	if sprite:
 		base_sprite_modulate = sprite.modulate
-	NetworkSession.configure_synchronizer(self, [&"position", &"velocity", &"hp", &"is_dying"])
+	network_generation = NetworkSession.match_generation
+	network_position = position
+	network_velocity = velocity
+	NetworkSession.configure_moving_synchronizer(self, [&"hp", &"is_dying"])
 	if not NetworkSession.has_simulation_authority() and hitbox:
 		hitbox.set_deferred("monitoring", false)
 		hitbox.set_deferred("monitorable", false)
+
+
+func _process(delta: float) -> void:
+	if NetworkSession.has_simulation_authority():
+		return
+	NetworkSession.interpolate_movement(self, delta)
+	if sprite and network_velocity.x != 0.0:
+		sprite.flip_h = network_velocity.x < 0.0
+	if has_method("_present_remote_state"):
+		call("_present_remote_state")
+	if is_dying and sprite and sprite.animation != &"death":
+		sprite.play(&"death")
+	_update_remote_footsteps(delta)
+
+
+func _update_remote_footsteps(delta: float) -> void:
+	if footstep_enemy == null or not has_method("play_footstep"):
+		return
+	if network_velocity.length_squared() <= 1.0 or is_dying:
+		remote_footstep_timer = 0.0
+		return
+	remote_footstep_timer -= delta
+	if remote_footstep_timer <= 0.0:
+		call("play_footstep")
+		var interval_value: Variant = get("footstep_interval")
+		remote_footstep_timer = float(interval_value) if interval_value != null else 0.5
 
 
 @abstract func get_enemy_id() -> String
@@ -121,11 +154,12 @@ func die() -> void:
 	if not NetworkSession.has_simulation_authority():
 		return
 	is_dying = true
+	velocity = Vector2.ZERO
+	NetworkSession.publish_movement(self, velocity)
 	if sprite:
 		sprite.play("death")
 	print(self, " is dying")
-	if death_sound:
-		death_sound.volume_db = -10.0
-		death_sound.play()
-		await death_sound.finished
+	NetworkSession.broadcast_sfx(GameplayAudio.Cue.ENEMY_DEATH, global_position)
+	if death_sound and death_sound.stream:
+		await get_tree().create_timer(death_sound.stream.get_length()).timeout
 	queue_free()

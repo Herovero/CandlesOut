@@ -17,24 +17,39 @@ var active: bool = false:
 var is_picking: bool = false
 var held_item: Node2D = null
 var current_dir: Vector2 = Vector2.ZERO # Store the latest movement
+var network_generation: int = 0
+var network_position: Vector2 = Vector2.ZERO
+var network_velocity: Vector2 = Vector2.ZERO
+var _presented_active: bool = false
 
 func _ready():
 	anim.sprite_frames.set_animation_speed("default", 10)
 	anim.play()
-	NetworkSession.configure_synchronizer(self, [&"position", &"velocity", &"active"])
+	network_generation = NetworkSession.match_generation
+	network_position = position
+	network_velocity = velocity
+	_presented_active = active
+	NetworkSession.configure_moving_synchronizer(self, [&"active"])
 	_apply_active_state()
 	if not NetworkSession.has_simulation_authority():
 		interaction_area.set_deferred("monitoring", false)
 		interaction_area.set_deferred("monitorable", false)
 
-func _physics_process(_delta: float) -> void:
-	if not active or not NetworkSession.has_simulation_authority():
+func _physics_process(delta: float) -> void:
+	if not NetworkSession.has_simulation_authority():
+		NetworkSession.interpolate_movement(self, delta, active != _presented_active)
+		if network_velocity.x != 0:
+			anim.flip_h = network_velocity.x > 0
+		_presented_active = active
+		return
+	if not active:
 		return
 	if velocity.x != 0:
 		anim.flip_h = velocity.x > 0
 	if is_picking:
 		velocity = Vector2.ZERO
 		move_and_slide()
+		NetworkSession.publish_movement(self, velocity)
 		return
 
 	var direction := Vector2.ZERO
@@ -51,6 +66,7 @@ func _physics_process(_delta: float) -> void:
 	current_dir = direction # Update aim direction
 	velocity = direction * speed
 	move_and_slide()
+	NetworkSession.publish_movement(self, velocity)
 
 func _input(event):
 	if not active or not NetworkSession.has_simulation_authority():
@@ -79,6 +95,8 @@ func _apply_active_state() -> void:
 		velocity = Vector2.ZERO
 		is_picking = false
 		held_item = null
+		if NetworkSession.has_simulation_authority():
+			NetworkSession.publish_movement(self, velocity)
 
 
 func _get_owner_player() -> Node:

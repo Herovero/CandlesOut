@@ -5,8 +5,6 @@ extends "res://Scripts/Item/item.gd"
 @onready var sprite = $Sprite2D # Your original bomb sprite
 @onready var left_wing = $LeftWing   # Your AnimatedSprite2D
 @onready var right_wing = $RightWing # Your AnimatedSprite2D
-@onready var explosion_sfx: AudioStreamPlayer2D = $ExplosionSFX
-@onready var fly_sfx: AudioStreamPlayer2D = $FlySFX
 
 @export var bomb_throw_distance: float = 250.0
 var is_stalking: bool = false
@@ -14,6 +12,8 @@ var was_stalking := false
 var is_exploding = false
 @export var max_stalk_time: float = 5.0
 var stalk_timer: float = 0.0
+var _presented_stalking: bool = false
+var _presented_exploding: bool = false
 
 func _ready():
 	super()
@@ -32,6 +32,8 @@ func _finish_throw(ghost):
 func explode():
 	if is_exploding:
 		return
+	is_exploding = true
+	NetworkSession.broadcast_sfx(GameplayAudio.Cue.BOMB_EXPLOSION, global_position)
 	# Stop the bomb from moving/being picked up again
 	is_thrown = false 
 	set_deferred("monitoring", false)
@@ -43,20 +45,15 @@ func explode():
 	anim_sprite.play("explode")
 	
 	print("explode sounds")
-	explosion_sfx.global_position = global_position
-	explosion_sfx.play()
 	# AOE Logic
 	var targets = explosion_area.get_overlapping_bodies()
 	for target in targets:
 		if target.is_in_group("Enemies"):
 			if target.has_method("take_bomb_damage"):
-				is_exploding = true
 				target.take_bomb_damage(1.0)
 			elif target.has_method("take_damage"):
-				is_exploding = true
 				target.take_damage(10.0)
 		elif target.is_in_group("Players") and is_stalking:
-			is_exploding = true
 			target.apply_damage(1.0)
 	
 	await anim_sprite.animation_finished
@@ -64,6 +61,7 @@ func explode():
 
 func start_stalking():
 	item_state = ItemState.THROWN
+	NetworkSession.broadcast_sfx(GameplayAudio.Cue.BOMB_FLY, global_position)
 	is_thrown = true
 	is_stalking = true
 	stalk_timer = 0.0 # Reset timer
@@ -88,8 +86,6 @@ func _physics_process(delta):
 		return
 	if is_stalking:
 		stalk_timer += delta
-		if not was_stalking:
-			fly_sfx.play()
 		# Condition: Explode if chase lasts too long
 		if stalk_timer >= max_stalk_time:
 			if is_exploding:
@@ -104,6 +100,23 @@ func _physics_process(delta):
 			global_position += dir * 150.0 * delta # Speed of the flying bomb
 	was_stalking = is_stalking
 	
+func _process(delta: float) -> void:
+	super(delta)
+	if NetworkSession.has_simulation_authority():
+		return
+	if is_stalking and not _presented_stalking:
+		left_wing.visible = true
+		right_wing.visible = true
+		left_wing.play("default")
+		right_wing.play("default")
+	if is_exploding and not _presented_exploding:
+		sprite.visible = false
+		anim_sprite.visible = true
+		anim_sprite.play("explode")
+	_presented_stalking = is_stalking
+	_presented_exploding = is_exploding
+
+
 func find_active_player() -> CharacterBody2D:
 	var players = get_tree().get_nodes_in_group("Players")
 	for p in players:

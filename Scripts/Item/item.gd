@@ -9,20 +9,28 @@ var holding_ghost: CharacterBody2D = null
 var throwing_ghost: CharacterBody2D = null
 @export var custom_throw_distance: float = 250.0
 
-@onready var heart_sfx: AudioStreamPlayer2D = get_node_or_null("HeartSFX")
 @onready var item_sprite = $Sprite2D
 
 var float_time: float = 0.0
 @export var float_speed: float = 2.0
 @export var float_amplitude: float = 4.0
+var network_generation: int = 0
+var network_position: Vector2 = Vector2.ZERO
+var network_velocity: Vector2 = Vector2.ZERO
+var network_rotation: float = 0.0
+var _presented_item_state: ItemState = ItemState.WORLD
 
 
 func _ready() -> void:
 	visible = false
 	monitorable = false
 	monitoring = false
-	NetworkSession.configure_synchronizer(self, [
-		&"position", &"rotation", &"visible", &"is_thrown", &"item_state", &"held_by_slot",
+	network_generation = NetworkSession.match_generation
+	network_position = position
+	network_rotation = rotation
+	_presented_item_state = item_state
+	NetworkSession.configure_moving_synchronizer(self, [
+		&"network_rotation", &"visible", &"is_thrown", &"item_state", &"held_by_slot",
 	])
 	if not NetworkSession.has_simulation_authority():
 		set_deferred("monitoring", false)
@@ -32,16 +40,20 @@ func _ready() -> void:
 func _process(delta: float) -> void:
 	item_sprite.modulate.a = randf_range(0.4, 0.6)
 	if not NetworkSession.has_simulation_authority():
+		NetworkSession.interpolate_movement(self, delta, item_state != _presented_item_state)
+		rotation = lerp_angle(rotation, network_rotation, 1.0 - exp(-NetworkSession.INTERPOLATION_SPEED * delta))
+		_presented_item_state = item_state
 		return
 	if item_state == ItemState.HELD:
 		if not is_instance_valid(holding_ghost):
 			holding_ghost = _find_ghost_for_slot(held_by_slot)
 		if is_instance_valid(holding_ghost):
 			global_position = holding_ghost.global_position + Vector2(0, -40)
-		return
-	if item_state == ItemState.WORLD:
+	elif item_state == ItemState.WORLD:
 		float_time += delta
 		item_sprite.position.y = sin(float_time * float_speed) * float_amplitude
+	network_rotation = rotation
+	NetworkSession.publish_movement(self, Vector2.ZERO)
 
 
 func show_item() -> void:
@@ -162,15 +174,5 @@ func _on_body_entered(body: Node) -> void:
 		if is_instance_valid(throwing_ghost):
 			throwing_ghost.is_picking = false
 		body.apply_damage(-3.0)
-		if heart_sfx:
-			play_heart_sfx()
+		NetworkSession.broadcast_sfx(GameplayAudio.Cue.ITEM_HEART, global_position)
 		queue_free()
-
-
-func play_heart_sfx() -> void:
-	var sfx := AudioStreamPlayer2D.new()
-	sfx.stream = heart_sfx.stream
-	sfx.global_position = global_position
-	get_tree().current_scene.add_child(sfx)
-	sfx.play()
-	sfx.finished.connect(sfx.queue_free)

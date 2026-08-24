@@ -12,8 +12,11 @@ enum MatchPhase { LOADING, PLAYING, PAUSED, GAME_OVER, VICTORY }
 enum PlayMode { LOCAL_COOP, ONLINE_HOST, ONLINE_JOIN }
 
 const LAN_PORT := 7000
-const PROTOCOL_VERSION := 1
+const PROTOCOL_VERSION := 2
 const HOST_PEER_ID := 1
+const REPLICATION_INTERVAL := 1.0 / 30.0
+const INTERPOLATION_SPEED := 18.0
+const INTERPOLATION_SNAP_DISTANCE := 96.0
 const MATCH_SCENE := "res://Scenes/main.tscn"
 const MENU_SCENE := "res://Scenes/main_menu.tscn"
 const CONNECTION_TIMEOUT_SECONDS := 10.0
@@ -33,6 +36,8 @@ var _connection_timeout_left: float = 0.0
 var _loading_timeout_left: float = 0.0
 var _ready_peers: Dictionary = {}
 var _returning_to_menu: bool = false
+var _audio_variant_seed: int = 0
+var _current_music_wave: int = 0
 
 
 func _ready() -> void:
@@ -127,6 +132,7 @@ func start_match() -> Error:
 
 func restart_match() -> Error:
 	if not is_online():
+		GameplayAudio.reset()
 		Global.skip_to_boss = false
 		return get_tree().reload_current_scene()
 	if not is_online_host() or session_state != SessionState.IN_MATCH:
@@ -149,6 +155,7 @@ func start_match_from_session() -> Error:
 
 func leave_game(return_to_menu: bool = false, reason: String = "") -> void:
 	_set_state(SessionState.CLOSING)
+	GameplayAudio.reset()
 	get_tree().paused = false
 	Engine.time_scale = 1.0
 	multiplayer.multiplayer_peer.close()
@@ -167,7 +174,8 @@ func leave_game(return_to_menu: bool = false, reason: String = "") -> void:
 	Global.item_spawner = null
 	Global.ost_manager = null
 	Global.active_footstep_count = 0
-	Global.active_shoot_sound_count = 0
+	_audio_variant_seed = 0
+	_current_music_wave = 0
 	_set_state(SessionState.IDLE)
 	lobby_changed.emit(false)
 	if not reason.is_empty():
@@ -235,7 +243,7 @@ func spawn_replicated(scene: PackedScene, properties: Dictionary = {}) -> Node:
 	return instance
 
 
-func configure_synchronizer(root: Node, properties: Array[StringName], interval: float = 0.05) -> void:
+func configure_synchronizer(root: Node, properties: Array[StringName], interval: float = REPLICATION_INTERVAL) -> void:
 	if not is_online():
 		return
 	var synchronizer := root.get_node_or_null("MultiplayerSynchronizer") as MultiplayerSynchronizer
@@ -254,6 +262,57 @@ func configure_synchronizer(root: Node, properties: Array[StringName], interval:
 		config.add_property(path)
 		config.property_set_spawn(path, true)
 		config.property_set_sync(path, true)
+
+
+func configure_moving_synchronizer(root: Node, properties: Array[StringName] = []) -> void:
+	var moving_properties: Array[StringName] = [
+		&"network_generation", &"network_position", &"network_velocity",
+	]
+	moving_properties.append_array(properties)
+	configure_synchronizer(root, moving_properties, REPLICATION_INTERVAL)
+
+
+func publish_movement(root: Node2D, movement_velocity: Vector2 = Vector2.ZERO) -> void:
+	root.set(&"network_generation", match_generation)
+	root.set(&"network_position", root.position)
+	root.set(&"network_velocity", movement_velocity)
+
+
+func interpolate_movement(root: Node2D, delta: float, force_snap: bool = false) -> void:
+	if int(root.get(&"network_generation")) != match_generation:
+		return
+	var target: Vector2 = root.get(&"network_position")
+	if force_snap or root.position.distance_to(target) >= INTERPOLATION_SNAP_DISTANCE:
+		root.position = target
+		return
+	var weight := 1.0 - exp(-INTERPOLATION_SPEED * delta)
+	root.position = root.position.lerp(target, weight)
+
+
+func broadcast_sfx(cue: int, world_position: Vector2, variant_seed: int = -1) -> void:
+	if variant_seed < 0:
+		_audio_variant_seed += 1
+		variant_seed = _audio_variant_seed
+	if not is_online():
+		GameplayAudio.play_sfx(cue, world_position, variant_seed)
+	elif is_online_host() and session_state == SessionState.IN_MATCH:
+		_receive_sfx.rpc(match_generation, cue, world_position, variant_seed)
+
+
+func broadcast_music(wave_number: int) -> void:
+	if not is_online():
+		_current_music_wave = wave_number
+		GameplayAudio.play_wave_music(wave_number)
+	elif is_online_host() and session_state == SessionState.IN_MATCH:
+		_receive_music_state.rpc(match_generation, wave_number)
+
+
+func broadcast_music_stop() -> void:
+	if not is_online():
+		_current_music_wave = 0
+		GameplayAudio.stop_music()
+	elif is_online_host():
+		_receive_music_stop.rpc(match_generation)
 
 
 func get_likely_lan_address() -> String:
@@ -299,6 +358,29 @@ func is_valid_ipv4_address(address: String) -> bool:
 		if value < 0 or value > 255:
 			return false
 	return true
+
+
+@rpc("authority", "call_local", "unreliable", 2)
+func _receive_sfx(generation: int, cue: int, world_position: Vector2, variant_seed: int) -> void:
+	if generation != match_generation or session_state != SessionState.IN_MATCH:
+		return
+	GameplayAudio.play_sfx(cue, world_position, variant_seed)
+
+
+@rpc("authority", "call_local", "reliable")
+func _receive_music_state(generation: int, wave_number: int) -> void:
+	if generation != match_generation or session_state != SessionState.IN_MATCH:
+		return
+	_current_music_wave = wave_number
+	GameplayAudio.play_wave_music(wave_number)
+
+
+@rpc("authority", "call_local", "reliable")
+func _receive_music_stop(generation: int) -> void:
+	if generation != match_generation:
+		return
+	_current_music_wave = 0
+	GameplayAudio.stop_music()
 
 
 @rpc("any_peer", "call_remote", "reliable")
@@ -347,6 +429,9 @@ func _protocol_rejected(reason: String) -> void:
 func _load_match(generation: int, scene_path: String, start_at_boss: bool) -> void:
 	if not is_online() or generation < match_generation or scene_path != MATCH_SCENE:
 		return
+	GameplayAudio.reset()
+	_audio_variant_seed = 0
+	_current_music_wave = 0
 	match_generation = generation
 	match_phase = MatchPhase.LOADING
 	Global.skip_to_boss = start_at_boss

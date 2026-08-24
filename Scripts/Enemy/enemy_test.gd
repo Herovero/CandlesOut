@@ -16,7 +16,6 @@ var attack_elapsed: float = 0.0
 var attack_dir: Vector2 = Vector2.RIGHT
 
 @onready var attack_timer: Timer = $AttackTimer
-@onready var slash_sfx: AudioStreamPlayer2D = get_node_or_null("Slash")
 var footstep_interval: float = 0.5
 var footstep_timer: float = 0.0
 var attacking_animation: bool = false
@@ -39,6 +38,7 @@ func apply_stats(stats: Dictionary) -> void:
 
 func _ready() -> void:
 	super()
+	NetworkSession.configure_synchronizer(self, [&"attack_in_progress"])
 	attack_timer.wait_time = melee_attack_buffer
 	sprite.sprite_frames.set_animation_speed("idle", 10)
 	sprite.sprite_frames.set_animation_speed("move", 10)
@@ -88,6 +88,7 @@ func _physics_process(delta: float) -> void:
 
 	move_and_slide()
 	handle_footsteps(delta, direction)
+	NetworkSession.publish_movement(self, velocity)
 
 
 func find_closest_player() -> CharacterBody2D:
@@ -141,11 +142,13 @@ func take_damage(amount: float) -> void:
 	hp = clamp(hp - amount, 0.0, max_hp)
 	if hp <= 0.0:
 		is_dying = true
+		velocity = Vector2.ZERO
+		NetworkSession.publish_movement(self, velocity)
 		sprite.play("death")
 		print(self, " is dying")
-		death_sound.volume_db = -10.0
-		death_sound.play()
-		await death_sound.finished
+		NetworkSession.broadcast_sfx(GameplayAudio.Cue.ENEMY_DEATH, global_position)
+		if death_sound and death_sound.stream:
+			await get_tree().create_timer(death_sound.stream.get_length()).timeout
 		queue_free()
 		return
 
@@ -160,8 +163,7 @@ func start_attack() -> void:
 	sprite.play("attack")
 	attack_timer.start()
 
-	if slash_sfx:
-		play_slash_sfx()
+	play_slash_sfx()
 
 
 func perform_cone_attack() -> void:
@@ -228,12 +230,16 @@ func _on_animation_finished():
 
 func play_slash_sfx():
 	await get_tree().create_timer(0.5).timeout
-	var sfx = AudioStreamPlayer2D.new()
-	sfx.volume_db = -5.0
-	sfx.stream = slash_sfx.stream
-	sfx.global_position = global_position
+	if is_inside_tree():
+		NetworkSession.broadcast_sfx(GameplayAudio.Cue.ENEMY_ATTACK, global_position)
 
-	get_tree().current_scene.add_child(sfx)
-	sfx.play()
 
-	sfx.finished.connect(sfx.queue_free)
+func _present_remote_state() -> void:
+	if is_dying:
+		sprite.play("death")
+	elif attack_in_progress:
+		sprite.play("attack")
+	elif network_velocity.length_squared() > 1.0:
+		sprite.play("move")
+	else:
+		sprite.play("idle")

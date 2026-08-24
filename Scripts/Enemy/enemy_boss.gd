@@ -53,15 +53,11 @@ var charge_cone_fired: bool = false
 var aoe_fired: bool = false
 var aoe_tint_visible: bool = false
 var aoe_tint_token: int = 0
-var is_playing_sfx: bool = false
-
+var charge_sfx_fired: bool = false
 
 
 @onready var cone_sprite: AnimatedSprite2D = $AnimatedSprite2D2
 @onready var aoe_sprite: Sprite2D = $aoe
-@onready var boss_radial: AudioStreamPlayer2D = $Boss_Radial
-@onready var boss_slash: AudioStreamPlayer2D = $Boss_Slash
-@onready var boss_charge: AudioStreamPlayer2D = $Boss_Charge
 
 
 func get_enemy_id() -> String:
@@ -126,6 +122,7 @@ func _physics_process(delta: float) -> void:
 
 	if is_phase_transitioning:
 		velocity = Vector2.ZERO
+		NetworkSession.publish_movement(self, velocity)
 		return
 
 	var target = find_closest_player()
@@ -149,6 +146,7 @@ func _physics_process(delta: float) -> void:
 			handle_aoe_attack()
 
 	move_and_slide()
+	NetworkSession.publish_movement(self, velocity)
 
 
 func handle_idle(_delta: float, target: CharacterBody2D) -> void:
@@ -164,7 +162,7 @@ func handle_radial_attack() -> void:
 	velocity = Vector2.ZERO
 
 	if not radial_fired and state_time_left <= radial_recover:
-		play_sfx(boss_radial)
+		NetworkSession.broadcast_sfx(GameplayAudio.Cue.BOSS_RADIAL, global_position)
 		radial_fired = true
 		fire_radial_burst()
 
@@ -177,7 +175,9 @@ func handle_charge_attack() -> void:
 		velocity = Vector2.ZERO
 		charge_cone_fired = false
 	elif not charge_cone_fired:
-		play_sfx(boss_charge)
+		if not charge_sfx_fired:
+			charge_sfx_fired = true
+			NetworkSession.broadcast_sfx(GameplayAudio.Cue.BOSS_CHARGE, global_position)
 		is_charging = true
 		velocity = charge_dir * charge_speed
 	else:
@@ -228,6 +228,7 @@ func pick_random_attack(target: CharacterBody2D) -> void:
 			sprite.play("death")
 		BossState.ATTACK_CHARGE:
 			is_charging = false
+			charge_sfx_fired = false
 			sprite.play("charge")
 			charge_cone_fired = false
 			state_time_left = charge_windup + charge_duration
@@ -282,7 +283,7 @@ func do_cone_attack() -> void:
 	var players = get_tree().get_nodes_in_group("Players")
 	var min_dot = cos(deg_to_rad(cone_angle_deg * 0.5))
 	
-	play_sfx(boss_slash)
+	NetworkSession.broadcast_sfx(GameplayAudio.Cue.BOSS_SLASH, global_position)
 	for p in players:
 		if not (p is Node2D):
 			continue
@@ -449,24 +450,16 @@ func _on_animation_finished() -> void:
 			if not is_charging:
 				enter_idle()
 				
-func play_sfx(sound):
-	if is_playing_sfx:
-		return
-	is_playing_sfx = true
-	
-	var sfx = AudioStreamPlayer2D.new()
-	sfx.volume_db = -5.0
-	sfx.stream = sound.stream
-	sfx.global_position = global_position
-	
-	get_tree().current_scene.add_child(sfx)
-	sfx.play()
-	
-	sfx.finished.connect(func():
-		sfx.queue_free()
-		is_playing_sfx = false  # unlock when done
-	)
-
+func _present_remote_state() -> void:
+	match state:
+		BossState.IDLE:
+			sprite.play("idle")
+		BossState.ATTACK_RADIAL:
+			sprite.play("death")
+		BossState.ATTACK_CHARGE:
+			sprite.play("charge")
+		BossState.ATTACK_CONE, BossState.ATTACK_AOE:
+			sprite.play("attack")
 
 
 func _on_cone_animation_finished() -> void:

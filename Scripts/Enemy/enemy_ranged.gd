@@ -15,8 +15,7 @@ var shoot_cooldown: float = 1.0
 var orbit_time_left: float = 0.0
 var orbit_sign: float = 1.0
 var last_move_dir: Vector2 = Vector2.RIGHT
-
-@onready var shoot_sound = $ShootEnemy
+var footstep_timer: float = 0.0
 
 
 func get_enemy_id() -> String:
@@ -54,6 +53,7 @@ func _physics_process(delta: float) -> void:
 		velocity = Vector2.ZERO
 		knockback_velocity = Vector2.ZERO
 		move_and_slide()
+		NetworkSession.publish_movement(self, velocity)
 		return
 		
 	var target = find_closest_player()
@@ -99,6 +99,8 @@ func _physics_process(delta: float) -> void:
 		orbit_sign *= -1.0
 
 	move_and_slide()
+	_handle_local_footsteps(delta)
+	NetworkSession.publish_movement(self, velocity)
 
 
 func shoot_projectile(shoot_dir: Vector2) -> void:
@@ -130,10 +132,23 @@ func _on_hitbox_body_entered(_body):
 	return
 	
 func play_shoot_sound():
-	if Global.active_shoot_sound_count >= Global.MAX_SHOOT_SOUNDS:
+	NetworkSession.broadcast_sfx(GameplayAudio.Cue.ENEMY_SHOOT, global_position)
+
+
+func _handle_local_footsteps(delta: float) -> void:
+	if velocity.length_squared() <= 1.0:
+		footstep_timer = 0.0
 		return
-	Global.active_shoot_sound_count += 1
-	shoot_sound.pitch_scale = randf_range(0.95, 1.05)
-	shoot_sound.play()
-	await shoot_sound.finished
-	Global.active_shoot_sound_count -= 1
+	footstep_timer -= delta
+	if footstep_timer <= 0.0:
+		play_footstep()
+		footstep_timer = footstep_interval
+
+
+func _present_remote_state() -> void:
+	if is_dying:
+		sprite.play("death")
+	elif network_velocity.length_squared() > 1.0:
+		sprite.play("run")
+	else:
+		sprite.play("idle")

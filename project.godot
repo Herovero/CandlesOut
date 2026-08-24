@@ -20,6 +20,7 @@ config/icon="uid://cfvs67gp5ktaj"
 
 Global="*uid://8v5wss64fddf"
 SignalBus="*uid://dcigyssxuhf46"
+GameplayAudio="*res://Scripts/Audio/gameplay_audio.gd"
 NetworkSession="*res://Scripts/Network/network_session.gd"
 
 [display]

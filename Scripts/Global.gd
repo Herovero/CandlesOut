@@ -8,9 +8,6 @@ var ost_manager
 var active_footstep_count: int = 0
 const MAX_ENEMY_FOOTSTEPS: int = 3
 
-var active_shoot_sound_count: int = 0
-const MAX_SHOOT_SOUNDS: int = 4
-
 var skip_to_boss: bool = false
 
 # Called when the node enters the scene tree for the first time.

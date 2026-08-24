@@ -1,7 +1,6 @@
 extends "res://Scripts/Item/item.gd"
 
 @export var stamina_restore_amount: float = 50.0
-@onready var coffee_sfx: AudioStreamPlayer2D = $CoffeeSFX
 
 func _ready():
 	super()
@@ -23,15 +22,5 @@ func _on_body_entered(body):
 		SignalBus.emit_signal("restore_stamina", stamina_restore_amount, target_slot)
 		
 		# Item is consumed
-		play_coffee_sfx()
+		NetworkSession.broadcast_sfx(GameplayAudio.Cue.ITEM_COFFEE, global_position)
 		call_deferred("queue_free")
-		
-func play_coffee_sfx():
-	var sfx = AudioStreamPlayer2D.new()
-	sfx.stream = coffee_sfx.stream
-	sfx.global_position = global_position
-	
-	get_tree().current_scene.add_child(sfx)
-	sfx.play()
-	
-	sfx.finished.connect(sfx.queue_free)

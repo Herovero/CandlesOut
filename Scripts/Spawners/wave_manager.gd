@@ -168,7 +168,7 @@ func _on_start_timer_timeout() -> void:
 		Global.skip_to_boss = false
 		
 		# Boss logic setup [cite: 65]
-		ost_manager.play_wave_ost(3) # Play the 3rd OST (Boss track) [cite: 66]
+		NetworkSession.broadcast_music(3) # Play the 3rd OST (Boss track) [cite: 66]
 		set_max_enemy(5) # Set appropriate enemy count for boss [cite: 65]
 		start_wave(4) # Start the defined Boss Wave [cite: 60, 62]
 		
@@ -177,15 +177,14 @@ func _on_start_timer_timeout() -> void:
 			Global.item_spawner.set_bomb_phase(true)
 	else:
 		# Standard start 
-		ost_manager.play_wave_ost(1)
+		NetworkSession.broadcast_music(1)
 		set_max_enemy(3)
 		start_wave(1)
 
 func _on_wave_completed(wave_number: int):
 	print("Wave signal emmitted")
 	
-	if ost_manager:
-		ost_manager.stop_all()
+	NetworkSession.broadcast_music_stop()
 	
 	# Guard against null tree during scene transitions/restarts 
 	if not is_inside_tree():
@@ -202,18 +201,18 @@ func _on_wave_completed(wave_number: int):
 			await get_tree().create_timer(2.0).timeout
 			set_max_enemy(4)
 			start_wave(2)
-			ost_manager.play_wave_ost(1)
+			NetworkSession.broadcast_music(1)
 		2:
 			await get_tree().create_timer(2.0).timeout
 			set_max_enemy(4)
 			start_wave(3)
-			ost_manager.play_wave_ost(2)
+			NetworkSession.broadcast_music(2)
 			Global.item_spawner.set_bomb_phase(true)
 		3:
 			await get_tree().create_timer(2.0).timeout
 			set_max_enemy(5)
 			start_wave(4)
-			ost_manager.play_wave_ost(3)
+			NetworkSession.broadcast_music(3)
 			Global.item_spawner.set_bomb_phase(true)
 		4:
 			print("Boss defeated! All waves complete.")

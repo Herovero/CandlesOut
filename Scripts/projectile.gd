@@ -8,6 +8,9 @@ extends Area2D
 var direction: Vector2 = Vector2.RIGHT
 var owner_group: String = ""
 var target_group: String = ""
+var network_generation: int = 0
+var network_position: Vector2 = Vector2.ZERO
+var network_velocity: Vector2 = Vector2.ZERO
 
 
 func _ready() -> void:
@@ -25,7 +28,10 @@ func _ready() -> void:
 	$LifetimeTimer.wait_time = lifetime
 	$LifetimeTimer.start()
 	rotation = direction.angle()
-	NetworkSession.configure_synchronizer(self, [&"position", &"rotation"])
+	network_generation = NetworkSession.match_generation
+	network_position = position
+	network_velocity = direction * speed
+	NetworkSession.configure_moving_synchronizer(self, [&"rotation"])
 	if not NetworkSession.has_simulation_authority():
 		set_deferred("monitoring", false)
 		set_deferred("monitorable", false)
@@ -34,6 +40,9 @@ func _ready() -> void:
 func _physics_process(delta: float) -> void:
 	if NetworkSession.has_simulation_authority():
 		global_position += direction * speed * delta
+		NetworkSession.publish_movement(self, direction * speed)
+	else:
+		NetworkSession.interpolate_movement(self, delta)
 
 
 func _on_body_entered(body: Node) -> void:

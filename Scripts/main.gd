@@ -524,6 +524,9 @@ func _show_phase_two_transition(generation: int) -> void:
 
 
 func _on_boss_defeated() -> void:
+	if not NetworkSession.has_simulation_authority():
+		return
+	NetworkSession.broadcast_music_stop()
 	if NetworkSession.is_online_host():
 		_show_victory.rpc(NetworkSession.match_generation)
 	else:
@@ -585,6 +588,7 @@ func update_effect_ui() -> void:
 func _on_game_over(reason: String):
 	if not NetworkSession.has_simulation_authority():
 		return
+	NetworkSession.broadcast_music_stop()
 	if NetworkSession.is_online_host():
 		_show_game_over.rpc(reason, NetworkSession.match_generation)
 	else:
