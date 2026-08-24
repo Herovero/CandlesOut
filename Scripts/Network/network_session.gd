@@ -257,10 +257,33 @@ func configure_synchronizer(root: Node, properties: Array[StringName], interval:
 
 
 func get_likely_lan_address() -> String:
-	for address in IP.get_local_addresses():
-		if is_valid_ipv4_address(address) and not address.begins_with("127.") and address != "0.0.0.0":
-			return address
+	for interface: Dictionary in IP.get_local_interfaces():
+		var name := str(interface.get("name", "")).to_lower()
+		var friendly := str(interface.get("friendly", "")).to_lower()
+		if not _is_wifi_or_ethernet(name, friendly):
+			continue
+
+		for address_value: Variant in interface.get("addresses", []):
+			var address := str(address_value)
+			if is_valid_ipv4_address(address) and _is_private_ipv4(address):
+				return address
+
 	return "127.0.0.1"
+
+
+func _is_wifi_or_ethernet(name: String, friendly: String) -> bool:
+	if friendly.begins_with("wi-fi") or friendly.begins_with("wireless"):
+		return true
+	if friendly.begins_with("ethernet"):
+		return true
+	return name.begins_with("wl") or name.begins_with("eth") or name.begins_with("en")
+
+
+func _is_private_ipv4(address: String) -> bool:
+	var parts := address.split(".", false)
+	var first := int(parts[0])
+	var second := int(parts[1])
+	return first == 10 or (first == 172 and second >= 16 and second <= 31) or (first == 192 and second == 168)
 
 
 func is_valid_ipv4_address(address: String) -> bool:
