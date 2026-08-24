@@ -585,16 +585,17 @@ func _apply_properties(node: Node, properties: Dictionary) -> void:
 
 func _ensure_online_input_actions() -> void:
 	var mappings := {
-		"move_left": "p1_move_left",
-		"move_right": "p1_move_right",
-		"move_up": "p1_move_up",
-		"move_down": "p1_move_down",
-		"sprint": "p1_sprint",
-		"interact": "item_pickup&throw",
+		"move_left": ["p1_move_left", "p2_move_left"],
+		"move_right": ["p1_move_right", "p2_move_right"],
+		"move_up": ["p1_move_up", "p2_move_up"],
+		"move_down": ["p1_move_down", "p2_move_down"],
+		"sprint": ["p1_sprint", "p2_sprint"],
+		"interact": ["item_pickup&throw"],
 	}
 	for action in mappings:
 		if not InputMap.has_action(action):
 			InputMap.add_action(action)
-		for event in InputMap.action_get_events(mappings[action]):
-			if not InputMap.action_has_event(action, event):
-				InputMap.action_add_event(action, event)
+		for source_action: String in mappings[action]:
+			for event in InputMap.action_get_events(source_action):
+				if not InputMap.action_has_event(action, event):
+					InputMap.action_add_event(action, event)
