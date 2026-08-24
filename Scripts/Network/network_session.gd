@@ -86,7 +86,7 @@ func host_game() -> Error:
 	host_lan_address = get_likely_lan_address()
 	_joining_peer_lobby_ready = false
 	_set_state(SessionState.HOSTING)
-	_set_status("Hosting on %s:%d. Waiting for player…" % [host_lan_address, LAN_PORT])
+	_set_status("Waiting for Joining Peer…")
 	lobby_changed.emit(false)
 	get_tree().call_deferred("change_scene_to_file", PLAYFIELD_SCENE)
 	return OK
