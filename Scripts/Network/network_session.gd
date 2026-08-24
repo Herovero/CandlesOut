@@ -279,6 +279,8 @@ func configure_synchronizer(root: Node, properties: Array[StringName], interval:
 		synchronizer.root_path = NodePath("..")
 		synchronizer.replication_interval = interval
 		synchronizer.replication_config = SceneReplicationConfig.new()
+		if multiplayer.is_server() and is_in_lobby():
+			synchronizer.public_visibility = _joining_peer_lobby_ready
 		root.add_child(synchronizer)
 	var config := synchronizer.replication_config
 	for property in properties:
@@ -288,6 +290,16 @@ func configure_synchronizer(root: Node, properties: Array[StringName], interval:
 		config.add_property(path)
 		config.property_set_spawn(path, true)
 		config.property_set_sync(path, true)
+
+
+func _set_lobby_replication_enabled(enabled: bool) -> void:
+	if not multiplayer.is_server():
+		return
+	var scene := get_tree().current_scene
+	if scene == null:
+		return
+	for node in scene.find_children("*", "MultiplayerSynchronizer", true, false):
+		(node as MultiplayerSynchronizer).public_visibility = enabled
 
 
 func configure_moving_synchronizer(root: Node, properties: Array[StringName] = []) -> void:
@@ -477,6 +489,7 @@ func _report_lobby_ready(generation: int) -> void:
 	if sender != joining_peer_id:
 		return
 	_joining_peer_lobby_ready = true
+	_set_lobby_replication_enabled(true)
 	_set_status("Both Participants are in the Lobby. Ready to start.")
 	lobby_changed.emit(true)
 
@@ -546,6 +559,7 @@ func _on_peer_disconnected(peer_id: int) -> void:
 		joining_peer_id = 0
 		_joining_peer_lobby_ready = false
 		_set_state(SessionState.HOSTING)
+		_set_lobby_replication_enabled(false)
 		_set_status("Player disconnected. Waiting for player…")
 		lobby_changed.emit(false)
 
