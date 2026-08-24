@@ -251,26 +251,6 @@ theme_override_styles/normal = SubResource("StyleBoxFlat_button_normal")
 theme_override_styles/hover = SubResource("StyleBoxFlat_button_hover")
 text = "JOIN LAN"
 
-[node name="LanAddressLabel" type="Label" parent="Center"]
-visible = false
-layout_mode = 2
-theme_override_colors/font_color = Color(1, 0.87451, 0.545098, 1)
-theme_override_fonts/font = ExtResource("2_font")
-theme_override_font_sizes/font_size = 28
-text = "HOST IP"
-horizontal_alignment = 1
-
-[node name="StartButton" type="Button" parent="Center"]
-visible = false
-custom_minimum_size = Vector2(300, 62)
-layout_mode = 2
-theme_override_colors/font_color = Color(1, 0.964706, 0.866667, 1)
-theme_override_fonts/font = ExtResource("2_font")
-theme_override_font_sizes/font_size = 36
-theme_override_styles/normal = SubResource("StyleBoxFlat_button_normal")
-theme_override_styles/hover = SubResource("StyleBoxFlat_button_hover")
-text = "START MATCH"
-
 [node name="DisconnectButton" type="Button" parent="Center"]
 visible = false
 custom_minimum_size = Vector2(300, 62)

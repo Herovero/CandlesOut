@@ -4,8 +4,6 @@ extends Control
 @onready var host_button: Button = $Center/HostButton
 @onready var join_address: LineEdit = $Center/JoinRow/Address
 @onready var join_button: Button = $Center/JoinRow/JoinButton
-@onready var lan_address_label: Label = $Center/LanAddressLabel
-@onready var start_button: Button = $Center/StartButton
 @onready var disconnect_button: Button = $Center/DisconnectButton
 @onready var status_label: Label = $Center/StatusLabel
 @onready var tutorial_button: Button = $Center/TutorialButton
@@ -20,19 +18,17 @@ func _ready() -> void:
 	play_button.pressed.connect(_on_play_pressed)
 	host_button.pressed.connect(_on_host_pressed)
 	join_button.pressed.connect(_on_join_pressed)
-	start_button.pressed.connect(_on_start_pressed)
 	disconnect_button.pressed.connect(_on_disconnect_pressed)
 	tutorial_button.pressed.connect(_on_tutorial_pressed)
 	join_address.text_changed.connect(_on_join_address_changed)
 
-	for button in [play_button, host_button, join_button, start_button, disconnect_button, tutorial_button, boss_button]:
+	for button in [play_button, host_button, join_button, disconnect_button, tutorial_button, boss_button]:
 		_bind_button_feedback(button)
 
 	_setup_volume_slider_visuals()
 	volume_slider.value_changed.connect(_on_volume_changed)
 	NetworkSession.status_changed.connect(_on_network_status_changed)
 	NetworkSession.session_state_changed.connect(_on_session_state_changed)
-	NetworkSession.lobby_changed.connect(_on_lobby_changed)
 
 	boss_button.visible = OS.is_debug_build()
 	boss_button.text = "DEBUG: LOCAL BOSS MATCH"
@@ -41,7 +37,7 @@ func _ready() -> void:
 	_refresh_session_ui()
 
 	await get_tree().process_frame
-	for button in [play_button, host_button, join_button, start_button, disconnect_button, tutorial_button, boss_button]:
+	for button in [play_button, host_button, join_button, disconnect_button, tutorial_button, boss_button]:
 		button.pivot_offset = button.size * 0.5
 
 	var master_bus := AudioServer.get_bus_index("Master")
@@ -67,11 +63,6 @@ func _on_join_pressed() -> void:
 	var error := NetworkSession.join_game(join_address.text)
 	if error == OK:
 		_refresh_session_ui()
-
-
-func _on_start_pressed() -> void:
-	if NetworkSession.start_match() == OK:
-		title_music.stop()
 
 
 func _on_disconnect_pressed() -> void:
@@ -104,36 +95,18 @@ func _on_session_state_changed(_state: NetworkSession.SessionState) -> void:
 	_refresh_session_ui()
 
 
-func _on_lobby_changed(_can_start: bool) -> void:
-	_refresh_session_ui()
-
-
 func _refresh_session_ui() -> void:
 	var idle := NetworkSession.session_state == NetworkSession.SessionState.IDLE
-	var host_lobby := NetworkSession.is_online_host() and NetworkSession.session_state in [
-		NetworkSession.SessionState.HOSTING,
-		NetworkSession.SessionState.LOBBY,
-	]
-	var joining_lobby := NetworkSession.is_joining_peer() and NetworkSession.session_state in [
-		NetworkSession.SessionState.CONNECTING,
-		NetworkSession.SessionState.LOBBY,
-	]
+	var connecting := NetworkSession.is_joining_peer() \
+		and NetworkSession.session_state == NetworkSession.SessionState.CONNECTING
 
 	play_button.visible = idle
 	host_button.visible = idle
 	$Center/JoinRow.visible = idle
 	tutorial_button.visible = idle
 	$Center/SoundRow.visible = idle
-	boss_button.visible = (idle or host_lobby) and OS.is_debug_build()
-	if host_lobby:
-		boss_button.text = "DEBUG BOSS START: %s" % ("ON" if NetworkSession.next_match_starts_at_boss else "OFF")
-	else:
-		boss_button.text = "DEBUG: LOCAL BOSS MATCH"
-
-	lan_address_label.visible = host_lobby
-	lan_address_label.text = "HOST IP: %s:%d" % [NetworkSession.get_likely_lan_address(), NetworkSession.LAN_PORT]
-	start_button.visible = host_lobby and NetworkSession.session_state == NetworkSession.SessionState.LOBBY
-	disconnect_button.visible = host_lobby or joining_lobby
+	boss_button.visible = idle and OS.is_debug_build()
+	disconnect_button.visible = connecting
 	status_label.text = NetworkSession.status_message
 	status_label.visible = not status_label.text.is_empty()
 
@@ -169,13 +142,6 @@ func animate_button_scale(button: Button, target: Vector2, duration: float) -> v
 
 func _on_boss_button_pressed() -> void:
 	if not OS.is_debug_build():
-		return
-	if NetworkSession.is_online_host() and NetworkSession.session_state in [
-		NetworkSession.SessionState.HOSTING,
-		NetworkSession.SessionState.LOBBY,
-	]:
-		NetworkSession.next_match_starts_at_boss = not NetworkSession.next_match_starts_at_boss
-		_refresh_session_ui()
 		return
 	title_music.stop()
 	NetworkSession.start_local_match(true)

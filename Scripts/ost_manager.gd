@@ -9,6 +9,8 @@ var transition_token: int = 0
 
 
 func _ready() -> void:
+	if NetworkSession.is_in_lobby():
+		return
 	Global.ost_manager = self
 	GameplayAudio.register_ost_manager(self)
 

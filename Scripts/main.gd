@@ -10,6 +10,14 @@ extends Node2D
 @onready var main_menu_button = $HUDs/PauseContainer/main_menu_button
 @onready var replicated_entities: Node = $ReplicatedEntities
 @onready var multiplayer_spawner: MultiplayerSpawner = $MultiplayerSpawner
+@onready var lobby_overlay: Control = $HUDs/LobbyOverlay
+@onready var lobby_status_label: Label = $HUDs/LobbyOverlay/Panel/Margin/Content/StatusLabel
+@onready var lobby_address_label: Label = $HUDs/LobbyOverlay/Panel/Margin/Content/AddressLabel
+@onready var lobby_host_label: Label = $HUDs/LobbyOverlay/Panel/Margin/Content/HostPresenceLabel
+@onready var lobby_joining_label: Label = $HUDs/LobbyOverlay/Panel/Margin/Content/JoiningPresenceLabel
+@onready var lobby_start_button: Button = $HUDs/LobbyOverlay/Panel/Margin/Content/StartButton
+@onready var lobby_boss_button: Button = $HUDs/LobbyOverlay/Panel/Margin/Content/BossButton
+@onready var lobby_disconnect_button: Button = $HUDs/LobbyOverlay/Panel/Margin/Content/DisconnectButton
 
 # Player Elemetns
 @onready var p1 = $Player1
@@ -76,7 +84,18 @@ func _ready():
 	SignalBus.connect("boss_phase_two_transition_started", _on_boss_phase_two_transition_started)
 	SignalBus.connect("boss_defeated", _on_boss_defeated)
 
-	if NetworkSession.is_online():
+	lobby_start_button.pressed.connect(_on_lobby_start_pressed)
+	lobby_disconnect_button.pressed.connect(_on_lobby_disconnect_pressed)
+	lobby_boss_button.pressed.connect(_on_lobby_boss_pressed)
+	NetworkSession.session_state_changed.connect(_on_session_state_changed)
+	NetworkSession.status_changed.connect(_on_session_status_changed)
+	NetworkSession.lobby_changed.connect(_on_lobby_changed)
+
+	if NetworkSession.is_in_lobby():
+		_configure_lobby_presentation()
+		if NetworkSession.is_joining_peer():
+			NetworkSession.lobby_scene_ready.call_deferred()
+	elif NetworkSession.is_online() and NetworkSession.session_state == NetworkSession.SessionState.LOADING:
 		get_tree().paused = true
 		NetworkSession.scene_ready.call_deferred(NetworkSession.match_generation)
 
@@ -91,9 +110,91 @@ func _configure_player_slots() -> void:
 	ghost1.controlling_peer_id = p1.controlling_peer_id
 	ghost2.controlling_peer_id = p2.controlling_peer_id
 
+	var player_two_active := not NetworkSession.is_online() or NetworkSession.joining_peer_id != 0
+	p2.visible = player_two_active
+	p2.set_physics_process(player_two_active)
+	p2.collision_layer = 5 if player_two_active else 0
+	p2.collision_mask = 5 if player_two_active else 0
+
+
+func _configure_lobby_presentation() -> void:
+	get_tree().paused = false
+	_configure_player_slots()
+	lobby_overlay.show()
+	$HUDs/Player1.hide()
+	$HUDs/Player2.hide()
+	p1.stamina_bar.hide()
+	p2.stamina_bar.hide()
+	gameover_label.hide()
+	wave_label.hide()
+	$HUDs/PauseContainer.hide()
+	$CanvasLayer.hide()
+	boss_hp_container.hide()
+	phase_overlay.hide()
+	pause_overlay.hide()
+	victory_overlay.hide()
+	_refresh_lobby_presentation()
+
+
+func _refresh_lobby_presentation() -> void:
+	if not NetworkSession.is_in_lobby():
+		lobby_overlay.hide()
+		return
+	_configure_player_slots()
+	lobby_overlay.show()
+	lobby_status_label.text = NetworkSession.status_message
+	lobby_address_label.text = "HOST LAN ADDRESS: %s:%d" % [
+		NetworkSession.host_lan_address,
+		NetworkSession.LAN_PORT,
+	]
+	lobby_host_label.text = "HOST: IN LOBBY"
+	if NetworkSession.is_joining_peer():
+		lobby_joining_label.text = "JOINING PEER: IN LOBBY (YOU)"
+	elif NetworkSession.joining_peer_id == 0:
+		lobby_joining_label.text = "JOINING PEER: WAITING…"
+	elif NetworkSession.can_start_match():
+		lobby_joining_label.text = "JOINING PEER: READY"
+	else:
+		lobby_joining_label.text = "JOINING PEER: ENTERING LOBBY…"
+	lobby_start_button.visible = NetworkSession.is_online_host()
+	lobby_start_button.disabled = not NetworkSession.can_start_match()
+	lobby_boss_button.visible = OS.is_debug_build() and NetworkSession.is_online_host()
+	lobby_boss_button.text = "DEBUG BOSS START: %s" % (
+		"ON" if NetworkSession.next_match_starts_at_boss else "OFF"
+	)
+
+
+func _on_session_state_changed(_state: NetworkSession.SessionState) -> void:
+	_refresh_lobby_presentation()
+
+
+func _on_session_status_changed(_message: String) -> void:
+	_refresh_lobby_presentation()
+
+
+func _on_lobby_changed(_can_start: bool) -> void:
+	_refresh_lobby_presentation()
+
+
+func _on_lobby_start_pressed() -> void:
+	NetworkSession.start_match()
+
+
+func _on_lobby_disconnect_pressed() -> void:
+	NetworkSession.leave_game(true, "Disconnected.")
+
+
+func _on_lobby_boss_pressed() -> void:
+	if not OS.is_debug_build() or not NetworkSession.is_online_host():
+		return
+	NetworkSession.next_match_starts_at_boss = not NetworkSession.next_match_starts_at_boss
+	_refresh_lobby_presentation()
+
 
 func spawn_replicated(scene_path: String, properties: Dictionary = {}) -> Node:
-	if not NetworkSession.has_simulation_authority() or not _is_allowed_spawn_scene(scene_path):
+	if NetworkSession.is_in_lobby() \
+		or not NetworkSession.has_simulation_authority() \
+		or not _is_allowed_spawn_scene(scene_path):
 		return null
 	var data := {
 		"generation": NetworkSession.match_generation,
@@ -106,6 +207,8 @@ func spawn_replicated(scene_path: String, properties: Dictionary = {}) -> Node:
 
 
 func _spawn_replicated_from_data(data: Dictionary) -> Node:
+	if NetworkSession.is_in_lobby():
+		return null
 	var scene_path := String(data.get("scene_path", ""))
 	if not _is_allowed_spawn_scene(scene_path):
 		return null
@@ -132,6 +235,9 @@ func _is_allowed_spawn_scene(scene_path: String) -> bool:
 
 
 func _input(event):
+	# The Lobby has its own always-visible controls and must not alter MatchPhase.
+	if NetworkSession.is_in_lobby():
+		return
 	# Check for Esc key press
 	if event.is_action_pressed("pause"):
 		if NetworkSession.is_joining_peer():
@@ -193,7 +299,9 @@ func _request_host_pause(paused: bool) -> void:
 
 @rpc("authority", "call_local", "reliable")
 func _set_network_pause(paused: bool, generation: int) -> void:
-	if not NetworkSession.is_online() or generation != NetworkSession.match_generation:
+	if not NetworkSession.is_online() \
+		or NetworkSession.session_state != NetworkSession.SessionState.IN_MATCH \
+		or generation != NetworkSession.match_generation:
 		return
 	_apply_pause(paused)
 
@@ -206,6 +314,8 @@ func _apply_pause(paused: bool) -> void:
 		_hide_pause_menu()
 
 func _process(_delta):
+	if NetworkSession.is_in_lobby():
+		return
 	if NetworkSession.has_simulation_authority():
 		check_total_sleep_condition()
 	update_effect_ui()
@@ -429,6 +539,8 @@ func toggle_pause() -> void:
 
 
 func _on_boss_hp_init(_boss: Node, current_hp: float, max_hp: float, is_phase_two: bool) -> void:
+	if NetworkSession.is_in_lobby():
+		return
 	boss_hp_container.visible = true
 	boss_hp_bar.max_value = max_hp
 	boss_hp_bar.value = current_hp
@@ -438,7 +550,7 @@ func _on_boss_hp_init(_boss: Node, current_hp: float, max_hp: float, is_phase_tw
 
 
 func _on_boss_hp_changed(current_hp: float, max_hp: float, is_phase_two: bool) -> void:
-	if not is_instance_valid(boss_hp_bar):
+	if NetworkSession.is_in_lobby() or not is_instance_valid(boss_hp_bar):
 		return
 
 	boss_hp_container.visible = true
@@ -473,7 +585,7 @@ func _set_boss_bar_phase_color(is_phase_two: bool) -> void:
 
 
 func _on_boss_phase_two_transition_started() -> void:
-	if not NetworkSession.has_simulation_authority():
+	if NetworkSession.is_in_lobby() or not NetworkSession.has_simulation_authority():
 		return
 	if NetworkSession.is_online_host():
 		_show_phase_two_transition.rpc(NetworkSession.match_generation)
@@ -483,7 +595,8 @@ func _on_boss_phase_two_transition_started() -> void:
 
 @rpc("authority", "call_local", "reliable")
 func _show_phase_two_transition(generation: int) -> void:
-	if NetworkSession.is_online() and generation != NetworkSession.match_generation:
+	if NetworkSession.is_in_lobby() \
+		or (NetworkSession.is_online() and generation != NetworkSession.match_generation):
 		return
 	if phase_transition_running:
 		return
@@ -524,7 +637,7 @@ func _show_phase_two_transition(generation: int) -> void:
 
 
 func _on_boss_defeated() -> void:
-	if not NetworkSession.has_simulation_authority():
+	if NetworkSession.is_in_lobby() or not NetworkSession.has_simulation_authority():
 		return
 	NetworkSession.broadcast_music_stop()
 	if NetworkSession.is_online_host():
@@ -535,7 +648,8 @@ func _on_boss_defeated() -> void:
 
 @rpc("authority", "call_local", "reliable")
 func _show_victory(generation: int) -> void:
-	if NetworkSession.is_online() and generation != NetworkSession.match_generation:
+	if NetworkSession.is_in_lobby() \
+		or (NetworkSession.is_online() and generation != NetworkSession.match_generation):
 		return
 	NetworkSession.match_phase = NetworkSession.MatchPhase.VICTORY
 	boss_hp_container.visible = false
@@ -586,7 +700,7 @@ func update_effect_ui() -> void:
 
 
 func _on_game_over(reason: String):
-	if not NetworkSession.has_simulation_authority():
+	if NetworkSession.is_in_lobby() or not NetworkSession.has_simulation_authority():
 		return
 	NetworkSession.broadcast_music_stop()
 	if NetworkSession.is_online_host():
@@ -597,7 +711,8 @@ func _on_game_over(reason: String):
 
 @rpc("authority", "call_local", "reliable")
 func _show_game_over(reason: String, generation: int) -> void:
-	if NetworkSession.is_online() and generation != NetworkSession.match_generation:
+	if NetworkSession.is_in_lobby() \
+		or (NetworkSession.is_online() and generation != NetworkSession.match_generation):
 		return
 	NetworkSession.match_phase = NetworkSession.MatchPhase.GAME_OVER
 	# 1. Clean up any existing manual pause state so it doesn't interfere

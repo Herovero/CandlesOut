@@ -157,6 +157,10 @@ func _ready():
 func _physics_process(delta: float) -> void:
 	update_ui()
 
+	if NetworkSession.is_in_lobby():
+		_process_lobby_movement(delta)
+		return
+
 	if NetworkSession.is_online() and not NetworkSession.has_simulation_authority():
 		_process_joining_peer_input(delta)
 		var force_snap := is_sleeping != _presented_sleeping \
@@ -241,6 +245,30 @@ func _physics_process(delta: float) -> void:
 	NetworkSession.publish_movement(self, velocity)
 
 
+func _process_lobby_movement(delta: float) -> void:
+	if not NetworkSession.has_simulation_authority():
+		_process_joining_peer_input(delta)
+		NetworkSession.interpolate_movement(self, delta)
+		_update_remote_presentation(delta)
+		return
+
+	var command := _get_authoritative_command()
+	var direction := (command.get("direction", Vector2.ZERO) as Vector2).limit_length(1.0)
+	command_direction = direction
+	command_sprinting = false
+	is_sprinting = false
+	velocity = direction * walk_speed
+	if direction != Vector2.ZERO:
+		last_move_dir = direction
+		sprite.play("walking")
+	else:
+		sprite.play("idle")
+	move_and_slide()
+	audio.handle_footsteps(delta, direction)
+	update_candle_glow(delta)
+	NetworkSession.publish_movement(self, velocity)
+
+
 func sample_local_input(use_online_actions: bool = false) -> Dictionary:
 	if not NetworkSession.local_has_focus or NetworkSession.local_input_suppressed:
 		return {"direction": Vector2.ZERO, "sprinting": false}
@@ -270,6 +298,8 @@ func _get_authoritative_command() -> Dictionary:
 
 
 func _input(event: InputEvent) -> void:
+	if NetworkSession.session_state != NetworkSession.SessionState.IN_MATCH:
+		return
 	if not NetworkSession.is_joining_peer() or player_slot != NetworkSession.get_local_player_slot():
 		return
 	if event.is_action_pressed("interact") and not event.is_echo():
@@ -282,7 +312,12 @@ func _input(event: InputEvent) -> void:
 
 
 func _process_joining_peer_input(delta: float) -> void:
-	if player_slot != NetworkSession.get_local_player_slot() or NetworkSession.session_state != NetworkSession.SessionState.IN_MATCH:
+	if player_slot != NetworkSession.get_local_player_slot() \
+		or NetworkSession.session_state not in [
+			NetworkSession.SessionState.HOSTING,
+			NetworkSession.SessionState.LOBBY,
+			NetworkSession.SessionState.IN_MATCH,
+		]:
 		return
 	input_send_accumulator += delta
 	if input_send_accumulator < INPUT_SEND_INTERVAL:
@@ -293,25 +328,33 @@ func _process_joining_peer_input(delta: float) -> void:
 		NetworkSession.HOST_PEER_ID,
 		NetworkSession.match_generation,
 		command["direction"],
-		command["sprinting"]
+		command["sprinting"] if NetworkSession.session_state == NetworkSession.SessionState.IN_MATCH else false
 	)
 
 
 @rpc("any_peer", "call_remote", "unreliable_ordered", 1)
 func submit_input(generation: int, direction: Vector2, sprinting: bool) -> void:
-	if not multiplayer.is_server() or generation != NetworkSession.match_generation:
+	if not multiplayer.is_server() \
+		or generation != NetworkSession.match_generation \
+		or NetworkSession.session_state not in [
+			NetworkSession.SessionState.HOSTING,
+			NetworkSession.SessionState.LOBBY,
+			NetworkSession.SessionState.IN_MATCH,
+		]:
 		return
 	var sender := multiplayer.get_remote_sender_id()
 	if sender != controlling_peer_id or player_slot != 2:
 		return
 	remote_direction = direction.limit_length(1.0)
-	remote_sprinting = sprinting
+	remote_sprinting = sprinting if NetworkSession.session_state == NetworkSession.SessionState.IN_MATCH else false
 	last_remote_input_msec = Time.get_ticks_msec()
 
 
 @rpc("any_peer", "call_remote", "reliable")
 func submit_interact(generation: int, direction: Vector2) -> void:
-	if not multiplayer.is_server() or generation != NetworkSession.match_generation:
+	if not multiplayer.is_server() \
+		or generation != NetworkSession.match_generation \
+		or NetworkSession.session_state != NetworkSession.SessionState.IN_MATCH:
 		return
 	var sender := multiplayer.get_remote_sender_id()
 	if sender != controlling_peer_id or player_slot != 2 or not is_sleeping:
@@ -514,7 +557,7 @@ func start_hit_stun() -> void:
 
 
 func apply_damage(amount: float) -> void:
-	if not NetworkSession.has_simulation_authority():
+	if NetworkSession.is_in_lobby() or not NetworkSession.has_simulation_authority():
 		return
 	health = clampf(health - amount, 0.0, max_health)
 	if health <= 0.0:
@@ -522,7 +565,7 @@ func apply_damage(amount: float) -> void:
 
 
 func receive_hit(damage_amount: float, knockback_force: Vector2 = Vector2.ZERO, apply_stun: bool = false) -> void:
-	if not NetworkSession.has_simulation_authority():
+	if NetworkSession.is_in_lobby() or not NetworkSession.has_simulation_authority():
 		return
 	if is_damage_blocked():
 		audio.play_block_sfx()
@@ -539,6 +582,8 @@ func receive_hit(damage_amount: float, knockback_force: Vector2 = Vector2.ZERO, 
 
 
 func apply_knockback(force: Vector2):
+	if NetworkSession.is_in_lobby():
+		return
 	knockback_velocity = force
 	start_invincibility_flash()
 	start_hit_stun()

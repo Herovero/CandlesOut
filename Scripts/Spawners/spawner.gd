@@ -9,7 +9,7 @@ extends Node2D
 var wave_ref = null
 # Called when the node enters the scene tree for the first time.
 func _ready() -> void:
-	if not NetworkSession.has_simulation_authority():
+	if NetworkSession.is_in_lobby() or not NetworkSession.has_simulation_authority():
 		return
 	add_to_group("spawner")
 	Global.spawners.append(self)
@@ -42,11 +42,13 @@ func _process(_delta: float) -> void:
 
 
 func spawn_n(count: int, enemy_toSpawn):
+	if NetworkSession.is_in_lobby() or not NetworkSession.has_simulation_authority():
+		return
 	for i in count:
 		spawn_one(enemy_toSpawn)
 
 func spawn_one(enemy_toSpawn):
-	if not NetworkSession.has_simulation_authority():
+	if NetworkSession.is_in_lobby() or not NetworkSession.has_simulation_authority():
 		return
 	var ene := NetworkSession.spawn_replicated(enemy_toSpawn, {"global_position": get_random_spawn_position()})
 	if ene == null:

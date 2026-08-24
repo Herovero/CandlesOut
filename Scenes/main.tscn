@@ -272,6 +272,108 @@ player_slot = 2
 [node name="HUDs" type="CanvasLayer" parent="." unique_id=518585437]
 layer = 10
 
+[node name="LobbyOverlay" type="Control" parent="HUDs"]
+process_mode = 3
+visible = false
+layout_mode = 3
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 2
+
+[node name="Panel" type="PanelContainer" parent="HUDs/LobbyOverlay"]
+layout_mode = 1
+anchors_preset = 1
+anchor_left = 1.0
+anchor_right = 1.0
+offset_left = -480.0
+offset_top = 24.0
+offset_right = -24.0
+offset_bottom = 510.0
+grow_horizontal = 0
+theme_override_styles/panel = SubResource("StyleBoxFlat_k12tt")
+
+[node name="Margin" type="MarginContainer" parent="HUDs/LobbyOverlay/Panel"]
+layout_mode = 2
+theme_override_constants/margin_left = 24
+theme_override_constants/margin_top = 20
+theme_override_constants/margin_right = 24
+theme_override_constants/margin_bottom = 20
+
+[node name="Content" type="VBoxContainer" parent="HUDs/LobbyOverlay/Panel/Margin"]
+layout_mode = 2
+theme_override_constants/separation = 12
+
+[node name="Title" type="Label" parent="HUDs/LobbyOverlay/Panel/Margin/Content"]
+layout_mode = 2
+theme_override_colors/font_color = Color(1, 0.87451, 0.545098, 1)
+theme_override_fonts/font = ExtResource("8_wsu2k")
+theme_override_font_sizes/font_size = 42
+text = "LAN LOBBY"
+horizontal_alignment = 1
+
+[node name="StatusLabel" type="Label" parent="HUDs/LobbyOverlay/Panel/Margin/Content"]
+custom_minimum_size = Vector2(400, 54)
+layout_mode = 2
+theme_override_fonts/font = ExtResource("8_wsu2k")
+theme_override_font_sizes/font_size = 22
+text = "Waiting for Joining Peer…"
+horizontal_alignment = 1
+autowrap_mode = 2
+
+[node name="AddressLabel" type="Label" parent="HUDs/LobbyOverlay/Panel/Margin/Content"]
+layout_mode = 2
+theme_override_colors/font_color = Color(1, 0.87451, 0.545098, 1)
+theme_override_fonts/font = ExtResource("8_wsu2k")
+theme_override_font_sizes/font_size = 22
+text = "HOST LAN ADDRESS"
+horizontal_alignment = 1
+
+[node name="HostPresenceLabel" type="Label" parent="HUDs/LobbyOverlay/Panel/Margin/Content"]
+layout_mode = 2
+theme_override_fonts/font = ExtResource("8_wsu2k")
+theme_override_font_sizes/font_size = 24
+text = "HOST: IN LOBBY"
+
+[node name="JoiningPresenceLabel" type="Label" parent="HUDs/LobbyOverlay/Panel/Margin/Content"]
+layout_mode = 2
+theme_override_fonts/font = ExtResource("8_wsu2k")
+theme_override_font_sizes/font_size = 24
+text = "JOINING PEER: WAITING…"
+
+[node name="StartButton" type="Button" parent="HUDs/LobbyOverlay/Panel/Margin/Content"]
+custom_minimum_size = Vector2(300, 58)
+layout_mode = 2
+theme_override_colors/font_color = Color(1, 0.964706, 0.866667, 1)
+theme_override_fonts/font = ExtResource("8_wsu2k")
+theme_override_font_sizes/font_size = 30
+theme_override_styles/normal = SubResource("StyleBoxFlat_jkdf5")
+theme_override_styles/hover = SubResource("StyleBoxFlat_wsu2k")
+text = "START MATCH"
+
+[node name="BossButton" type="Button" parent="HUDs/LobbyOverlay/Panel/Margin/Content"]
+visible = false
+custom_minimum_size = Vector2(300, 52)
+layout_mode = 2
+theme_override_colors/font_color = Color(1, 0.964706, 0.866667, 1)
+theme_override_fonts/font = ExtResource("8_wsu2k")
+theme_override_font_sizes/font_size = 24
+theme_override_styles/normal = SubResource("StyleBoxFlat_jkdf5")
+theme_override_styles/hover = SubResource("StyleBoxFlat_wsu2k")
+text = "DEBUG BOSS START: OFF"
+
+[node name="DisconnectButton" type="Button" parent="HUDs/LobbyOverlay/Panel/Margin/Content"]
+custom_minimum_size = Vector2(300, 58)
+layout_mode = 2
+theme_override_colors/font_color = Color(1, 0.964706, 0.866667, 1)
+theme_override_fonts/font = ExtResource("8_wsu2k")
+theme_override_font_sizes/font_size = 30
+theme_override_styles/normal = SubResource("StyleBoxFlat_jkdf5")
+theme_override_styles/hover = SubResource("StyleBoxFlat_wsu2k")
+text = "DISCONNECT"
+
 [node name="Player1" type="Control" parent="HUDs" unique_id=1050061049]
 layout_mode = 3
 anchors_preset = 0

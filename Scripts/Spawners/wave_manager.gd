@@ -40,7 +40,7 @@ func set_max_enemy(number : int) -> void:
 	MAX_ENEMIES_ON_SCREEN = number
 
 func _ready() -> void:
-	if not NetworkSession.has_simulation_authority():
+	if NetworkSession.is_in_lobby() or not NetworkSession.has_simulation_authority():
 		spawn_timer.stop()
 		$StartTimer.stop()
 		return
@@ -50,7 +50,7 @@ func _ready() -> void:
 	pass # Replace with function body.
 
 func start_wave(wave_number: int):
-	if not NetworkSession.has_simulation_authority():
+	if NetworkSession.is_in_lobby() or not NetworkSession.has_simulation_authority():
 		return
 	current_wave = wave_number
 	spawn_queue.clear()
@@ -114,6 +114,8 @@ func start_wave(wave_number: int):
 
 
 func try_spawn():
+	if NetworkSession.is_in_lobby() or not NetworkSession.has_simulation_authority():
+		return
 	var slots_available = MAX_ENEMIES_ON_SCREEN - enemies_alive
 
 	if slots_available <= 0 or spawn_queue.is_empty():
@@ -127,7 +129,7 @@ func try_spawn():
 
 
 func _on_timer_timeout():
-	if not NetworkSession.has_simulation_authority():
+	if NetworkSession.is_in_lobby() or not NetworkSession.has_simulation_authority():
 		return
 	var slots_available = MAX_ENEMIES_ON_SCREEN - enemies_alive
 
@@ -161,7 +163,7 @@ func on_enemy_died():
 
 
 func _on_start_timer_timeout() -> void:
-	if not NetworkSession.has_simulation_authority():
+	if NetworkSession.is_in_lobby() or not NetworkSession.has_simulation_authority():
 		return
 	if Global.skip_to_boss:
 		# Reset the flag so it doesn't stay true next time
@@ -182,6 +184,8 @@ func _on_start_timer_timeout() -> void:
 		start_wave(1)
 
 func _on_wave_completed(wave_number: int):
+	if NetworkSession.is_in_lobby() or not NetworkSession.has_simulation_authority():
+		return
 	print("Wave signal emmitted")
 	
 	NetworkSession.broadcast_music_stop()

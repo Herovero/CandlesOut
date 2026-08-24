@@ -46,7 +46,7 @@ func set_spawn_state(state: bool) -> void:
 	can_spawn = state
 
 func spawn_one() -> void:
-	if not NetworkSession.has_simulation_authority() or not can_spawn:
+	if NetworkSession.is_in_lobby() or not NetworkSession.has_simulation_authority() or not can_spawn:
 		return
 	if items_alive >= MAX_ITEMS:
 		#print_debug("max item reached")
@@ -73,7 +73,7 @@ func _on_item_removed() -> void:
 # Called when the node enters the scene tree for the first time.
 func _ready() -> void:
 	current_weights = normal_weights.duplicate()
-	if not NetworkSession.has_simulation_authority():
+	if NetworkSession.is_in_lobby() or not NetworkSession.has_simulation_authority():
 		$Timer.stop()
 		return
 	Global.item_spawner = self
@@ -124,5 +124,7 @@ func get_weighted_random_item():
 	return items[0]
 
 func _on_timer_timeout() -> void:
+	if NetworkSession.is_in_lobby():
+		return
 	spawn_one()
 	pass # Replace with function body.

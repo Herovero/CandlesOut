@@ -12,12 +12,12 @@ enum MatchPhase { LOADING, PLAYING, PAUSED, GAME_OVER, VICTORY }
 enum PlayMode { LOCAL_COOP, ONLINE_HOST, ONLINE_JOIN }
 
 const LAN_PORT := 7000
-const PROTOCOL_VERSION := 2
+const PROTOCOL_VERSION := 3
 const HOST_PEER_ID := 1
 const REPLICATION_INTERVAL := 1.0 / 30.0
 const INTERPOLATION_SPEED := 18.0
 const INTERPOLATION_SNAP_DISTANCE := 96.0
-const MATCH_SCENE := "res://Scenes/main.tscn"
+const PLAYFIELD_SCENE := "res://Scenes/main.tscn"
 const MENU_SCENE := "res://Scenes/main_menu.tscn"
 const CONNECTION_TIMEOUT_SECONDS := 10.0
 const LOADING_TIMEOUT_SECONDS := 30.0
@@ -27,6 +27,7 @@ var match_phase: MatchPhase = MatchPhase.LOADING
 var play_mode: PlayMode = PlayMode.LOCAL_COOP
 var match_generation: int = 0
 var joining_peer_id: int = 0
+var host_lan_address: String = ""
 var status_message: String = ""
 var next_match_starts_at_boss: bool = false
 var local_has_focus: bool = true
@@ -35,6 +36,7 @@ var local_input_suppressed: bool = false
 var _connection_timeout_left: float = 0.0
 var _loading_timeout_left: float = 0.0
 var _ready_peers: Dictionary = {}
+var _joining_peer_lobby_ready: bool = false
 var _returning_to_menu: bool = false
 var _audio_variant_seed: int = 0
 var _current_music_wave: int = 0
@@ -81,9 +83,12 @@ func host_game() -> Error:
 
 	multiplayer.multiplayer_peer = peer
 	play_mode = PlayMode.ONLINE_HOST
+	host_lan_address = get_likely_lan_address()
+	_joining_peer_lobby_ready = false
 	_set_state(SessionState.HOSTING)
-	_set_status("Hosting on %s:%d. Waiting for player…" % [get_likely_lan_address(), LAN_PORT])
+	_set_status("Hosting on %s:%d. Waiting for player…" % [host_lan_address, LAN_PORT])
 	lobby_changed.emit(false)
+	get_tree().call_deferred("change_scene_to_file", PLAYFIELD_SCENE)
 	return OK
 
 
@@ -102,6 +107,7 @@ func join_game(address: String) -> Error:
 
 	multiplayer.multiplayer_peer = peer
 	play_mode = PlayMode.ONLINE_JOIN
+	host_lan_address = normalized_address
 	_connection_timeout_left = CONNECTION_TIMEOUT_SECONDS
 	_set_state(SessionState.CONNECTING)
 	_set_status("Connecting to %s:%d…" % [normalized_address, LAN_PORT])
@@ -113,11 +119,11 @@ func start_local_match(start_at_boss: bool = false) -> void:
 	play_mode = PlayMode.LOCAL_COOP
 	next_match_starts_at_boss = start_at_boss
 	Global.skip_to_boss = start_at_boss
-	get_tree().change_scene_to_file(MATCH_SCENE)
+	get_tree().change_scene_to_file(PLAYFIELD_SCENE)
 
 
 func start_match() -> Error:
-	if not is_online_host() or session_state != SessionState.LOBBY or joining_peer_id == 0:
+	if not can_start_match():
 		return ERR_UNAUTHORIZED
 
 	match_generation += 1
@@ -126,7 +132,7 @@ func start_match() -> Error:
 	_loading_timeout_left = LOADING_TIMEOUT_SECONDS
 	_set_state(SessionState.LOADING)
 	_set_status("Loading match…")
-	_load_match.rpc(match_generation, MATCH_SCENE, next_match_starts_at_boss)
+	_load_match.rpc(match_generation, PLAYFIELD_SCENE, next_match_starts_at_boss)
 	return OK
 
 
@@ -149,7 +155,7 @@ func start_match_from_session() -> Error:
 	_loading_timeout_left = LOADING_TIMEOUT_SECONDS
 	_set_state(SessionState.LOADING)
 	_set_status("Loading match…")
-	_load_match.rpc(match_generation, MATCH_SCENE, false)
+	_load_match.rpc(match_generation, PLAYFIELD_SCENE, false)
 	return OK
 
 
@@ -161,7 +167,9 @@ func leave_game(return_to_menu: bool = false, reason: String = "") -> void:
 	multiplayer.multiplayer_peer.close()
 	multiplayer.multiplayer_peer = OfflineMultiplayerPeer.new()
 	joining_peer_id = 0
+	host_lan_address = ""
 	_ready_peers.clear()
+	_joining_peer_lobby_ready = false
 	_connection_timeout_left = 0.0
 	_loading_timeout_left = 0.0
 	match_phase = MatchPhase.LOADING
@@ -192,6 +200,24 @@ func scene_ready(generation: int) -> void:
 		_mark_peer_ready(HOST_PEER_ID, generation)
 	else:
 		_report_scene_ready.rpc_id(HOST_PEER_ID, generation)
+
+
+func lobby_scene_ready() -> void:
+	if not is_joining_peer() or session_state != SessionState.LOBBY:
+		return
+	_set_status("In the Lobby. Waiting for Host to start the Match…")
+	_report_lobby_ready.rpc_id(HOST_PEER_ID, match_generation)
+
+
+func is_in_lobby() -> bool:
+	return is_online() and session_state in [SessionState.HOSTING, SessionState.LOBBY]
+
+
+func can_start_match() -> bool:
+	return is_online_host() \
+		and session_state == SessionState.LOBBY \
+		and joining_peer_id != 0 \
+		and _joining_peer_lobby_ready
 
 
 func is_online() -> bool:
@@ -400,9 +426,10 @@ func _register_protocol(version: int) -> void:
 		return
 
 	joining_peer_id = sender
+	_joining_peer_lobby_ready = false
 	_set_state(SessionState.LOBBY)
-	_set_status("Player connected. Ready to start.")
-	lobby_changed.emit(true)
+	_set_status("Player connected. Waiting for them to enter the Lobby…")
+	lobby_changed.emit(false)
 	_protocol_accepted.rpc_id(sender, match_generation)
 
 
@@ -414,8 +441,9 @@ func _protocol_accepted(server_generation: int) -> void:
 	match_generation = server_generation
 	joining_peer_id = multiplayer.get_unique_id()
 	_set_state(SessionState.LOBBY)
-	_set_status("Connected. Waiting for Host to start…")
+	_set_status("Connected. Entering the Lobby…")
 	lobby_changed.emit(false)
+	get_tree().call_deferred("change_scene_to_file", PLAYFIELD_SCENE)
 
 
 @rpc("authority", "call_remote", "reliable")
@@ -427,7 +455,7 @@ func _protocol_rejected(reason: String) -> void:
 
 @rpc("authority", "call_local", "reliable")
 func _load_match(generation: int, scene_path: String, start_at_boss: bool) -> void:
-	if not is_online() or generation < match_generation or scene_path != MATCH_SCENE:
+	if not is_online() or generation < match_generation or scene_path != PLAYFIELD_SCENE:
 		return
 	GameplayAudio.reset()
 	_audio_variant_seed = 0
@@ -439,6 +467,18 @@ func _load_match(generation: int, scene_path: String, start_at_boss: bool) -> vo
 	_set_status("Loading match…")
 	get_tree().paused = false
 	get_tree().call_deferred("change_scene_to_file", scene_path)
+
+
+@rpc("any_peer", "call_remote", "reliable")
+func _report_lobby_ready(generation: int) -> void:
+	if not multiplayer.is_server() or session_state != SessionState.LOBBY or generation != match_generation:
+		return
+	var sender := multiplayer.get_remote_sender_id()
+	if sender != joining_peer_id:
+		return
+	_joining_peer_lobby_ready = true
+	_set_status("Both Participants are in the Lobby. Ready to start.")
+	lobby_changed.emit(true)
 
 
 @rpc("any_peer", "call_remote", "reliable")
@@ -504,6 +544,7 @@ func _on_peer_disconnected(peer_id: int) -> void:
 		_end_session("Other player disconnected.", true)
 	elif multiplayer.is_server():
 		joining_peer_id = 0
+		_joining_peer_lobby_ready = false
 		_set_state(SessionState.HOSTING)
 		_set_status("Player disconnected. Waiting for player…")
 		lobby_changed.emit(false)
