@@ -48,6 +48,8 @@ func _ready() -> void:
 	sprite.play("idle")
 
 func _physics_process(delta: float) -> void:
+	if not NetworkSession.has_simulation_authority():
+		return
 	if is_dying:
 		velocity = Vector2.ZERO
 		knockback_velocity = Vector2.ZERO
@@ -104,14 +106,14 @@ func shoot_projectile(shoot_dir: Vector2) -> void:
 	if projectile_scene == null:
 		return
 
-	var projectile = projectile_scene.instantiate()
-	projectile.global_position = global_position + (shoot_dir * muzzle_offset)
-	projectile.direction = shoot_dir
-	projectile.speed = projectile_speed
-	projectile.damage = projectile_damage
-	projectile.owner_group = "Enemies"
-	projectile.target_group = "Players"
-	get_tree().current_scene.add_child(projectile)
+	NetworkSession.spawn_replicated(projectile_scene, {
+		"global_position": global_position + (shoot_dir * muzzle_offset),
+		"direction": shoot_dir,
+		"speed": projectile_speed,
+		"damage": projectile_damage,
+		"owner_group": "Enemies",
+		"target_group": "Players",
+	})
 	play_shoot_sound()
 
 func play_footstep():

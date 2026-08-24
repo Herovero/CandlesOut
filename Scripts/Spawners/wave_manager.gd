@@ -40,12 +40,18 @@ func set_max_enemy(number : int) -> void:
 	MAX_ENEMIES_ON_SCREEN = number
 
 func _ready() -> void:
+	if not NetworkSession.has_simulation_authority():
+		spawn_timer.stop()
+		$StartTimer.stop()
+		return
 	wave_completed.connect(_on_wave_completed)
 	Global.wave = self
 	print("OST:", ost_manager)
 	pass # Replace with function body.
 
 func start_wave(wave_number: int):
+	if not NetworkSession.has_simulation_authority():
+		return
 	current_wave = wave_number
 	spawn_queue.clear()
 
@@ -121,6 +127,8 @@ func try_spawn():
 
 
 func _on_timer_timeout():
+	if not NetworkSession.has_simulation_authority():
+		return
 	var slots_available = MAX_ENEMIES_ON_SCREEN - enemies_alive
 
 	if slots_available <= 0 or spawn_queue.is_empty():
@@ -141,7 +149,9 @@ func _on_timer_timeout():
 		spawn_timer.stop()
 
 func on_enemy_died():
-	enemies_alive -= 1
+	if not is_inside_tree() or not NetworkSession.has_simulation_authority():
+		return
+	enemies_alive = maxi(enemies_alive - 1, 0)
 
 	if not spawn_queue.is_empty():
 		try_spawn()
@@ -151,6 +161,8 @@ func on_enemy_died():
 
 
 func _on_start_timer_timeout() -> void:
+	if not NetworkSession.has_simulation_authority():
+		return
 	if Global.skip_to_boss:
 		# Reset the flag so it doesn't stay true next time
 		Global.skip_to_boss = false

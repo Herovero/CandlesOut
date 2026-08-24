@@ -8,6 +8,8 @@ extends Node2D
 @onready var restart_button = $HUDs/PauseContainer/restart_button
 @onready var resume_button = $HUDs/PauseContainer/resume_button
 @onready var main_menu_button = $HUDs/PauseContainer/main_menu_button
+@onready var replicated_entities: Node = $ReplicatedEntities
+@onready var multiplayer_spawner: MultiplayerSpawner = $MultiplayerSpawner
 
 # Player Elemetns
 @onready var p1 = $Player1
@@ -52,6 +54,9 @@ func _ready():
 	process_mode = Node.PROCESS_MODE_INHERIT
 	Engine.time_scale = 1.0
 	get_tree().paused = false
+	multiplayer_spawner.spawn_function = _spawn_replicated_from_data
+	multiplayer_spawner.process_mode = Node.PROCESS_MODE_ALWAYS
+	_configure_player_slots()
 	gameover_label.hide()
 	_hide_pause_menu()
 
@@ -71,13 +76,75 @@ func _ready():
 	SignalBus.connect("boss_phase_two_transition_started", _on_boss_phase_two_transition_started)
 	SignalBus.connect("boss_defeated", _on_boss_defeated)
 
+	if NetworkSession.is_online():
+		get_tree().paused = true
+		NetworkSession.scene_ready.call_deferred(NetworkSession.match_generation)
+
+
+func _configure_player_slots() -> void:
+	p1.player_slot = 1
+	p2.player_slot = 2
+	p1.controlling_peer_id = NetworkSession.get_peer_for_slot(1)
+	p2.controlling_peer_id = NetworkSession.get_peer_for_slot(2)
+	var ghost1 := $Ghosts/PlayerGhost1
+	var ghost2 := $Ghosts/PlayerGhost2
+	ghost1.controlling_peer_id = p1.controlling_peer_id
+	ghost2.controlling_peer_id = p2.controlling_peer_id
+
+
+func spawn_replicated(scene_path: String, properties: Dictionary = {}) -> Node:
+	if not NetworkSession.has_simulation_authority() or not _is_allowed_spawn_scene(scene_path):
+		return null
+	var data := {
+		"generation": NetworkSession.match_generation,
+		"scene_path": scene_path,
+		"properties": properties,
+	}
+	if NetworkSession.is_online():
+		return multiplayer_spawner.spawn(data)
+	return _spawn_replicated_from_data(data)
+
+
+func _spawn_replicated_from_data(data: Dictionary) -> Node:
+	var scene_path := String(data.get("scene_path", ""))
+	if not _is_allowed_spawn_scene(scene_path):
+		return null
+	if NetworkSession.is_online() and int(data.get("generation", -1)) != NetworkSession.match_generation:
+		return null
+	var packed_scene := load(scene_path) as PackedScene
+	if packed_scene == null:
+		return null
+	var instance := packed_scene.instantiate()
+	var properties: Dictionary = data.get("properties", {})
+	for property in properties:
+		if property in instance:
+			instance.set(property, properties[property])
+	if not NetworkSession.is_online():
+		replicated_entities.add_child(instance)
+	return instance
+
+
+func _is_allowed_spawn_scene(scene_path: String) -> bool:
+	return scene_path.begins_with("res://Scenes/Enemy/") \
+		or scene_path.begins_with("res://Scenes/Items/") \
+		or scene_path == "res://Scenes/Player/player_ghost.tscn" \
+		or scene_path == "res://Scenes/projectile.tscn"
+
+
 func _input(event):
 	# Check for Esc key press
 	if event.is_action_pressed("pause"):
-		if not get_tree().paused:
-			_show_pause_menu()
+		if NetworkSession.is_joining_peer():
+			if paused_label.visible:
+				_hide_joining_peer_menu()
+			else:
+				_show_joining_peer_menu()
+			return
+		if get_tree().paused:
+			_request_host_pause(false)
 		else:
-			_hide_pause_menu()
+			_request_host_pause(true)
+
 
 func _hide_pause_menu():
 	paused_label.hide()
@@ -86,15 +153,61 @@ func _hide_pause_menu():
 	restart_button.hide()
 	main_menu_button.hide()
 
+
 func _show_pause_menu():
+	paused_label.text = "PAUSED"
 	paused_label.show()
 	get_tree().paused = true
 	resume_button.show()
-	restart_button.show()
+	restart_button.visible = not NetworkSession.is_joining_peer()
+	main_menu_button.show()
+	main_menu_button.text = "MAIN MENU"
+
+
+func _show_joining_peer_menu() -> void:
+	NetworkSession.local_input_suppressed = true
+	paused_label.text = "LOCAL MENU\nMATCH IS STILL RUNNING\nYOU ARE VULNERABLE"
+	paused_label.show()
+	resume_button.show()
+	restart_button.hide()
+	main_menu_button.text = "DISCONNECT"
 	main_menu_button.show()
 
+
+func _hide_joining_peer_menu() -> void:
+	NetworkSession.local_input_suppressed = false
+	paused_label.hide()
+	resume_button.hide()
+	restart_button.hide()
+	main_menu_button.hide()
+
+
+func _request_host_pause(paused: bool) -> void:
+	if NetworkSession.is_online():
+		if not NetworkSession.is_online_host():
+			return
+		_set_network_pause.rpc(paused, NetworkSession.match_generation)
+	else:
+		_apply_pause(paused)
+
+
+@rpc("authority", "call_local", "reliable")
+func _set_network_pause(paused: bool, generation: int) -> void:
+	if not NetworkSession.is_online() or generation != NetworkSession.match_generation:
+		return
+	_apply_pause(paused)
+
+
+func _apply_pause(paused: bool) -> void:
+	NetworkSession.match_phase = NetworkSession.MatchPhase.PAUSED if paused else NetworkSession.MatchPhase.PLAYING
+	if paused:
+		_show_pause_menu()
+	else:
+		_hide_pause_menu()
+
 func _process(_delta):
-	check_total_sleep_condition()
+	if NetworkSession.has_simulation_authority():
+		check_total_sleep_condition()
 	update_effect_ui()
 
 
@@ -320,6 +433,8 @@ func _on_boss_hp_init(_boss: Node, current_hp: float, max_hp: float, is_phase_tw
 	boss_hp_bar.max_value = max_hp
 	boss_hp_bar.value = current_hp
 	_set_boss_bar_phase_color(is_phase_two)
+	if NetworkSession.is_online_host():
+		_sync_boss_hp.rpc(current_hp, max_hp, is_phase_two, NetworkSession.match_generation)
 
 
 func _on_boss_hp_changed(current_hp: float, max_hp: float, is_phase_two: bool) -> void:
@@ -339,6 +454,15 @@ func _on_boss_hp_changed(current_hp: float, max_hp: float, is_phase_two: bool) -
 		return
 
 	boss_hp_bar.value = current_hp
+	if NetworkSession.is_online_host():
+		_sync_boss_hp.rpc(current_hp, max_hp, is_phase_two, NetworkSession.match_generation)
+
+
+@rpc("authority", "call_remote", "reliable")
+func _sync_boss_hp(current_hp: float, max_hp: float, is_phase_two: bool, generation: int) -> void:
+	if not NetworkSession.is_joining_peer() or generation != NetworkSession.match_generation:
+		return
+	_on_boss_hp_changed(current_hp, max_hp, is_phase_two)
 
 
 func _set_boss_bar_phase_color(is_phase_two: bool) -> void:
@@ -349,6 +473,18 @@ func _set_boss_bar_phase_color(is_phase_two: bool) -> void:
 
 
 func _on_boss_phase_two_transition_started() -> void:
+	if not NetworkSession.has_simulation_authority():
+		return
+	if NetworkSession.is_online_host():
+		_show_phase_two_transition.rpc(NetworkSession.match_generation)
+	else:
+		_show_phase_two_transition(NetworkSession.match_generation)
+
+
+@rpc("authority", "call_local", "reliable")
+func _show_phase_two_transition(generation: int) -> void:
+	if NetworkSession.is_online() and generation != NetworkSession.match_generation:
+		return
 	if phase_transition_running:
 		return
 
@@ -380,13 +516,25 @@ func _on_boss_phase_two_transition_started() -> void:
 	await fade_out.finished
 
 	pending_phase_two_refill = true
-	SignalBus.emit_signal("boss_activate_phase_two")
+	if NetworkSession.has_simulation_authority():
+		SignalBus.emit_signal("boss_activate_phase_two")
 
 	phase_overlay.visible = false
 	phase_transition_running = false
 
 
 func _on_boss_defeated() -> void:
+	if NetworkSession.is_online_host():
+		_show_victory.rpc(NetworkSession.match_generation)
+	else:
+		_show_victory(NetworkSession.match_generation)
+
+
+@rpc("authority", "call_local", "reliable")
+func _show_victory(generation: int) -> void:
+	if NetworkSession.is_online() and generation != NetworkSession.match_generation:
+		return
+	NetworkSession.match_phase = NetworkSession.MatchPhase.VICTORY
 	boss_hp_container.visible = false
 	wave_label.hide()
 	is_manual_paused = false
@@ -395,6 +543,9 @@ func _on_boss_defeated() -> void:
 	victory_overlay.visible = true
 	_position_victory_candle()
 	victory_candle.play("walking")
+	restart_button.visible = not NetworkSession.is_joining_peer()
+	main_menu_button.visible = true
+	main_menu_button.text = "DISCONNECT" if NetworkSession.is_joining_peer() else "MAIN MENU"
 	get_tree().paused = true
 
 
@@ -431,21 +582,39 @@ func update_effect_ui() -> void:
 	update_one_effect_ui(p2, p2_effect_label, p2_effect_icon)
 
 
-func _on_game_over(_reason: String):
+func _on_game_over(reason: String):
+	if not NetworkSession.has_simulation_authority():
+		return
+	if NetworkSession.is_online_host():
+		_show_game_over.rpc(reason, NetworkSession.match_generation)
+	else:
+		_show_game_over(reason, NetworkSession.match_generation)
+
+
+@rpc("authority", "call_local", "reliable")
+func _show_game_over(reason: String, generation: int) -> void:
+	if NetworkSession.is_online() and generation != NetworkSession.match_generation:
+		return
+	NetworkSession.match_phase = NetworkSession.MatchPhase.GAME_OVER
 	# 1. Clean up any existing manual pause state so it doesn't interfere
 	is_manual_paused = false
 	_hide_pause_menu() 
 	
 	# 2. Display the Game Over UI
 	wave_label.hide()
-	gameover_label.text = "GAME OVER\n" + _reason
+	gameover_label.text = "GAME OVER\n" + reason
 	gameover_label.show()
-	
-	restart_button.show()
-	
+
+	restart_button.visible = not NetworkSession.is_joining_peer()
+	main_menu_button.visible = true
+	main_menu_button.text = "DISCONNECT" if NetworkSession.is_joining_peer() else "MAIN MENU"
+
 	# 3. Pause the game engine 
 	get_tree().paused = true
 
 
 func _on_resume_button_pressed():
-	_hide_pause_menu()
+	if NetworkSession.is_joining_peer():
+		_hide_joining_peer_menu()
+	else:
+		_request_host_pause(false)

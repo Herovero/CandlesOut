@@ -30,6 +30,10 @@ func _ready() -> void:
 	hp = max_hp
 	if sprite:
 		base_sprite_modulate = sprite.modulate
+	NetworkSession.configure_synchronizer(self, [&"position", &"velocity", &"hp", &"is_dying"])
+	if not NetworkSession.has_simulation_authority() and hitbox:
+		hitbox.set_deferred("monitoring", false)
+		hitbox.set_deferred("monitorable", false)
 
 
 @abstract func get_enemy_id() -> String
@@ -103,7 +107,7 @@ func play_hurt_tint() -> void:
 
 
 func take_damage(amount: float) -> void:
-	if is_dying:
+	if not NetworkSession.has_simulation_authority() or is_dying:
 		return
 	hp = clamp(hp - amount, 0.0, max_hp)
 	if hp <= 0.0:
@@ -114,6 +118,8 @@ func take_damage(amount: float) -> void:
 
 
 func die() -> void:
+	if not NetworkSession.has_simulation_authority():
+		return
 	is_dying = true
 	if sprite:
 		sprite.play("death")

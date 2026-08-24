@@ -1,6 +1,7 @@
 [gd_scene format=4 uid="uid://b4jda3svu4fmh"]
 
 [ext_resource type="PackedScene" uid="uid://c4sy607bwof83" path="res://Scenes/Player/player.tscn" id="1_jjgbg"]
+[ext_resource type="PackedScene" uid="uid://co8ys1q0spb7f" path="res://Scenes/Player/player_ghost.tscn" id="1_ghost"]
 [ext_resource type="Script" uid="uid://bmd6hkjls56de" path="res://Scripts/main.gd" id="1_ynf5e"]
 [ext_resource type="PackedScene" uid="uid://cqbq35ef7qsmd" path="res://Scenes/Items/heart.tscn" id="2_8gbba"]
 [ext_resource type="PackedScene" uid="uid://ct8trhua4tgaq" path="res://Scenes/Spawners/Spawner.tscn" id="5_21xkr"]
@@ -252,9 +253,19 @@ metadata/_edit_use_anchors_ = true
 z_index = 5
 position = Vector2(80, 0)
 input_prefix = "p2_"
+player_slot = 2
 
 [node name="StaminaBar" parent="Player2/Stats" parent_id_path=PackedInt32Array(771985895, 1450506992) index="0" unique_id=61292380]
 metadata/_edit_use_anchors_ = true
+
+[node name="Ghosts" type="Node2D" parent="."]
+
+[node name="PlayerGhost1" parent="Ghosts" instance=ExtResource("1_ghost")]
+player_slot = 1
+
+[node name="PlayerGhost2" parent="Ghosts" instance=ExtResource("1_ghost")]
+input_prefix = "p2_"
+player_slot = 2
 
 [node name="Camera2D" type="Camera2D" parent="." unique_id=1658536604]
 
@@ -317,7 +328,7 @@ offset_left = 1069.0
 offset_top = 21.0
 offset_right = 2440.0
 offset_bottom = 58.999996
-my_player_id = "p2_"
+player_slot = 2
 
 [node name="EffectIcon" type="TextureRect" parent="HUDs/Player2" unique_id=935725333]
 custom_minimum_size = Vector2(28, 28)
@@ -447,6 +458,11 @@ position = Vector2(-144, -23)
 scale = Vector2(3, 3)
 tile_map_data = PackedByteArray("AAD3//v/AAAEAAYAAAD9//r/AAAEAAcAAAAJAPr/AAAEAAcAAAANAPr/AAAFAAcAAAAEAPr/AAAJAAUAAAD3/wYAAAAEAAYAAAAOAPv/AAAFAAYAAAABAPr/AAAEAAYAAAABAAgAAAAEAAYAAAA=")
 tile_set = SubResource("TileSet_6bp64")
+
+[node name="ReplicatedEntities" type="Node2D" parent="."]
+
+[node name="MultiplayerSpawner" type="MultiplayerSpawner" parent="."]
+spawn_path = NodePath("../ReplicatedEntities")
 
 [node name="Spawners" type="Node" parent="." unique_id=1638346625]
 

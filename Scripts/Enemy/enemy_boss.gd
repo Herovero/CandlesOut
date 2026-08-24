@@ -98,6 +98,10 @@ func apply_stats(stats: Dictionary) -> void:
 
 func _ready() -> void:
 	super()
+	NetworkSession.configure_synchronizer(self, [
+		&"is_phase_two", &"is_phase_transitioning", &"state", &"state_time_left",
+		&"facing_dir", &"is_charging", &"aoe_tint_visible",
+	])
 	update_aoe_sprite_scale()
 	aoe_sprite.visible = false
 	enter_idle()
@@ -112,6 +116,8 @@ func _ready() -> void:
 	SignalBus.emit_signal("boss_hp_changed", hp, get_current_phase_max_hp(), is_phase_two)
 
 func _physics_process(delta: float) -> void:
+	if not NetworkSession.has_simulation_authority():
+		return
 	if aoe_sprite.visible:
 		aoe_sprite.rotation += 3 * delta
 	cone_sprite.flip_h = velocity.x < 0
@@ -259,15 +265,15 @@ func fire_radial_burst() -> void:
 
 
 func spawn_projectile(dir: Vector2, dmg: float) -> void:
-	var projectile = projectile_scene.instantiate()
-	projectile.global_position = global_position + (dir * 32.0)
-	projectile.direction = dir
-	projectile.speed = projectile_speed
-	projectile.damage = dmg
-	projectile.lifetime = 99.0
-	projectile.owner_group = "Enemies"
-	projectile.target_group = "Players"
-	get_tree().current_scene.add_child(projectile)
+	NetworkSession.spawn_replicated(projectile_scene, {
+		"global_position": global_position + (dir * 32.0),
+		"direction": dir,
+		"speed": projectile_speed,
+		"damage": dmg,
+		"lifetime": 99.0,
+		"owner_group": "Enemies",
+		"target_group": "Players",
+	})
 
 
 func do_cone_attack() -> void:
@@ -381,7 +387,7 @@ func play_hurt_tint() -> void:
 
 
 func take_damage(amount: float) -> void:
-	if is_phase_two or is_phase_transitioning:
+	if not NetworkSession.has_simulation_authority() or is_phase_two or is_phase_transitioning:
 		return
 
 	hp = clamp(hp - amount, 0.0, max_hp)
@@ -395,7 +401,7 @@ func take_damage(amount: float) -> void:
 	play_hurt_tint()
 
 func take_bomb_damage(amount: float = 1.0) -> void:
-	if is_phase_transitioning:
+	if not NetworkSession.has_simulation_authority() or is_phase_transitioning:
 		return
 
 	var phase_max_hp = get_current_phase_max_hp()

@@ -25,13 +25,20 @@ func _ready() -> void:
 	$LifetimeTimer.wait_time = lifetime
 	$LifetimeTimer.start()
 	rotation = direction.angle()
+	NetworkSession.configure_synchronizer(self, [&"position", &"rotation"])
+	if not NetworkSession.has_simulation_authority():
+		set_deferred("monitoring", false)
+		set_deferred("monitorable", false)
 
 
 func _physics_process(delta: float) -> void:
-	global_position += direction * speed * delta
+	if NetworkSession.has_simulation_authority():
+		global_position += direction * speed * delta
 
 
 func _on_body_entered(body: Node) -> void:
+	if not NetworkSession.has_simulation_authority():
+		return
 	if owner_group != "" and body.is_in_group(owner_group):
 		return
 
@@ -45,7 +52,7 @@ func _on_body_entered(body: Node) -> void:
 			queue_free()
 			return
 		else:
-			SignalBus.emit_signal("take_damage", damage, body.input_prefix)
+			body.apply_damage(damage)
 	elif body.is_in_group("Enemies") and body.has_method("take_damage"):
 		body.take_damage(damage)
 
@@ -53,4 +60,5 @@ func _on_body_entered(body: Node) -> void:
 
 
 func _on_lifetime_timer_timeout() -> void:
-	queue_free()
+	if NetworkSession.has_simulation_authority():
+		queue_free()

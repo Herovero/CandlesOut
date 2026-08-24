@@ -9,6 +9,8 @@ extends Node2D
 var wave_ref = null
 # Called when the node enters the scene tree for the first time.
 func _ready() -> void:
+	if not NetworkSession.has_simulation_authority():
+		return
 	add_to_group("spawner")
 	Global.spawners.append(self)
 	pass # Replace with function body.
@@ -44,12 +46,15 @@ func spawn_n(count: int, enemy_toSpawn):
 		spawn_one(enemy_toSpawn)
 
 func spawn_one(enemy_toSpawn):
-	var ene = enemy_toSpawn.instantiate()
-	ene.position = get_random_spawn_position()
-	get_tree().current_scene.add_child(ene)
+	if not NetworkSession.has_simulation_authority():
+		return
+	var ene := NetworkSession.spawn_replicated(enemy_toSpawn, {"global_position": get_random_spawn_position()})
+	if ene == null:
+		return
 	# tell wave manager when this enemy dies
 	var wm = Global.wave
-	ene.tree_exited.connect(wm.on_enemy_died)
+	if wm:
+		ene.tree_exited.connect(wm.on_enemy_died)
 
 func _exit_tree() -> void:
 	Global.spawners.erase(self)

@@ -17,6 +17,7 @@ var stalk_timer: float = 0.0
 
 func _ready():
 	super()
+	NetworkSession.configure_synchronizer(self, [&"is_stalking", &"is_exploding", &"stalk_timer"])
 	custom_throw_distance = 450.0
 	
 func _finish_throw(ghost):
@@ -56,12 +57,14 @@ func explode():
 				target.take_damage(10.0)
 		elif target.is_in_group("Players") and is_stalking:
 			is_exploding = true
-			SignalBus.emit_signal("take_damage", 1.0, target.input_prefix)
+			target.apply_damage(1.0)
 	
 	await anim_sprite.animation_finished
 	queue_free()
 
 func start_stalking():
+	item_state = ItemState.THROWN
+	is_thrown = true
 	is_stalking = true
 	stalk_timer = 0.0 # Reset timer
 	
@@ -81,6 +84,8 @@ func start_stalking():
 	right_wing.play("default")
 
 func _physics_process(delta):
+	if not NetworkSession.has_simulation_authority():
+		return
 	if is_stalking:
 		stalk_timer += delta
 		if not was_stalking:

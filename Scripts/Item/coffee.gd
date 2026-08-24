@@ -9,16 +9,18 @@ func _ready():
 
 # We override this to change the effect from Healing to Stamina
 func _on_body_entered(body):
+	if not NetworkSession.has_simulation_authority():
+		return
 	if is_thrown and body.is_in_group("Players"):
 		# Unlock the ghost movement before the item is deleted 
 		if is_instance_valid(throwing_ghost):
 			throwing_ghost.is_picking = false
 				
-		var p_id = body.input_prefix
+		var target_slot: int = body.player_slot
 		
 		# Instead of 'take_damage', we emit a stamina restoration signal
 		# Make sure your SignalBus and Player script are set up to receive this
-		SignalBus.emit_signal("restore_stamina", stamina_restore_amount, p_id)
+		SignalBus.emit_signal("restore_stamina", stamina_restore_amount, target_slot)
 		
 		# Item is consumed
 		play_coffee_sfx()

@@ -1,12 +1,19 @@
 extends CharacterBody2D
 
 @export var input_prefix: String = "p1_"
+@export_range(1, 2) var player_slot: int = 1
+var controlling_peer_id: int = 1
 @export var speed: float = 400.0 # Maybe ghosts move faster?
 @export var throw_distance: float = 250.0
 
 @onready var interaction_area: Area2D = $InteractionArea
 @onready var anim := $AnimatedSprite2D
 
+var active: bool = false:
+	set(value):
+		active = value
+		if is_node_ready():
+			_apply_active_state()
 var is_picking: bool = false
 var held_item: Node2D = null
 var current_dir: Vector2 = Vector2.ZERO # Store the latest movement
@@ -14,8 +21,15 @@ var current_dir: Vector2 = Vector2.ZERO # Store the latest movement
 func _ready():
 	anim.sprite_frames.set_animation_speed("default", 10)
 	anim.play()
+	NetworkSession.configure_synchronizer(self, [&"position", &"velocity", &"active"])
+	_apply_active_state()
+	if not NetworkSession.has_simulation_authority():
+		interaction_area.set_deferred("monitoring", false)
+		interaction_area.set_deferred("monitorable", false)
 
 func _physics_process(_delta: float) -> void:
+	if not active or not NetworkSession.has_simulation_authority():
+		return
 	if velocity.x != 0:
 		anim.flip_h = velocity.x > 0
 	if is_picking:
@@ -23,16 +37,26 @@ func _physics_process(_delta: float) -> void:
 		move_and_slide()
 		return
 
-	var direction = Input.get_vector(
-		input_prefix + "move_left", input_prefix + "move_right",
-		input_prefix + "move_up", input_prefix + "move_down"
-	)
+	var direction := Vector2.ZERO
+	if NetworkSession.is_online():
+		var owner_player := _get_owner_player()
+		if owner_player:
+			direction = owner_player.command_direction
+	else:
+		direction = Input.get_vector(
+			input_prefix + "move_left", input_prefix + "move_right",
+			input_prefix + "move_up", input_prefix + "move_down"
+		)
 	
 	current_dir = direction # Update aim direction
 	velocity = direction * speed
 	move_and_slide()
 
 func _input(event):
+	if not active or not NetworkSession.has_simulation_authority():
+		return
+	if NetworkSession.is_online() and controlling_peer_id != NetworkSession.HOST_PEER_ID:
+		return
 	if is_picking: 
 		return
 		
@@ -47,7 +71,26 @@ func _input(event):
 			else:
 				drop_item()
 
+func _apply_active_state() -> void:
+	visible = active
+	$CollisionShape2D.set_deferred("disabled", not active)
+	$InteractionArea/CollisionShape2D.set_deferred("disabled", not active)
+	if not active:
+		velocity = Vector2.ZERO
+		is_picking = false
+		held_item = null
+
+
+func _get_owner_player() -> Node:
+	for player in get_tree().get_nodes_in_group("Players"):
+		if int(player.get("player_slot")) == player_slot:
+			return player
+	return null
+
+
 func attempt_pickup():
+	if not NetworkSession.has_simulation_authority():
+		return
 	var overlapping_areas = interaction_area.get_overlapping_areas()
 	for area in overlapping_areas:
 		# Check if the area is a spiritual item

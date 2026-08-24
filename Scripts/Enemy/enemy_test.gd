@@ -48,6 +48,8 @@ func _ready() -> void:
 
 
 func _physics_process(delta: float) -> void:
+	if not NetworkSession.has_simulation_authority():
+		return
 	if is_dying:
 		return
 
@@ -134,7 +136,7 @@ func play_hurt_tint() -> void:
 
 
 func take_damage(amount: float) -> void:
-	if is_dying:
+	if not NetworkSession.has_simulation_authority() or is_dying:
 		return
 	hp = clamp(hp - amount, 0.0, max_hp)
 	if hp <= 0.0:
@@ -181,7 +183,7 @@ func perform_cone_attack() -> void:
 		if p.has_method("receive_hit"):
 			p.receive_hit(damage_amount, dir_to_player * 240, true)
 		elif not (p.has_method("is_damage_blocked") and p.is_damage_blocked()):
-			SignalBus.emit_signal("take_damage", damage_amount, p.input_prefix)
+			p.apply_damage(damage_amount)
 
 
 func _on_hitbox_body_entered(_body):

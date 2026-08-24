@@ -1,36 +1,36 @@
 extends Node
 
 @warning_ignore("unused_signal")
-signal take_damage(amount: float, player_id: String)
+signal take_damage(amount: float, player_slot: int)
 
 @warning_ignore("unused_signal")
 signal game_over(reason: String)
 
 # item effects
 @warning_ignore("unused_signal")
-signal restore_stamina(amount: float, player_id: String)
+signal restore_stamina(amount: float, player_slot: int)
 @warning_ignore("unused_signal")
-signal apply_speed_boost(speed_multiplier: float, duration: float, player_id: String)
+signal apply_speed_boost(speed_multiplier: float, duration: float, player_slot: int)
 @warning_ignore("unused_signal")
-signal apply_triple_shot(duration: float, player_id: String)
+signal apply_triple_shot(duration: float, player_slot: int)
 @warning_ignore("unused_signal")
 signal swap_player()
 @warning_ignore("unused_signal")
-signal apply_shield_boost(duration: float, player_id: String)
+signal apply_shield_boost(duration: float, player_slot: int)
 
 # item effects (losing control)
 @warning_ignore("unused_signal")
-signal apply_flamethrower_backfire(duration: float, player_id: String)
+signal apply_flamethrower_backfire(duration: float, player_slot: int)
 @warning_ignore("unused_signal")
-signal apply_speed_backfire(multiplier: float, duration: float, player_id: String)
+signal apply_speed_backfire(multiplier: float, duration: float, player_slot: int)
 @warning_ignore("unused_signal")
-signal apply_shield_backfire(duration: float, player_id: String)
+signal apply_shield_backfire(duration: float, player_slot: int)
 
 # ghost mode
 @warning_ignore("unused_signal")
-signal ghost_mode_started
+signal ghost_mode_started(player_slot: int)
 @warning_ignore("unused_signal")
-signal ghost_mode_ended
+signal ghost_mode_ended(player_slot: int)
 
 # boss UI / phase flow
 @warning_ignore("unused_signal")

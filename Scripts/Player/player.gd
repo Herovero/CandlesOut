@@ -1,6 +1,8 @@
 extends CharacterBody2D
 
 @export var input_prefix: String = "p1_"
+@export_range(1, 2) var player_slot: int = 1
+var controlling_peer_id: int = 1
 @export var walk_speed: float = 70.0
 var is_sprinting: bool = false
 var speed: float = 200.0
@@ -35,6 +37,8 @@ const SHIELD_CHAOS_LABEL := "Social Distancing"
 const OIL_EFFECT_LABEL := "Triple Shot"
 const OIL_CHAOS_LABEL := "Minigun"
 
+@export var max_health: float = 5.0
+var health: float = 5.0
 @export var max_stamina: float = 100.0
 var current_stamina: float = 100.0
 @export var depletion_rate: float = 10.0
@@ -44,7 +48,6 @@ var regen_accumulator: float = 0.0
 
 var is_sleeping: bool = false
 var is_returning: bool = false
-var ghost_scene = preload("res://Scenes/Player/player_ghost.tscn")
 var active_ghost: CharacterBody2D = null
 var is_transitioning_to_ghost: bool = false
 
@@ -66,8 +69,8 @@ var is_prison_active: bool = false
 var active_effect_name: String = ""
 var active_effect_time_left: float = 0.0
 var active_effect_icon: Texture2D = null
-var speed_boost_token: int = 0
 var active_effect_token: int = 0
+var default_shoot_interval: float = 1.0
 
 @onready var stamina_bar = $Stats/StaminaBar
 @onready var sprite: AnimatedSprite2D = $Asset/AnimatedSprite2D
@@ -81,6 +84,15 @@ var active_effect_token: int = 0
 var footstep_timer: float = 0.0
 var glow_time: float = 0.0
 
+const INPUT_SEND_INTERVAL := 1.0 / 30.0
+const INPUT_STALE_MSEC := 500
+var command_direction: Vector2 = Vector2.ZERO
+var command_sprinting: bool = false
+var remote_direction: Vector2 = Vector2.ZERO
+var remote_sprinting: bool = false
+var last_remote_input_msec: int = 0
+var input_send_accumulator: float = 0.0
+
 @onready var candle_light: Sprite2D = $Asset/CandleLight
 
 func _ready():
@@ -88,7 +100,7 @@ func _ready():
 	stamina_bar.max_value = max_stamina
 	stamina_bar.value = max_stamina
 	sprite.sprite_frames.set_animation_speed("idle", 4)
-	sprite.sprite_frames.set_animation_speed("sleep", 2)
+	sprite.sprite_frames.set_animation_speed("sleeping", 2)
 	sprite.sprite_frames.set_animation_speed("walking", 8)
 	transition.sprite_frames.set_animation_speed("default", 12)
 	sprite.play("idle")
@@ -99,6 +111,7 @@ func _ready():
 
 	shield_visual.hide()
 	prison_visual.hide()
+	default_shoot_interval = shoot_interval
 
 	# item effects signal
 	SignalBus.connect("restore_stamina", _on_restore_stamina)
@@ -120,19 +133,32 @@ func _ready():
 	if candle_light:
 		candle_light.modulate.a = glow_base_energy
 
+	NetworkSession.configure_synchronizer(self, [
+		&"position", &"velocity", &"health", &"current_stamina", &"is_sleeping",
+		&"is_returning", &"is_invincible", &"is_hit_stunned", &"active_effect_name",
+		&"active_effect_time_left", &"last_move_dir", &"is_triple_shot_active",
+		&"is_panicked_fire_active", &"is_ramming_active", &"is_shield_active", &"is_prison_active",
+	])
+	NetworkSession.local_focus_changed.connect(_on_local_focus_changed)
+
 
 func _physics_process(delta: float) -> void:
-	
 	update_ui()
+
+	if NetworkSession.is_online() and not NetworkSession.has_simulation_authority():
+		_process_joining_peer_input(delta)
+		_update_remote_presentation()
+		return
+
 	update_effect_state(delta)
-	
+	var command := _get_authoritative_command()
+	apply_command(command, delta)
+
 	if is_prison_active:
 		speed = 0.0
 	else:
-		is_sprinting = Input.is_action_pressed(input_prefix + "sprint") and current_stamina > 0
-		if speed > sprint_speed:
-			speed = speed
-		else:
+		is_sprinting = command_sprinting and current_stamina > 0.0
+		if speed <= sprint_speed:
 			speed = sprint_speed if is_sprinting else walk_speed
 		
 	update_candle_glow(delta)
@@ -141,15 +167,10 @@ func _physics_process(delta: float) -> void:
 		handle_sleep(delta)
 		return
 
-	var direction = Vector2.ZERO
+	var direction := Vector2.ZERO
 	if not is_hit_stunned:
-		direction = Input.get_vector(
-			input_prefix + "move_left",
-			input_prefix + "move_right",
-			input_prefix + "move_up",
-			input_prefix + "move_down"
-		)
-		is_sprinting = Input.is_action_pressed(input_prefix + "sprint") and current_stamina > 0
+		direction = command_direction
+		is_sprinting = command_sprinting and current_stamina > 0.0
 	else:
 		is_sprinting = false
 
@@ -198,14 +219,123 @@ func _physics_process(delta: float) -> void:
 	audio.handle_footsteps(delta, direction)
 
 
+func sample_local_input(use_online_actions: bool = false) -> Dictionary:
+	if not NetworkSession.local_has_focus or NetworkSession.local_input_suppressed:
+		return {"direction": Vector2.ZERO, "sprinting": false}
+	var prefix := "" if use_online_actions else input_prefix
+	return {
+		"direction": Input.get_vector(
+			prefix + "move_left", prefix + "move_right",
+			prefix + "move_up", prefix + "move_down"
+		).limit_length(1.0),
+		"sprinting": Input.is_action_pressed(prefix + "sprint"),
+	}
+
+
+func apply_command(command: Dictionary, _delta: float) -> void:
+	command_direction = (command.get("direction", Vector2.ZERO) as Vector2).limit_length(1.0)
+	command_sprinting = bool(command.get("sprinting", false)) and current_stamina > 0.0 and not is_prison_active
+
+
+func _get_authoritative_command() -> Dictionary:
+	if not NetworkSession.is_online():
+		return sample_local_input(false)
+	if controlling_peer_id == NetworkSession.HOST_PEER_ID:
+		return sample_local_input(true)
+	if Time.get_ticks_msec() - last_remote_input_msec > INPUT_STALE_MSEC:
+		return {"direction": Vector2.ZERO, "sprinting": false}
+	return {"direction": remote_direction, "sprinting": remote_sprinting}
+
+
+func _input(event: InputEvent) -> void:
+	if not NetworkSession.is_joining_peer() or player_slot != NetworkSession.get_local_player_slot():
+		return
+	if event.is_action_pressed("interact") and not event.is_echo():
+		var command := sample_local_input(true)
+		submit_interact.rpc_id(
+			NetworkSession.HOST_PEER_ID,
+			NetworkSession.match_generation,
+			command["direction"]
+		)
+
+
+func _process_joining_peer_input(delta: float) -> void:
+	if player_slot != NetworkSession.get_local_player_slot() or NetworkSession.session_state != NetworkSession.SessionState.IN_MATCH:
+		return
+	input_send_accumulator += delta
+	if input_send_accumulator < INPUT_SEND_INTERVAL:
+		return
+	input_send_accumulator = fmod(input_send_accumulator, INPUT_SEND_INTERVAL)
+	var command := sample_local_input(true)
+	submit_input.rpc_id(
+		NetworkSession.HOST_PEER_ID,
+		NetworkSession.match_generation,
+		command["direction"],
+		command["sprinting"]
+	)
+
+
+@rpc("any_peer", "call_remote", "unreliable_ordered", 1)
+func submit_input(generation: int, direction: Vector2, sprinting: bool) -> void:
+	if not multiplayer.is_server() or generation != NetworkSession.match_generation:
+		return
+	var sender := multiplayer.get_remote_sender_id()
+	if sender != controlling_peer_id or player_slot != 2:
+		return
+	remote_direction = direction.limit_length(1.0)
+	remote_sprinting = sprinting
+	last_remote_input_msec = Time.get_ticks_msec()
+
+
+@rpc("any_peer", "call_remote", "reliable")
+func submit_interact(generation: int, direction: Vector2) -> void:
+	if not multiplayer.is_server() or generation != NetworkSession.match_generation:
+		return
+	var sender := multiplayer.get_remote_sender_id()
+	if sender != controlling_peer_id or player_slot != 2 or not is_sleeping:
+		return
+	if not is_instance_valid(active_ghost) or active_ghost.is_picking:
+		return
+	if active_ghost.held_item == null:
+		active_ghost.attempt_pickup()
+	elif direction.length_squared() > 0.01:
+		active_ghost.throw_item(direction.limit_length(1.0))
+	else:
+		active_ghost.drop_item()
+
+
+func _on_local_focus_changed(has_focus: bool) -> void:
+	if has_focus or not NetworkSession.is_joining_peer() or player_slot != NetworkSession.get_local_player_slot():
+		return
+	submit_input.rpc_id(NetworkSession.HOST_PEER_ID, NetworkSession.match_generation, Vector2.ZERO, false)
+
+
+func _update_remote_presentation() -> void:
+	shield_visual.visible = is_shield_active
+	prison_visual.visible = is_prison_active
+	active_effect_icon = SHOE_ICON if active_effect_name in [SHOE_EFFECT_LABEL, SHOE_CHAOS_LABEL] else null
+	if is_panicked_fire_active:
+		modulate = Color(1.0, 0.5, 0.5)
+	elif is_ramming_active:
+		modulate = Color(1.5, 1.5, 0.5, 0.8)
+	elif not is_sleeping:
+		modulate = Color.WHITE
+	if is_sleeping:
+		sprite.play("sleeping")
+	elif velocity.length_squared() > 1.0:
+		sprite.play("walking")
+	else:
+		sprite.play("idle")
+
+
 func consume_stamina(delta):
 	current_stamina -= depletion_rate * delta
 
 	if current_stamina <= 0:
 		enter_sleep()
 
-func _on_restore_stamina(amount: float, target_id: String):
-	if target_id == input_prefix:
+func _on_restore_stamina(amount: float, target_slot: int):
+	if target_slot == player_slot and NetworkSession.has_simulation_authority():
 		current_stamina += amount
 		# Prevent stamina from exceeding the maximum limit
 		current_stamina = min(current_stamina, max_stamina)
@@ -220,14 +350,17 @@ func enter_sleep():
 	# modulate = Color(0.5, 0.5, 1.0) # Turn slightly blue/dark to show sleeping
 
 	audio.play_sleep_sfx()
-	active_ghost = ghost_scene.instantiate()
-	active_ghost.input_prefix = input_prefix # Give the ghost your controls
-	active_ghost.global_position = global_position # Start at player's body
-
+	active_ghost = get_parent().get_node_or_null("Ghosts/PlayerGhost%d" % player_slot) as CharacterBody2D
+	if active_ghost == null:
+		is_transitioning_to_ghost = false
+		return
+	active_ghost.input_prefix = input_prefix
+	active_ghost.player_slot = player_slot
+	active_ghost.controlling_peer_id = controlling_peer_id
+	active_ghost.global_position = global_position
+	active_ghost.active = true
 	active_ghost.modulate.a = 0.0 # Start invisible
 	var end_pos = global_position + Vector2(0, -60) # Float up slightly
-
-	get_parent().call_deferred("add_child", active_ghost)
 
 	await get_tree().process_frame
 
@@ -240,7 +373,7 @@ func enter_sleep():
 	await tween.finished
 	is_transitioning_to_ghost = false
 
-	SignalBus.emit_signal("ghost_mode_started")
+	SignalBus.emit_signal("ghost_mode_started", player_slot)
 
 
 func handle_sleep(delta):
@@ -251,7 +384,7 @@ func handle_sleep(delta):
 	regen_accumulator += health_regen_rate * delta
 	if regen_accumulator >= 0.5: # Heal in half-heart increments
 		# Sending negative damage to the SignalBus restores health
-		SignalBus.emit_signal("take_damage", -0.5, input_prefix)
+		apply_damage(-0.5)
 		regen_accumulator = 0.0
 
 	if current_stamina >= max_stamina and not is_returning:
@@ -280,9 +413,9 @@ func trigger_ghost_return():
 
 			await tween.finished
 
-			# Second check before cleanup
+			# Persistent Ghosts keep stable scene paths for replication.
 			if is_instance_valid(active_ghost):
-				active_ghost.queue_free()
+				active_ghost.active = false
 				active_ghost = null
 
 	is_returning = false
@@ -293,13 +426,15 @@ func wake_up():
 	modulate = Color(1, 1, 1)
 	sprite.play("idle")
 
-	SignalBus.emit_signal("ghost_mode_ended")
+	SignalBus.emit_signal("ghost_mode_ended", player_slot)
 
 func _on_swap_player():
 	if is_sleeping:
 		# 1. Force the ghost to disappear immediately on swap
 		if is_instance_valid(active_ghost):
-			active_ghost.queue_free()
+			if active_ghost.held_item != null:
+				active_ghost.drop_item()
+			active_ghost.active = false
 			active_ghost = null
 
 		# 2. Reset the transition flag just in case it was mid-entrance
@@ -353,12 +488,22 @@ func start_hit_stun() -> void:
 	hit_stun_timer.start()
 
 
+func apply_damage(amount: float) -> void:
+	if not NetworkSession.has_simulation_authority():
+		return
+	health = clampf(health - amount, 0.0, max_health)
+	if health <= 0.0:
+		SignalBus.emit_signal("game_over", "Player %d died!" % player_slot)
+
+
 func receive_hit(damage_amount: float, knockback_force: Vector2 = Vector2.ZERO, apply_stun: bool = false) -> void:
+	if not NetworkSession.has_simulation_authority():
+		return
 	if is_damage_blocked():
 		audio.play_block_sfx()
 		return
 
-	SignalBus.emit_signal("take_damage", damage_amount, input_prefix)
+	apply_damage(damage_amount)
 	start_invincibility_flash()
 
 	if knockback_force != Vector2.ZERO:
@@ -416,29 +561,29 @@ func shoot_projectile(target: Node2D = null) -> void:
 		shot_angles = [-0.52, 0.0, 0.52] # -30, 0, +30 degrees
 
 	for angle in shot_angles:
-		var projectile = projectile_scene.instantiate()
 		var final_dir = base_dir.rotated(angle)
-
-		projectile.global_position = global_position + (final_dir * muzzle_offset)
-		projectile.direction = final_dir
-		projectile.speed = projectile_speed
-		projectile.damage = projectile_damage
-		projectile.owner_group = "Players"
-		projectile.target_group = "Enemies"
-		get_tree().current_scene.add_child(projectile)
-
+		NetworkSession.spawn_replicated(projectile_scene, {
+			"global_position": global_position + (final_dir * muzzle_offset),
+			"direction": final_dir,
+			"speed": projectile_speed,
+			"damage": projectile_damage,
+			"owner_group": "Players",
+			"target_group": "Enemies",
+		})
 		audio.play_shoot_sfx()
 
-func _on_triple_shot_received(duration: float, p_id: String):
-	if p_id == input_prefix:
+func _on_triple_shot_received(duration: float, target_slot: int):
+	if target_slot == player_slot and NetworkSession.has_simulation_authority():
 		is_triple_shot_active = true
 		var effect_token := begin_timed_effect(OIL_EFFECT_LABEL, duration)
 		await get_tree().create_timer(duration).timeout
+		if effect_token != active_effect_token:
+			return
 		is_triple_shot_active = false
 		end_timed_effect(effect_token)
 
-func _on_flamethrower_received(duration: float, p_id: String):
-	if p_id == input_prefix:
+func _on_flamethrower_received(duration: float, target_slot: int):
+	if target_slot == player_slot and NetworkSession.has_simulation_authority():
 		var original_interval = shoot_interval
 		var effect_token := begin_timed_effect(OIL_CHAOS_LABEL, duration)
 
@@ -449,6 +594,8 @@ func _on_flamethrower_received(duration: float, p_id: String):
 		modulate = Color(1.0, 0.5, 0.5) # Panicked red tint
 
 		await get_tree().create_timer(duration).timeout
+		if effect_token != active_effect_token:
+			return
 
 		# Reset
 		is_panicked_fire_active = false
@@ -463,10 +610,27 @@ func set_active_effect(name: String, duration: float, icon: Texture2D = null) ->
 
 
 func begin_timed_effect(name: String, duration: float, icon: Texture2D = null) -> int:
+	_cleanup_timed_effect_modifiers()
 	active_effect_token += 1
 	var token := active_effect_token
 	set_active_effect(name, duration, icon)
 	return token
+
+
+func _cleanup_timed_effect_modifiers() -> void:
+	is_triple_shot_active = false
+	is_flamethrower_active = false
+	is_panicked_fire_active = false
+	is_ramming_active = false
+	if is_shield_active:
+		is_invincible = false
+	is_shield_active = false
+	is_prison_active = false
+	speed = base_speed
+	shoot_interval = default_shoot_interval
+	shield_visual.hide()
+	prison_visual.hide()
+	modulate = Color.WHITE
 
 
 func end_timed_effect(token: int) -> void:
@@ -491,25 +655,23 @@ func update_effect_state(delta: float) -> void:
 			clear_active_effect()
 
 
-func _on_speed_boost_received(multiplier: float, duration: float, p_id: String):
-	if p_id == input_prefix:
-		speed_boost_token += 1
-		var token := speed_boost_token
+func _on_speed_boost_received(multiplier: float, duration: float, target_slot: int):
+	if target_slot == player_slot and NetworkSession.has_simulation_authority():
 		var effect_token := begin_timed_effect(SHOE_EFFECT_LABEL, duration, SHOE_ICON)
 
 		speed = base_speed * multiplier
 
 		await get_tree().create_timer(duration).timeout
 
-		if token != speed_boost_token:
+		if effect_token != active_effect_token:
 			return
 
 		speed = base_speed
 		end_timed_effect(effect_token)
 
-func _on_speed_backfire_received(multiplier: float, duration: float, p_id: String):
-	play_tv_static(0.25)
-	if p_id == input_prefix:
+func _on_speed_backfire_received(multiplier: float, duration: float, target_slot: int):
+	if target_slot == player_slot and NetworkSession.has_simulation_authority():
+		play_tv_static(0.25)
 		var original_speed = base_speed
 		var effect_token := begin_timed_effect(SHOE_CHAOS_LABEL, duration, SHOE_ICON)
 		is_ramming_active = true
@@ -519,31 +681,35 @@ func _on_speed_backfire_received(multiplier: float, duration: float, p_id: Strin
 		modulate = Color(1.5, 1.5, 0.5, 0.8)
 
 		await get_tree().create_timer(duration).timeout
+		if effect_token != active_effect_token:
+			return
 
 		is_ramming_active = false
 		speed = base_speed
 		modulate = Color(1, 1, 1, 1)
 		end_timed_effect(effect_token)
 
-func _on_shield_boost_received(duration: float, p_id: String):
-	print_debug("shield boost")
-	if p_id == input_prefix:
+func _on_shield_boost_received(duration: float, target_slot: int):
+	if target_slot == player_slot and NetworkSession.has_simulation_authority():
+		print_debug("shield boost")
 		var effect_token := begin_timed_effect(SHIELD_EFFECT_LABEL, duration)
 		is_invincible = true
 		is_shield_active = true
 		shield_visual.show()
 
 		await get_tree().create_timer(duration).timeout
+		if effect_token != active_effect_token:
+			return
 
 		is_shield_active = false
 		is_invincible = false
 		shield_visual.hide()
 		end_timed_effect(effect_token)
 
-func _on_shield_backfire_received(duration: float, p_id: String):
-	play_tv_static(0.25)
-	print_debug("shield side effect boost")
-	if p_id == input_prefix:
+func _on_shield_backfire_received(duration: float, target_slot: int):
+	if target_slot == player_slot and NetworkSession.has_simulation_authority():
+		play_tv_static(0.25)
+		print_debug("shield side effect boost")
 		var effect_token := begin_timed_effect(SHIELD_CHAOS_LABEL, duration)
 		is_prison_active = true
 		speed = 0
@@ -552,6 +718,8 @@ func _on_shield_backfire_received(duration: float, p_id: String):
 		# Optional: Add a screen shake or visual glitch for "Losing Control"
 
 		await get_tree().create_timer(duration).timeout
+		if effect_token != active_effect_token:
+			return
 
 		is_prison_active = false
 		speed = base_speed # Restore movement [cite: 17]

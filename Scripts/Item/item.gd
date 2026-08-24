@@ -1,185 +1,176 @@
 extends Area2D
 
+enum ItemState { WORLD, HELD, THROWN }
+
+var item_state: ItemState = ItemState.WORLD
+var held_by_slot: int = 0
 var is_thrown: bool = false
+var holding_ghost: CharacterBody2D = null
 var throwing_ghost: CharacterBody2D = null
 @export var custom_throw_distance: float = 250.0
 
 @onready var heart_sfx: AudioStreamPlayer2D = get_node_or_null("HeartSFX")
+@onready var item_sprite = $Sprite2D
 
-# Visual polish
 var float_time: float = 0.0
 @export var float_speed: float = 2.0
 @export var float_amplitude: float = 4.0
-@onready var item_sprite = $Sprite2D # Or whatever your visual node is named
 
-# Called when the node enters the scene tree for the first time.
-func _ready():
+
+func _ready() -> void:
 	visible = false
 	monitorable = false
 	monitoring = false
-	
-	SignalBus.connect("ghost_mode_ended", hide_item)
+	NetworkSession.configure_synchronizer(self, [
+		&"position", &"rotation", &"visible", &"is_thrown", &"item_state", &"held_by_slot",
+	])
+	if not NetworkSession.has_simulation_authority():
+		set_deferred("monitoring", false)
+		set_deferred("monitorable", false)
 
-# Called every frame. 'delta' is the elapsed time since the previous frame.
-func _process(delta):
-	item_sprite.modulate.a = randf_range(0.4, 0.6) # Constant subtle spiritual flicker
-	# Only bob if the item is not being held or thrown
-	if not is_thrown and get_parent().name != "PlayerGhost": 
+
+func _process(delta: float) -> void:
+	item_sprite.modulate.a = randf_range(0.4, 0.6)
+	if not NetworkSession.has_simulation_authority():
+		return
+	if item_state == ItemState.HELD:
+		if not is_instance_valid(holding_ghost):
+			holding_ghost = _find_ghost_for_slot(held_by_slot)
+		if is_instance_valid(holding_ghost):
+			global_position = holding_ghost.global_position + Vector2(0, -40)
+		return
+	if item_state == ItemState.WORLD:
 		float_time += delta
-		# Use a sine wave for smooth floating logic
 		item_sprite.position.y = sin(float_time * float_speed) * float_amplitude
 
-func show_item():
+
+func show_item() -> void:
+	if not NetworkSession.has_simulation_authority():
+		return
 	modulate.a = 0.0
 	visible = true
-	
-	var tween = create_tween()
-	tween.tween_property(self, "modulate:a", 1.0, 0.5)\
-		.set_trans(Tween.TRANS_SINE)\
-		.set_ease(Tween.EASE_OUT)
-		
+	var tween := create_tween()
+	tween.tween_property(self, "modulate:a", 1.0, 0.5) \
+		.set_trans(Tween.TRANS_SINE).set_ease(Tween.EASE_OUT)
 	set_deferred("monitorable", true)
 	set_deferred("monitoring", true)
 
-func hide_item():
+
+func hide_item() -> void:
+	if not NetworkSession.has_simulation_authority() or item_state != ItemState.WORLD:
+		return
 	set_deferred("monitorable", false)
 	set_deferred("monitoring", false)
-	
-	var tween = create_tween()
-	tween.tween_property(self, "modulate:a", 0.0, 0.4)\
-		.set_trans(Tween.TRANS_SINE)\
-		.set_ease(Tween.EASE_IN)
-	
-	# Hide the node only after the animation is finished
-	tween.tween_callback(func(): visible = false)
+	var tween := create_tween()
+	tween.tween_property(self, "modulate:a", 0.0, 0.4) \
+		.set_trans(Tween.TRANS_SINE).set_ease(Tween.EASE_IN)
+	tween.tween_callback(queue_free)
 
-func on_collected(target_ghost: CharacterBody2D):
-	# Now 'target_ghost' is declared and usable!
+
+func on_collected(target_ghost: CharacterBody2D) -> void:
+	if not NetworkSession.has_simulation_authority() or item_state != ItemState.WORLD:
+		return
+	item_state = ItemState.HELD
+	held_by_slot = int(target_ghost.player_slot)
+	holding_ghost = target_ghost
+	is_thrown = false
 	monitorable = false
 	monitoring = false
-	
-	var tween = create_tween()
-	var target_pos = Vector2(0, -40) # Position above head
-	var global_target = target_ghost.global_position + target_pos
-	
-	tween.tween_property(self, "global_position", global_target, 0.3)\
-		.set_trans(Tween.TRANS_CUBIC)\
-		.set_ease(Tween.EASE_OUT)
-	
-	# Attach to ghost after flying
-	tween.tween_callback(func(): _finish_pickup(target_ghost, target_pos))
+	var target_pos := Vector2(0, -40)
+	var global_target := target_ghost.global_position + target_pos
+	var tween := create_tween()
+	tween.tween_property(self, "global_position", global_target, 0.3) \
+		.set_trans(Tween.TRANS_CUBIC).set_ease(Tween.EASE_OUT)
+	tween.tween_callback(func() -> void: _finish_pickup(target_ghost, target_pos))
 
-func _finish_pickup(ghost: CharacterBody2D, offset: Vector2):
-	_attach_to_ghost(ghost, offset)
-	
+
+func _finish_pickup(ghost: CharacterBody2D, _offset: Vector2) -> void:
 	if is_instance_valid(ghost):
 		ghost.is_picking = false
 
-func on_dropped():
-	# 1. Get the ghost (current parent) and the world (the ghost's parent)
-	var ghost = get_parent()
-	var world = ghost.get_parent()
-	
-	# 2. Record current global position before reparenting
-	var current_global_pos = global_position
-	var drop_target_pos = ghost.global_position # Drop to the ghost's center
-	
-	# 3. Move from Ghost back to World scene tree
-	ghost.remove_child(self)
-	world.add_child(self)
-	global_position = current_global_pos
-	
-	# 4. Tween downward to the ghost's middle position
-	var tween = create_tween()
-	tween.tween_property(self, "global_position", drop_target_pos, 0.3)\
-		.set_trans(Tween.TRANS_CUBIC)\
-		.set_ease(Tween.EASE_IN_OUT)
-	
-	# 5. Unlock the ghost and re-enable item detection
-	tween.tween_callback(func(): _finish_drop(ghost))
 
-func _finish_drop(ghost):
-	monitoring = true
-	monitorable = true
-	
-	if is_instance_valid(ghost) and ghost is CharacterBody2D:
-		if "is_picking" in ghost:
-			ghost.is_picking = false
-		
-func _attach_to_ghost(ghost: CharacterBody2D, offset: Vector2):
-	if is_instance_valid(ghost):
-		get_parent().remove_child(self)
-		ghost.add_child(self)
-		position = offset
-
-func on_thrown(target_global_pos: Vector2):
-	is_thrown = true # Mark as active projectile
-	monitoring = true
-	monitorable = true
-	
-	throwing_ghost = get_parent() as CharacterBody2D
-	if not throwing_ghost:
-		push_error("Item parent is not a CharacterBody2D!")
+func on_dropped() -> void:
+	if not NetworkSession.has_simulation_authority() or item_state != ItemState.HELD:
 		return
-	
-	# 1. Identify the ghost (current parent) and the world
-	var ghost = get_parent()
-	var world = ghost.get_parent()
-	
-	# 2. Record global position before changing the hierarchy
-	var current_pos = global_position
-	
-	# 3. Detach from ghost and add to world so it stays in place
-	ghost.remove_child(self)
-	world.add_child(self)
-	global_position = current_pos
-	
-	# 4. Create the throw animation
-	var tween = create_tween()
-	
-	# Move to the target calculated by ghost movement
-	tween.tween_property(self, "global_position", target_global_pos, 0.4)\
-		.set_trans(Tween.TRANS_QUAD)\
-		.set_ease(Tween.EASE_OUT)
-	
-	# Parallel rotation for visual "juice"
-	tween.parallel().tween_property(self, "rotation", rotation + PI * 2, 0.4)
-	
-	# 5. Unlock the ghost once the throw is complete
-	tween.tween_callback(func(): _finish_throw(ghost))
+	var ghost := holding_ghost
+	if not is_instance_valid(ghost):
+		ghost = _find_ghost_for_slot(held_by_slot)
+	if not is_instance_valid(ghost):
+		return
+	item_state = ItemState.WORLD
+	held_by_slot = 0
+	holding_ghost = null
+	is_thrown = false
+	var tween := create_tween()
+	tween.tween_property(self, "global_position", ghost.global_position, 0.3) \
+		.set_trans(Tween.TRANS_CUBIC).set_ease(Tween.EASE_IN_OUT)
+	tween.tween_callback(func() -> void: _finish_drop(ghost))
 
-func _finish_throw(ghost):
-	# Re-enable detection so it can be picked up again at its new location
+
+func _finish_drop(ghost: CharacterBody2D) -> void:
 	monitoring = true
 	monitorable = true
-	
-	if is_instance_valid(ghost) and ghost is CharacterBody2D:
-		if "is_picking" in ghost:
-			ghost.is_picking = false
+	if is_instance_valid(ghost):
+		ghost.is_picking = false
 
-func _on_body_entered(body):
-	# Only trigger if the item is currently flying
+
+func on_thrown(target_global_pos: Vector2) -> void:
+	if not NetworkSession.has_simulation_authority() or item_state != ItemState.HELD:
+		return
+	var ghost := holding_ghost
+	if not is_instance_valid(ghost):
+		ghost = _find_ghost_for_slot(held_by_slot)
+	if not is_instance_valid(ghost):
+		return
+	throwing_ghost = ghost
+	holding_ghost = null
+	held_by_slot = 0
+	item_state = ItemState.THROWN
+	is_thrown = true
+	monitoring = true
+	monitorable = true
+	var tween := create_tween()
+	tween.tween_property(self, "global_position", target_global_pos, 0.4) \
+		.set_trans(Tween.TRANS_QUAD).set_ease(Tween.EASE_OUT)
+	tween.parallel().tween_property(self, "rotation", rotation + PI * 2, 0.4)
+	tween.tween_callback(func() -> void: _finish_throw(ghost))
+
+
+func _finish_throw(ghost: CharacterBody2D) -> void:
+	item_state = ItemState.WORLD
+	is_thrown = false
+	throwing_ghost = null
+	monitoring = true
+	monitorable = true
+	if is_instance_valid(ghost):
+		ghost.is_picking = false
+	if Global.item_spawner and Global.item_spawner.active_ghost_slots.is_empty():
+		hide_item()
+
+
+func _find_ghost_for_slot(slot: int) -> CharacterBody2D:
+	for ghost in get_tree().get_nodes_in_group("Ghost"):
+		if int(ghost.get("player_slot")) == slot:
+			return ghost as CharacterBody2D
+	return null
+
+
+func _on_body_entered(body: Node) -> void:
+	if not NetworkSession.has_simulation_authority():
+		return
 	if is_thrown and body.is_in_group("Players"):
 		if is_instance_valid(throwing_ghost):
 			throwing_ghost.is_picking = false
-				
-		# Since your players have an 'input_prefix' 
-		var p_id = body.input_prefix
-		
-		# Trigger the heal via SignalBus [cite: 5]
-		SignalBus.emit_signal("take_damage", -3.0, p_id)
-		
-		# Item is 'consumed'
+		body.apply_damage(-3.0)
 		if heart_sfx:
 			play_heart_sfx()
 		queue_free()
-		
-func play_heart_sfx():
-	var sfx = AudioStreamPlayer2D.new()
+
+
+func play_heart_sfx() -> void:
+	var sfx := AudioStreamPlayer2D.new()
 	sfx.stream = heart_sfx.stream
 	sfx.global_position = global_position
-	
 	get_tree().current_scene.add_child(sfx)
 	sfx.play()
-	
 	sfx.finished.connect(sfx.queue_free)

@@ -11,17 +11,19 @@ func _ready():
 	custom_throw_distance = 250.0 # Shoes are aerodynamic!
 
 func _on_body_entered(body):
+	if not NetworkSession.has_simulation_authority():
+		return
 	if is_thrown and body.is_in_group("Players"):
 		if is_instance_valid(throwing_ghost):
 			throwing_ghost.set_deferred("is_picking", false)
 				
-		var p_id = body.input_prefix
+		var target_slot: int = body.player_slot
 		if randf() < 0.5:
 			play_shoes_fast_sfx()
-			SignalBus.emit_signal.call_deferred("apply_speed_backfire", speed_multiplier * 2.5, duration, p_id)
+			SignalBus.emit_signal.call_deferred("apply_speed_backfire", speed_multiplier * 2.5, duration, target_slot)
 		else:
 			play_shoes_sfx()
-			SignalBus.emit_signal.call_deferred("apply_speed_boost", speed_multiplier, duration, p_id)
+			SignalBus.emit_signal.call_deferred("apply_speed_boost", speed_multiplier, duration, target_slot)
 		
 		queue_free()
 		

@@ -1,39 +1,47 @@
 extends HBoxContainer
 
-@export var my_player_id: String = "p1_"
+@export_range(1, 2) var player_slot: int = 1
 
-var heart_full = preload("res://Assets/UIs/heart_full.png")
-var heart_half = preload("res://Assets/UIs/heart_half.png")
-var heart_empty = preload("res://Assets/UIs/heart_empty.png")
+var heart_full: Texture2D = preload("res://Assets/UIs/heart_full.png")
+var heart_half: Texture2D = preload("res://Assets/UIs/heart_half.png")
+var heart_empty: Texture2D = preload("res://Assets/UIs/heart_empty.png")
 
-var hearts_list: Array[TextureRect]
-var health: float = 5
+var hearts_list: Array[TextureRect] = []
+var observed_player: Node = null
+var _last_health: float = -1.0
+
 
 func _ready() -> void:
-	SignalBus.connect("take_damage", _on_take_damage)
-	var hearts_parent = $"."
-	for child in hearts_parent.get_children():
+	for child in get_children():
 		if child is TextureRect:
 			hearts_list.append(child)
+	_find_player()
 	update_heart_visuals()
 
-func _on_take_damage(amount: float, target_id: String):
-	if target_id == my_player_id:
-		health -= amount
-		health = clamp(health, 0, hearts_list.size()) # Prevent negative health
+
+func _process(_delta: float) -> void:
+	if not is_instance_valid(observed_player):
+		_find_player()
+	if not is_instance_valid(observed_player):
+		return
+	var current_health := float(observed_player.health)
+	if not is_equal_approx(current_health, _last_health):
+		_last_health = current_health
 		update_heart_visuals()
-		
-		if health <= 0:
-			SignalBus.emit_signal("game_over", "Player " + my_player_id + " died!")
-		
-func update_heart_visuals():
+
+
+func _find_player() -> void:
+	for player in get_tree().get_nodes_in_group("Players"):
+		if int(player.get("player_slot")) == player_slot:
+			observed_player = player
+			_last_health = float(player.get("health"))
+			return
+
+
+func update_heart_visuals() -> void:
+	var health := _last_health if _last_health >= 0.0 else 0.0
 	for i in range(hearts_list.size()):
-		var heart_node = hearts_list[i]
-		
-		# Example: if i is 4 (5th heart) and health is 4.5
-		# i < 4.5 is true for 0,1,2,3,4. 
-		# But we need to check the 'remainder' for the half heart.
-		
+		var heart_node := hearts_list[i]
 		if health >= i + 1:
 			heart_node.texture = heart_full
 		elif health >= i + 0.5:

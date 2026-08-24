@@ -1,40 +1,82 @@
 extends Control
 
 @onready var play_button: Button = $Center/PlayButton
+@onready var host_button: Button = $Center/HostButton
+@onready var join_address: LineEdit = $Center/JoinRow/Address
+@onready var join_button: Button = $Center/JoinRow/JoinButton
+@onready var lan_address_label: Label = $Center/LanAddressLabel
+@onready var start_button: Button = $Center/StartButton
+@onready var disconnect_button: Button = $Center/DisconnectButton
+@onready var status_label: Label = $Center/StatusLabel
 @onready var tutorial_button: Button = $Center/TutorialButton
 @onready var boss_button: Button = $Center/BossButton
 @onready var volume_slider: HSlider = $Center/SoundRow/VolumeSlider
 @onready var title_music: AudioStreamPlayer = $TitleMusic
 
+
 func _ready() -> void:
 	get_tree().paused = false
+	Engine.time_scale = 1.0
 	play_button.pressed.connect(_on_play_pressed)
+	host_button.pressed.connect(_on_host_pressed)
+	join_button.pressed.connect(_on_join_pressed)
+	start_button.pressed.connect(_on_start_pressed)
+	disconnect_button.pressed.connect(_on_disconnect_pressed)
 	tutorial_button.pressed.connect(_on_tutorial_pressed)
+	join_address.text_changed.connect(_on_join_address_changed)
 
-	_bind_button_feedback(play_button)
-	_bind_button_feedback(tutorial_button)
+	for button in [play_button, host_button, join_button, start_button, disconnect_button, tutorial_button, boss_button]:
+		_bind_button_feedback(button)
 
 	_setup_volume_slider_visuals()
 	volume_slider.value_changed.connect(_on_volume_changed)
+	NetworkSession.status_changed.connect(_on_network_status_changed)
+	NetworkSession.session_state_changed.connect(_on_session_state_changed)
+	NetworkSession.lobby_changed.connect(_on_lobby_changed)
+
+	boss_button.visible = OS.is_debug_build()
+	boss_button.text = "DEBUG: LOCAL BOSS MATCH"
+	join_address.text = "127.0.0.1"
+	_on_join_address_changed(join_address.text)
+	_refresh_session_ui()
 
 	await get_tree().process_frame
-	play_button.pivot_offset = play_button.size * 0.5
-	tutorial_button.pivot_offset = tutorial_button.size * 0.5
+	for button in [play_button, host_button, join_button, start_button, disconnect_button, tutorial_button, boss_button]:
+		button.pivot_offset = button.size * 0.5
 
-	var master_bus = AudioServer.get_bus_index("Master")
+	var master_bus := AudioServer.get_bus_index("Master")
 	AudioServer.set_bus_mute(master_bus, false)
-	var current_db = AudioServer.get_bus_volume_db(master_bus)
-	var current_linear = db_to_linear(current_db)
-	volume_slider.value = clamp(current_linear, 0.0, 1.0)
-	title_music.volume_db = -10.0 
+	var current_db := AudioServer.get_bus_volume_db(master_bus)
+	volume_slider.value = clamp(db_to_linear(current_db), 0.0, 1.0)
+	title_music.volume_db = -10.0
 	title_music.play()
-	
-	_bind_button_feedback(boss_button)
 
 
 func _on_play_pressed() -> void:
 	title_music.stop()
-	get_tree().change_scene_to_file("res://Scenes/main.tscn")
+	NetworkSession.start_local_match(false)
+
+
+func _on_host_pressed() -> void:
+	var error := NetworkSession.host_game()
+	if error == OK:
+		_refresh_session_ui()
+
+
+func _on_join_pressed() -> void:
+	var error := NetworkSession.join_game(join_address.text)
+	if error == OK:
+		_refresh_session_ui()
+
+
+func _on_start_pressed() -> void:
+	if NetworkSession.start_match() == OK:
+		title_music.stop()
+
+
+func _on_disconnect_pressed() -> void:
+	NetworkSession.leave_game(false, "Disconnected.")
+	_refresh_session_ui()
 
 
 func _on_tutorial_pressed() -> void:
@@ -42,11 +84,67 @@ func _on_tutorial_pressed() -> void:
 
 
 func _on_volume_changed(value: float) -> void:
-	var master_bus = AudioServer.get_bus_index("Master")
-	var clamped = clamp(value, 0.0, 1.0)
-	var db = -80.0 if clamped <= 0.001 else linear_to_db(clamped)
+	var master_bus := AudioServer.get_bus_index("Master")
+	var clamped: float = clampf(value, 0.0, 1.0)
+	var db: float = -80.0 if clamped <= 0.001 else linear_to_db(clamped)
 	AudioServer.set_bus_mute(master_bus, false)
 	AudioServer.set_bus_volume_db(master_bus, db)
+
+
+func _on_join_address_changed(value: String) -> void:
+	join_button.disabled = not NetworkSession.is_valid_ipv4_address(value.strip_edges())
+
+
+func _on_network_status_changed(message: String) -> void:
+	status_label.text = message
+	status_label.visible = not message.is_empty()
+
+
+func _on_session_state_changed(_state: NetworkSession.SessionState) -> void:
+	_refresh_session_ui()
+
+
+func _on_lobby_changed(_can_start: bool) -> void:
+	_refresh_session_ui()
+
+
+func _refresh_session_ui() -> void:
+	var idle := NetworkSession.session_state == NetworkSession.SessionState.IDLE
+	var host_lobby := NetworkSession.is_online_host() and NetworkSession.session_state in [
+		NetworkSession.SessionState.HOSTING,
+		NetworkSession.SessionState.LOBBY,
+	]
+	var joining_lobby := NetworkSession.is_joining_peer() and NetworkSession.session_state in [
+		NetworkSession.SessionState.CONNECTING,
+		NetworkSession.SessionState.LOBBY,
+	]
+
+	play_button.visible = idle
+	host_button.visible = idle
+	$Center/JoinRow.visible = idle
+	tutorial_button.visible = idle
+	$Center/SoundRow.visible = idle
+	boss_button.visible = (idle or host_lobby) and OS.is_debug_build()
+	if host_lobby:
+		boss_button.text = "DEBUG BOSS START: %s" % ("ON" if NetworkSession.next_match_starts_at_boss else "OFF")
+	else:
+		boss_button.text = "DEBUG: LOCAL BOSS MATCH"
+
+	lan_address_label.visible = host_lobby
+	lan_address_label.text = "HOST IP: %s:%d" % [NetworkSession.get_likely_lan_address(), NetworkSession.LAN_PORT]
+	start_button.visible = host_lobby and NetworkSession.session_state == NetworkSession.SessionState.LOBBY
+	disconnect_button.visible = host_lobby or joining_lobby
+	status_label.text = NetworkSession.status_message
+	status_label.visible = not status_label.text.is_empty()
+
+
+func _setup_volume_slider_visuals() -> void:
+	var img := Image.create(2, 2, false, Image.FORMAT_RGBA8)
+	img.fill(Color(1, 1, 1, 0))
+	var transparent_icon := ImageTexture.create_from_image(img)
+	volume_slider.add_theme_icon_override("grabber", transparent_icon)
+	volume_slider.add_theme_icon_override("grabber_highlight", transparent_icon)
+	volume_slider.add_theme_icon_override("grabber_disabled", transparent_icon)
 
 
 func _bind_button_feedback(button: Button) -> void:
@@ -64,21 +162,20 @@ func _bind_button_feedback(button: Button) -> void:
 	)
 
 
-func _setup_volume_slider_visuals() -> void:
-	var img := Image.create(2, 2, false, Image.FORMAT_RGBA8)
-	img.fill(Color(1, 1, 1, 0))
-	var transparent_icon := ImageTexture.create_from_image(img)
-	volume_slider.add_theme_icon_override("grabber", transparent_icon)
-	volume_slider.add_theme_icon_override("grabber_highlight", transparent_icon)
-	volume_slider.add_theme_icon_override("grabber_disabled", transparent_icon)
-
-
 func animate_button_scale(button: Button, target: Vector2, duration: float) -> void:
-	var tween = create_tween()
+	var tween := create_tween()
 	tween.tween_property(button, "scale", target, duration).set_trans(Tween.TRANS_QUAD).set_ease(Tween.EASE_OUT)
 
-func _on_boss_button_pressed():
-	title_music.stop() 
-	# Use Global to tell the game we want to skip 
-	Global.skip_to_boss = true 
-	get_tree().change_scene_to_file("res://Scenes/main.tscn")
+
+func _on_boss_button_pressed() -> void:
+	if not OS.is_debug_build():
+		return
+	if NetworkSession.is_online_host() and NetworkSession.session_state in [
+		NetworkSession.SessionState.HOSTING,
+		NetworkSession.SessionState.LOBBY,
+	]:
+		NetworkSession.next_match_starts_at_boss = not NetworkSession.next_match_starts_at_boss
+		_refresh_session_ui()
+		return
+	title_music.stop()
+	NetworkSession.start_local_match(true)

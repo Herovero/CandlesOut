@@ -10,4 +10,4 @@ func _process(delta):
 	pass
 
 func _on_pressed():
-	get_tree().reload_current_scene()
+	NetworkSession.restart_match()

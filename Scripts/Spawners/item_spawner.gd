@@ -14,7 +14,8 @@ var normal_weights = [15, 10, 15, 10, 5, 10, 10]
 var bomb_weights =   [10,  10, 10,  0,  5,  0, 0]  # bomb is index 1, much higher chance
 var current_weights: Array
 
-var can_spawn : bool = false
+var can_spawn: bool = false
+var active_ghost_slots: Dictionary = {}
 @onready var spawn_area = $Area2D/CollisionShape2D
 @export var min_x: float = 0
 @export var min_y: float = 0
@@ -45,17 +46,18 @@ func set_spawn_state(state: bool) -> void:
 	can_spawn = state
 
 func spawn_one() -> void:
-	if not can_spawn:
+	if not NetworkSession.has_simulation_authority() or not can_spawn:
 		return
 	if items_alive >= MAX_ITEMS:
 		#print_debug("max item reached")
 		return
 	
-	var random_item = get_weighted_random_item()  # replace old randi() line
-	var item_instance = random_item.instantiate()
-	#print_debug("spawning item")
-	item_instance.global_position = get_random_spawn_position()
-	get_tree().current_scene.add_child(item_instance)
+	var random_item = get_weighted_random_item()
+	var item_instance := NetworkSession.spawn_replicated(random_item, {
+		"global_position": get_random_spawn_position(),
+	})
+	if item_instance == null:
+		return
 	
 	# Call show_item directly on the new instance instead of using SignalBus 
 	if item_instance.has_method("show_item"):
@@ -71,11 +73,24 @@ func _on_item_removed() -> void:
 # Called when the node enters the scene tree for the first time.
 func _ready() -> void:
 	current_weights = normal_weights.duplicate()
+	if not NetworkSession.has_simulation_authority():
+		$Timer.stop()
+		return
 	Global.item_spawner = self
-	SignalBus.connect("ghost_mode_started",  func(): set_spawn_state(true))
-	SignalBus.connect("ghost_mode_ended",  func(): set_spawn_state(false))
-	SignalBus.connect("ghost_mode_ended", func(): destroy_all_items())
-	pass # Replace with function body.
+	SignalBus.connect("ghost_mode_started", _on_ghost_mode_started)
+	SignalBus.connect("ghost_mode_ended", _on_ghost_mode_ended)
+
+func _on_ghost_mode_started(player_slot: int) -> void:
+	active_ghost_slots[player_slot] = true
+	set_spawn_state(true)
+
+
+func _on_ghost_mode_ended(player_slot: int) -> void:
+	active_ghost_slots.erase(player_slot)
+	if active_ghost_slots.is_empty():
+		set_spawn_state(false)
+		destroy_all_items()
+
 
 func set_bomb_phase(enabled: bool) -> void:
 	current_weights = bomb_weights.duplicate() if enabled else normal_weights.duplicate()
@@ -85,11 +100,11 @@ func destroy_all_items() -> void:
 	# get all children of current scene and remove items
 	print("destroy all items")
 	for item in get_tree().get_nodes_in_group("items"):
-		if item.has_method("hide_item"):
-			item.hide_item() # This triggers your new fade-out tween!
-		else:
-			item.queue_free()
-	items_alive = 0
+		if int(item.get("item_state")) == 0:
+			if item.has_method("hide_item"):
+				item.hide_item()
+			else:
+				item.queue_free()
 
 # Called every frame. 'delta' is the elapsed time since the previous frame.
 func _process(delta: float) -> void:
