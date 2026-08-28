@@ -63,7 +63,7 @@ func _on_join_pressed() -> void:
 
 
 func _on_disconnect_pressed() -> void:
-	NetworkSession.leave_game(false, "Disconnected.")
+	NetworkSession.leave_game(false)
 	_refresh_session_ui()
 
 

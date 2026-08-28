@@ -10,4 +10,4 @@ func _process(delta):
 	pass
 
 func _on_pressed():
-	NetworkSession.leave_game(true, "Left the match.")
+	NetworkSession.leave_game(true)

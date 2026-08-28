@@ -175,7 +175,7 @@ func _on_lobby_start_pressed() -> void:
 
 
 func _on_lobby_disconnect_pressed() -> void:
-	NetworkSession.leave_game(true, "Disconnected.")
+	NetworkSession.leave_game(true)
 
 
 func spawn_replicated(scene_path: String, properties: Dictionary = {}) -> Node:

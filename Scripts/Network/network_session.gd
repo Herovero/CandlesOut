@@ -180,8 +180,8 @@ func leave_game(return_to_menu: bool = false, reason: String = "") -> void:
 	_current_music_wave = 0
 	_set_state(SessionState.IDLE)
 	lobby_changed.emit(false)
+	_set_status(reason)
 	if not reason.is_empty():
-		_set_status(reason)
 		session_ended.emit(reason)
 	if return_to_menu:
 		_return_to_menu()
