@@ -273,16 +273,6 @@ text = "Status"
 horizontal_alignment = 1
 autowrap_mode = 2
 
-[node name="BossButton" type="Button" parent="Center" unique_id=1070363133]
-custom_minimum_size = Vector2(300, 62)
-layout_mode = 2
-theme_override_colors/font_color = Color(1, 0.964706, 0.866667, 1)
-theme_override_fonts/font = ExtResource("2_font")
-theme_override_font_sizes/font_size = 30
-theme_override_styles/normal = SubResource("StyleBoxFlat_button_normal")
-theme_override_styles/hover = SubResource("StyleBoxFlat_button_hover")
-text = "DEBUG: LOCAL BOSS MATCH"
-
 [node name="TutorialButton" type="Button" parent="Center" unique_id=1298878946]
 custom_minimum_size = Vector2(300, 62)
 layout_mode = 2
@@ -317,5 +307,3 @@ value = 1.0
 
 [node name="TitleMusic" type="AudioStreamPlayer" parent="." unique_id=370940596]
 stream = SubResource("AudioStreamOggVorbis_48xlc")
-
-[connection signal="pressed" from="Center/BossButton" to="." method="_on_boss_button_pressed"]

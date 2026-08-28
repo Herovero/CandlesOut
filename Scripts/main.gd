@@ -16,7 +16,6 @@ extends Node2D
 @onready var lobby_host_label: Label = $HUDs/LobbyOverlay/Panel/Margin/Content/HostPresenceLabel
 @onready var lobby_joining_label: Label = $HUDs/LobbyOverlay/Panel/Margin/Content/JoiningPresenceLabel
 @onready var lobby_start_button: Button = $HUDs/LobbyOverlay/Panel/Margin/Content/StartButton
-@onready var lobby_boss_button: Button = $HUDs/LobbyOverlay/Panel/Margin/Content/BossButton
 @onready var lobby_disconnect_button: Button = $HUDs/LobbyOverlay/Panel/Margin/Content/DisconnectButton
 
 # Player Elemetns
@@ -86,7 +85,6 @@ func _ready():
 
 	lobby_start_button.pressed.connect(_on_lobby_start_pressed)
 	lobby_disconnect_button.pressed.connect(_on_lobby_disconnect_pressed)
-	lobby_boss_button.pressed.connect(_on_lobby_boss_pressed)
 	NetworkSession.session_state_changed.connect(_on_session_state_changed)
 	NetworkSession.status_changed.connect(_on_session_status_changed)
 	NetworkSession.lobby_changed.connect(_on_lobby_changed)
@@ -158,10 +156,6 @@ func _refresh_lobby_presentation() -> void:
 		lobby_joining_label.text = "JOINING PEER: ENTERING LOBBY…"
 	lobby_start_button.visible = NetworkSession.is_online_host()
 	lobby_start_button.disabled = not NetworkSession.can_start_match()
-	lobby_boss_button.visible = OS.is_debug_build() and NetworkSession.is_online_host()
-	lobby_boss_button.text = "DEBUG BOSS START: %s" % (
-		"ON" if NetworkSession.next_match_starts_at_boss else "OFF"
-	)
 
 
 func _on_session_state_changed(_state: NetworkSession.SessionState) -> void:
@@ -182,13 +176,6 @@ func _on_lobby_start_pressed() -> void:
 
 func _on_lobby_disconnect_pressed() -> void:
 	NetworkSession.leave_game(true, "Disconnected.")
-
-
-func _on_lobby_boss_pressed() -> void:
-	if not OS.is_debug_build() or not NetworkSession.is_online_host():
-		return
-	NetworkSession.next_match_starts_at_boss = not NetworkSession.next_match_starts_at_boss
-	_refresh_lobby_presentation()
 
 
 func spawn_replicated(scene_path: String, properties: Dictionary = {}) -> Node:

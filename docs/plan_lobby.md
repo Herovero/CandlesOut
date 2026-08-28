@@ -88,7 +88,6 @@ Add `LobbyOverlay` under `$HUDs` with:
 - Joining Peer presence/readiness indicator.
 - Host-only Start Match button.
 - Disconnect button for both Participants.
-- The existing debug boss-start toggle for debug builds.
 
 In `main.gd::_ready()`:
 
@@ -226,7 +225,6 @@ Move out of the Main Menu:
 - Host LAN address display after hosting.
 - Start Match button.
 - Host Lobby disconnect controls.
-- Online debug boss-start toggle.
 
 Retain on the Main Menu:
 
@@ -234,9 +232,7 @@ Retain on the Main Menu:
 - LAN address entry and Join button.
 - `CONNECTING` progress and error messages.
 - Cancel/Disconnect while a Joining Peer is still connecting.
-- Local Co-op, tutorial, audio, and local debug controls.
-
-Do not remove the existing debug boss-start functionality; move its online form into `LobbyOverlay`.
+- Local Co-op, tutorial, and audio controls.
 
 ---
 
@@ -297,8 +293,6 @@ The final sequence should be:
 ### Regression
 
 - Local Co-op still enters a normal Match directly.
-- Local debug boss start still works.
-- Online debug boss start remains available to the Host in the Lobby.
 - Match restart behavior remains unchanged.
 
 ---

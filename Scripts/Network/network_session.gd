@@ -12,7 +12,7 @@ enum MatchPhase { LOADING, PLAYING, PAUSED, GAME_OVER, VICTORY }
 enum PlayMode { LOCAL_COOP, ONLINE_HOST, ONLINE_JOIN }
 
 const LAN_PORT := 7000
-const PROTOCOL_VERSION := 3
+const PROTOCOL_VERSION := 4
 const HOST_PEER_ID := 1
 const REPLICATION_INTERVAL := 1.0 / 30.0
 const INTERPOLATION_SPEED := 18.0
@@ -29,7 +29,6 @@ var match_generation: int = 0
 var joining_peer_id: int = 0
 var host_lan_address: String = ""
 var status_message: String = ""
-var next_match_starts_at_boss: bool = false
 var local_has_focus: bool = true
 var local_input_suppressed: bool = false
 
@@ -114,11 +113,9 @@ func join_game(address: String) -> Error:
 	return OK
 
 
-func start_local_match(start_at_boss: bool = false) -> void:
+func start_local_match() -> void:
 	leave_game(false)
 	play_mode = PlayMode.LOCAL_COOP
-	next_match_starts_at_boss = start_at_boss
-	Global.skip_to_boss = start_at_boss
 	get_tree().change_scene_to_file(PLAYFIELD_SCENE)
 
 
@@ -132,14 +129,13 @@ func start_match() -> Error:
 	_loading_timeout_left = LOADING_TIMEOUT_SECONDS
 	_set_state(SessionState.LOADING)
 	_set_status("Loading match…")
-	_load_match.rpc(match_generation, PLAYFIELD_SCENE, next_match_starts_at_boss)
+	_load_match.rpc(match_generation, PLAYFIELD_SCENE)
 	return OK
 
 
 func restart_match() -> Error:
 	if not is_online():
 		GameplayAudio.reset()
-		Global.skip_to_boss = false
 		return get_tree().reload_current_scene()
 	if not is_online_host() or session_state != SessionState.IN_MATCH:
 		return ERR_UNAUTHORIZED
@@ -155,7 +151,7 @@ func start_match_from_session() -> Error:
 	_loading_timeout_left = LOADING_TIMEOUT_SECONDS
 	_set_state(SessionState.LOADING)
 	_set_status("Loading match…")
-	_load_match.rpc(match_generation, PLAYFIELD_SCENE, false)
+	_load_match.rpc(match_generation, PLAYFIELD_SCENE)
 	return OK
 
 
@@ -174,9 +170,7 @@ func leave_game(return_to_menu: bool = false, reason: String = "") -> void:
 	_loading_timeout_left = 0.0
 	match_phase = MatchPhase.LOADING
 	play_mode = PlayMode.LOCAL_COOP
-	next_match_starts_at_boss = false
 	local_input_suppressed = false
-	Global.skip_to_boss = false
 	Global.wave = null
 	Global.spawners.clear()
 	Global.item_spawner = null
@@ -466,7 +460,7 @@ func _protocol_rejected(reason: String) -> void:
 
 
 @rpc("authority", "call_local", "reliable")
-func _load_match(generation: int, scene_path: String, start_at_boss: bool) -> void:
+func _load_match(generation: int, scene_path: String) -> void:
 	if not is_online() or generation < match_generation or scene_path != PLAYFIELD_SCENE:
 		return
 	GameplayAudio.reset()
@@ -474,7 +468,6 @@ func _load_match(generation: int, scene_path: String, start_at_boss: bool) -> vo
 	_current_music_wave = 0
 	match_generation = generation
 	match_phase = MatchPhase.LOADING
-	Global.skip_to_boss = start_at_boss
 	_set_state(SessionState.LOADING)
 	_set_status("Loading match…")
 	get_tree().paused = false

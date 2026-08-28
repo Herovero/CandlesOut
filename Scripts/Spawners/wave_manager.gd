@@ -165,23 +165,9 @@ func on_enemy_died():
 func _on_start_timer_timeout() -> void:
 	if NetworkSession.is_in_lobby() or not NetworkSession.has_simulation_authority():
 		return
-	if Global.skip_to_boss:
-		# Reset the flag so it doesn't stay true next time
-		Global.skip_to_boss = false
-		
-		# Boss logic setup [cite: 65]
-		NetworkSession.broadcast_music(3) # Play the 3rd OST (Boss track) [cite: 66]
-		set_max_enemy(5) # Set appropriate enemy count for boss [cite: 65]
-		start_wave(4) # Start the defined Boss Wave [cite: 60, 62]
-		
-		# Ensure items are in the correct phase [cite: 65]
-		if Global.item_spawner:
-			Global.item_spawner.set_bomb_phase(true)
-	else:
-		# Standard start 
-		NetworkSession.broadcast_music(1)
-		set_max_enemy(3)
-		start_wave(1)
+	NetworkSession.broadcast_music(1)
+	set_max_enemy(3)
+	start_wave(1)
 
 func _on_wave_completed(wave_number: int):
 	if NetworkSession.is_in_lobby() or not NetworkSession.has_simulation_authority():

@@ -7,7 +7,6 @@ extends Control
 @onready var disconnect_button: Button = $Center/DisconnectButton
 @onready var status_label: Label = $Center/StatusLabel
 @onready var tutorial_button: Button = $Center/TutorialButton
-@onready var boss_button: Button = $Center/BossButton
 @onready var volume_slider: HSlider = $Center/SoundRow/VolumeSlider
 @onready var title_music: AudioStreamPlayer = $TitleMusic
 
@@ -22,7 +21,7 @@ func _ready() -> void:
 	tutorial_button.pressed.connect(_on_tutorial_pressed)
 	join_address.text_changed.connect(_on_join_address_changed)
 
-	for button in [play_button, host_button, join_button, disconnect_button, tutorial_button, boss_button]:
+	for button in [play_button, host_button, join_button, disconnect_button, tutorial_button]:
 		_bind_button_feedback(button)
 
 	_setup_volume_slider_visuals()
@@ -30,14 +29,12 @@ func _ready() -> void:
 	NetworkSession.status_changed.connect(_on_network_status_changed)
 	NetworkSession.session_state_changed.connect(_on_session_state_changed)
 
-	boss_button.visible = OS.is_debug_build()
-	boss_button.text = "DEBUG: LOCAL BOSS MATCH"
 	join_address.text = "127.0.0.1"
 	_on_join_address_changed(join_address.text)
 	_refresh_session_ui()
 
 	await get_tree().process_frame
-	for button in [play_button, host_button, join_button, disconnect_button, tutorial_button, boss_button]:
+	for button in [play_button, host_button, join_button, disconnect_button, tutorial_button]:
 		button.pivot_offset = button.size * 0.5
 
 	var master_bus := AudioServer.get_bus_index("Master")
@@ -50,7 +47,7 @@ func _ready() -> void:
 
 func _on_play_pressed() -> void:
 	title_music.stop()
-	NetworkSession.start_local_match(false)
+	NetworkSession.start_local_match()
 
 
 func _on_host_pressed() -> void:
@@ -105,7 +102,6 @@ func _refresh_session_ui() -> void:
 	$Center/JoinRow.visible = idle
 	tutorial_button.visible = idle
 	$Center/SoundRow.visible = idle
-	boss_button.visible = idle and OS.is_debug_build()
 	disconnect_button.visible = connecting
 	status_label.text = NetworkSession.status_message
 	status_label.visible = not status_label.text.is_empty()
@@ -138,10 +134,3 @@ func _bind_button_feedback(button: Button) -> void:
 func animate_button_scale(button: Button, target: Vector2, duration: float) -> void:
 	var tween := create_tween()
 	tween.tween_property(button, "scale", target, duration).set_trans(Tween.TRANS_QUAD).set_ease(Tween.EASE_OUT)
-
-
-func _on_boss_button_pressed() -> void:
-	if not OS.is_debug_build():
-		return
-	title_music.stop()
-	NetworkSession.start_local_match(true)

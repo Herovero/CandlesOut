@@ -353,17 +353,6 @@ theme_override_styles/normal = SubResource("StyleBoxFlat_jkdf5")
 theme_override_styles/hover = SubResource("StyleBoxFlat_wsu2k")
 text = "START MATCH"
 
-[node name="BossButton" type="Button" parent="HUDs/LobbyOverlay/Panel/Margin/Content"]
-visible = false
-custom_minimum_size = Vector2(300, 52)
-layout_mode = 2
-theme_override_colors/font_color = Color(1, 0.964706, 0.866667, 1)
-theme_override_fonts/font = ExtResource("8_wsu2k")
-theme_override_font_sizes/font_size = 24
-theme_override_styles/normal = SubResource("StyleBoxFlat_jkdf5")
-theme_override_styles/hover = SubResource("StyleBoxFlat_wsu2k")
-text = "DEBUG BOSS START: OFF"
-
 [node name="DisconnectButton" type="Button" parent="HUDs/LobbyOverlay/Panel/Margin/Content"]
 custom_minimum_size = Vector2(300, 58)
 layout_mode = 2
